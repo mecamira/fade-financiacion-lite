@@ -1,0 +1,1009 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Convocatorias - Dashboard de Financiación{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary text-center">Gestión de Convocatorias de Financiación</h1>
+            <p class="text-center lead">Herramienta para extraer y validar información de convocatorias</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de entrada de información -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Información de la Convocatoria</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Sección de autocompletado desde BDNS -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading"><i class="fas fa-magic me-2"></i>Autocompletar desde BDNS</h6>
+                        <p class="mb-2 small">Pega la URL de la BDNS para autocompletar los campos automáticamente:</p>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="url-bdns-input" placeholder="https://www.infosubvenciones.es/bdnstrans/GE/es/convocatorias/860141">
+                            <button class="btn btn-primary" type="button" id="obtener-bdns-btn">
+                                <i class="fas fa-download me-1"></i>Obtener Datos
+                            </button>
+                        </div>
+                        <div id="bdns-loading" class="mt-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>Obteniendo información de BDNS...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Selector de documentos (oculto inicialmente) -->
+                    <div id="selector-documentos" class="alert alert-warning mb-4 d-none">
+                        <h6 class="alert-heading"><i class="fas fa-file-pdf me-2"></i>Múltiples Documentos Encontrados</h6>
+                        <p class="mb-2 small">Selecciona el documento de la convocatoria:</p>
+                        <select class="form-select" id="documento-select">
+                            <option value="">-- Selecciona un documento --</option>
+                        </select>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <form id="convocatoria-form">
+                        <div class="mb-3">
+                            <label for="codigo-bdns" class="form-label">Código BDNS:</label>
+                            <input type="text" class="form-control" id="codigo-bdns" name="codigo_bdns" placeholder="Ej: 830175">
+                            <small class="text-muted">Se autocompleta desde la URL de BDNS o introduce manualmente</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fecha-publicacion" class="form-label">Fecha de Publicación:</label>
+                            <input type="date" class="form-control" id="fecha-publicacion" name="fecha_publicacion">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bases-url" class="form-label">URL de las Bases:</label>
+                            <input type="url" class="form-control" id="bases-url" name="bases_url" placeholder="https://...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="convocatoria-url" class="form-label">URL de la Convocatoria:</label>
+                            <input type="url" class="form-control" id="convocatoria-url" name="convocatoria_url" placeholder="https://...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Información de la Convocatoria:</label>
+                            <ul class="nav nav-tabs mb-2" id="input-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-input" type="button" role="tab" aria-controls="text-input" aria-selected="true">
+                                        <i class="fas fa-file-alt me-1"></i> Texto
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pdf-tab" data-bs-toggle="tab" data-bs-target="#pdf-input" type="button" role="tab" aria-controls="pdf-input" aria-selected="false">
+                                        <i class="fas fa-file-pdf me-1"></i> PDF
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="input-tabs-content">
+                                <div class="tab-pane fade show active" id="text-input" role="tabpanel" aria-labelledby="text-tab">
+                                    <textarea class="form-control" id="convocatoria-text" name="convocatoria_text" rows="10" placeholder="Pega aquí el texto completo de la convocatoria..."></textarea>
+                                </div>
+                                <div class="tab-pane fade" id="pdf-input" role="tabpanel" aria-labelledby="pdf-tab">
+                                    <div class="card p-3 bg-light">
+                                        <div class="mb-3">
+                                            <input class="form-control" type="file" id="convocatoria-pdf" name="convocatoria_pdf" accept=".pdf">
+                                        </div>
+                                        <div id="pdf-info" class="d-none alert alert-info mt-2">
+                                            <i class="fas fa-file-pdf me-2"></i> <span id="pdf-filename"></span>
+                                        </div>
+                                        <small class="text-muted">El archivo debe estar en formato PDF y no superar los 10MB</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="extraer-btn">
+                                <i class="fas fa-magic me-2"></i>Extraer Información
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="limpiar-btn">
+                                <i class="fas fa-broom me-2"></i>Limpiar Formulario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de resultados y validación -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <ul class="nav nav-tabs card-header-tabs" id="result-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-view" type="button" role="tab" aria-controls="json-view" aria-selected="true">
+                                <i class="fas fa-code me-1"></i> JSON
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview-view" type="button" role="tab" aria-controls="preview-view" aria-selected="false">
+                                <i class="fas fa-eye me-1"></i> Vista Previa
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="validation-tab" data-bs-toggle="tab" data-bs-target="#validation-view" type="button" role="tab" aria-controls="validation-view" aria-selected="false">
+                                <i class="fas fa-check-circle me-1"></i> Validación
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="result-tabs-content">
+                        <!-- Vista JSON -->
+                        <div class="tab-pane fade show active" id="json-view" role="tabpanel" aria-labelledby="json-tab">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">JSON Extraído:</h6>
+                                    <div>
+                                        <button id="copy-json-btn" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-copy me-1"></i> Copiar
+                                        </button>
+                                        <button id="download-json-btn" class="btn btn-sm btn-primary ms-2">
+                                            <i class="fas fa-download me-1"></i> Descargar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="json-editor" class="border rounded p-3 bg-light" style="min-height: 300px; max-height: 600px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Vista previa -->
+                        <div class="tab-pane fade" id="preview-view" role="tabpanel" aria-labelledby="preview-tab">
+                            <div id="preview-container">
+                                <div class="text-center py-5">
+                                    <p class="text-muted">Extrae la información de una convocatoria para visualizar la vista previa</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Validación -->
+                        <div class="tab-pane fade" id="validation-view" role="tabpanel" aria-labelledby="validation-tab">
+                            <div id="validation-container">
+                                <div class="text-center py-5">
+                                    <p class="text-muted">Extrae la información de una convocatoria para validarla</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales para mensajes y avisos -->
+<div class="modal fade" id="processingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h5>Procesando convocatoria...</h5>
+                <p class="text-muted">Esto puede tomar unos segundos, por favor espera.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="error-message">
+                Ha ocurrido un error al procesar la convocatoria.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JSON editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.css" rel="stylesheet" type="text/css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para formatear valores monetarios
+        function formatMoney(value) {
+            if (!value || value === 'null' || value === 'undefined' || isNaN(value)) {
+                return 'No especificado';
+            }
+            
+            // Convertir a número si es string
+            const numValue = typeof value === 'string' ? parseFloat(value) : value;
+            
+            // Formatear con separadores de miles y símbolo de euro
+            return numValue.toLocaleString('es-ES') + ' €';
+        }
+        // Manejar cambios en el archivo PDF seleccionado
+        document.getElementById('convocatoria-pdf').addEventListener('change', function(e) {
+            const fileInfo = document.getElementById('pdf-info');
+            const fileNameElement = document.getElementById('pdf-filename');
+            
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileNameElement.textContent = file.name;
+                fileInfo.classList.remove('d-none');
+                
+                // Actualizar tamaño del archivo en formato legible
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                fileNameElement.textContent = `${file.name} (${fileSizeMB} MB)`;
+            } else {
+                fileInfo.classList.add('d-none');
+            }
+        });
+        // Inicializar el editor JSON
+        const container = document.getElementById('json-editor');
+        const options = {
+            mode: 'code',
+            modes: ['code', 'tree'],
+            onError: function(err) {
+                alert(err.toString());
+            }
+        };
+        const editor = new JSONEditor(container, options);
+        
+        // Establecer JSON vacío por defecto
+        editor.set({});
+        
+        // Actualizar vista previa cuando se edita el JSON
+        let jsonUpdateTimeout;
+        try {
+            if (editor.aceEditor) {
+                editor.aceEditor.on('change', function() {
+                    // Usar debounce para no actualizar constantemente mientras se escribe
+                    clearTimeout(jsonUpdateTimeout);
+                    jsonUpdateTimeout = setTimeout(function() {
+                        try {
+                            const jsonData = editor.get();
+                            // Verificar que es un objeto válido con los campos necesarios
+                            if (jsonData && typeof jsonData === 'object' && Object.keys(jsonData).length > 0 && jsonData.nombre) {
+                                // Actualizar vista previa
+                                generatePreview(jsonData);
+                                // Verificar duplicados en tiempo real
+                                checkDuplicatesRealTime(jsonData);
+                            }
+                        } catch (error) {
+                            // Silenciar error si el editor está vacío o se está editando
+                            // Solo loguear si no es un error de EOF (editor vacío)
+                            if (!error.message.includes('EOF') && !error.message.includes('Expecting')) {
+                                console.log('Error al parsear JSON durante edición:', error);
+                            }
+                        }
+                    }, 1000); // Actualizar después de 1 segundo sin cambios
+                });
+            }
+        } catch (e) {
+            console.log('No se pudo configurar la actualización automática del editor:', e);
+        }
+        
+        // Función para verificar duplicados en tiempo real
+        async function checkDuplicatesRealTime(jsonData) {
+            try {
+                // Solo verificar si hay datos mínimos
+                if (!jsonData.nombre && !jsonData.codigo_bdns) {
+                    validateConvocatoria(jsonData, { duplicados: [] });
+                    return;
+                }
+                
+                // Crear un FormData simple con la información mínima
+                const formData = new FormData();
+                formData.append('convocatoria_text', `Nombre: ${jsonData.nombre || ''}
+Código BDNS: ${jsonData.codigo_bdns || ''}
+Organismo: ${jsonData.organismo || ''}`);
+                
+                if (jsonData.codigo_bdns) {
+                    formData.append('codigo_bdns', jsonData.codigo_bdns);
+                }
+                
+                // Hacer petición a la API para verificar duplicados
+                const response = await fetch('/api/extraer-convocatoria', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.validation && data.validation.duplicados) {
+                    validateConvocatoria(jsonData, data.validation);
+                } else {
+                    validateConvocatoria(jsonData, { duplicados: [] });
+                }
+            } catch (error) {
+                console.log('Error al verificar duplicados en tiempo real:', error);
+                // En caso de error, validar sin duplicados
+                validateConvocatoria(jsonData, { duplicados: [] });
+            }
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('convocatoria-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar modal de procesamiento
+            const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+            processingModal.show();
+            
+            // Recoger datos del formulario
+            const formData = new FormData(this);
+            
+            // Determinar qué pestaña está activa (texto o PDF)
+            const textTabActive = document.getElementById('text-tab').classList.contains('active');
+            const pdfTabActive = document.getElementById('pdf-tab').classList.contains('active');
+            
+            // Validar según pestaña activa
+            if (textTabActive) {
+                // Validar que hay texto de convocatoria
+                if (!formData.get('convocatoria_text').trim()) {
+                    processingModal.hide();
+                    showError('El texto de la convocatoria es obligatorio cuando se usa la opción de texto');
+                    return;
+                }
+            } else if (pdfTabActive) {
+                // Validar que hay un archivo PDF seleccionado
+                const pdfFile = document.getElementById('convocatoria-pdf').files[0];
+                if (!pdfFile) {
+                    processingModal.hide();
+                    showError('Debe seleccionar un archivo PDF');
+                    return;
+                }
+                
+                // Validar tipo y tamaño del archivo
+                if (!pdfFile.type.match('application/pdf')) {
+                    processingModal.hide();
+                    showError('El archivo debe ser un PDF válido');
+                    return;
+                }
+                
+                if (pdfFile.size > 10 * 1024 * 1024) { // 10MB
+                    processingModal.hide();
+                    showError('El archivo PDF no debe superar los 10MB');
+                    return;
+                }
+                
+                // Agregar el archivo al FormData
+                formData.set('convocatoria_pdf', pdfFile);
+            }
+            
+            // Enviar solicitud a la API
+            fetch('/api/extraer-convocatoria', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                processingModal.hide();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                // Actualizar el editor JSON
+                editor.set(data.data);
+                
+                // Generar vista previa
+                generatePreview(data.data);
+                
+                // Validar convocatoria
+                validateConvocatoria(data.data, data.validation);
+                
+                // Activar pestaña de previsualización
+                const previewTab = document.getElementById('preview-tab');
+                bootstrap.Tab.getOrCreateInstance(previewTab).show();
+            })
+            .catch(error => {
+                processingModal.hide();
+                console.error('Error:', error);
+                showError('Error al procesar la solicitud. Por favor, inténtalo de nuevo.');
+            });
+        });
+        
+        // Limpiar formulario
+        document.getElementById('limpiar-btn').addEventListener('click', function() {
+            // Resetear formulario
+            document.getElementById('convocatoria-form').reset();
+            
+            // Resetear editor JSON
+            editor.set({});
+            
+            // Resetear contenedores de resultados
+            document.getElementById('preview-container').innerHTML = '<div class="text-center py-5"><p class="text-muted">Extrae la información de una convocatoria para visualizar la vista previa</p></div>';
+            document.getElementById('validation-container').innerHTML = '<div class="text-center py-5"><p class="text-muted">Extrae la información de una convocatoria para validarla</p></div>';
+            
+            // Volver a la pestaña de texto por defecto
+            const textTab = document.getElementById('text-tab');
+            bootstrap.Tab.getOrCreateInstance(textTab).show();
+        });
+        
+        // Copiar JSON al portapapeles
+        document.getElementById('copy-json-btn').addEventListener('click', function() {
+            try {
+                const json = JSON.stringify(editor.get(), null, 2);
+                navigator.clipboard.writeText(json).then(() => {
+                    this.innerHTML = '<i class="fas fa-check me-1"></i> Copiado';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-copy me-1"></i> Copiar';
+                    }, 2000);
+                });
+            } catch (e) {
+                showError('No se pudo copiar el JSON: ' + e.message);
+            }
+        });
+        
+        // Descargar JSON
+        document.getElementById('download-json-btn').addEventListener('click', function() {
+            try {
+                const json = JSON.stringify(editor.get(), null, 2);
+                const data = editor.get();
+                
+                // Generar nombre de archivo basado en fecha y código BDNS
+                let filename = '';
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+                
+                if (data.codigo_bdns) {
+                    filename = `${dateStr}_${data.codigo_bdns}.json`;
+                } else {
+                    filename = `${dateStr}_convocatoria.json`;
+                }
+                
+                // Crear blob y descargar
+                const blob = new Blob([json], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                showError('No se pudo descargar el JSON: ' + e.message);
+            }
+        });
+        
+        // Función para mostrar errores
+        function showError(message) {
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            document.getElementById('error-message').textContent = message;
+            errorModal.show();
+        }
+        
+// Función para generar vista previa
+function generatePreview(data) {
+            const container = document.getElementById('preview-container');
+            
+            let html = `
+                <div class="card border-0 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">${data.nombre || 'Sin nombre'}</h5>
+                        <small>${data.organismo || 'Organismo no especificado'}</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <p class="lead">${data.resumen_breve || 'Sin resumen disponible'}</p>
+                                <p>${data.descripcion_detallada || ''}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>Información básica</h6>
+                                        <ul class="list-unstyled">
+                                            <li><strong>Tipo:</strong> ${data.tipo_ayuda || 'No especificado'}</li>
+                                            <li><strong>Ámbito:</strong> ${data.ambito || 'No especificado'}</li>
+                                            <li><strong>Estado:</strong> <span class="badge ${getBadgeClass(data.convocatoria?.estado)}">${data.convocatoria?.estado || 'No especificado'}</span></li>
+                                            <li><strong>Código BDNS:</strong> ${data.codigo_bdns || 'No especificado'}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Fechas</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Apertura:</strong> ${formatDate(data.convocatoria?.fecha_apertura) || 'No especificada'}</li>
+                                    <li><strong>Cierre:</strong> ${formatDate(data.convocatoria?.fecha_cierre) || 'No especificada'}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                            <h6>Financiación</h6>
+                            <ul class="list-unstyled">
+                            <li><strong>Intensidad:</strong> ${data.financiacion?.intensidad || 'No especificada'}</li>
+                            <li><strong>Importe máximo:</strong> ${data.financiacion?.importe_maximo ? formatMoney(data.financiacion.importe_maximo) : 'No especificado'}</li>
+                            <li><strong>Presupuesto mínimo:</strong> ${data.financiacion?.presupuesto_minimo ? formatMoney(data.financiacion.presupuesto_minimo) : 'No especificado'}</li>
+                            <li><strong>Presupuesto máximo:</strong> ${data.financiacion?.presupuesto_maximo ? formatMoney(data.financiacion.presupuesto_maximo) : 'No especificado'}</li>
+                            </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Beneficiarios</h6>
+                                <div>
+                                    ${renderTags(data.beneficiarios, 'bg-light text-dark')}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Sectores</h6>
+                                <div>
+                                    ${renderTags(data.sectores, 'bg-light text-dark')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h6 class="mt-3">Requisitos</h6>
+                        <ul>
+                            ${renderList(data.requisitos)}
+                        </ul>
+                        
+                        <h6>Palabras clave</h6>
+                        <div>
+                            ${renderTags(data.tags, 'bg-secondary text-white')}
+                        </div>
+                        
+                        <h6 class="mt-3">Enlaces</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                ${renderLink(data.enlaces?.bases, 'Bases de la convocatoria')}
+                            </div>
+                            <div class="col-md-6">
+                                ${renderLink(data.enlaces?.convocatoria, 'Página de la convocatoria')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Función para validar convocatoria
+        function validateConvocatoria(data, validationData) {
+            const container = document.getElementById('validation-container');
+            
+            // Validación básica de campos
+            const missingFields = [];
+            const requiredFields = [
+                {field: 'nombre', label: 'Nombre de la convocatoria'},
+                {field: 'organismo', label: 'Organismo'},
+                {field: 'tipo_ayuda', label: 'Tipo de ayuda'},
+                {field: 'ambito', label: 'Ámbito geográfico'},
+                {field: 'tipo_proyecto', label: 'Tipo de proyecto'}
+            ];
+            
+            for (const req of requiredFields) {
+                if (!data[req.field] || data[req.field] === 'null') {
+                    missingFields.push(req.label);
+                }
+            }
+            
+            // Validar campos anidados importantes
+            if (!data.convocatoria?.estado || data.convocatoria.estado === 'null') {
+                missingFields.push('Estado de la convocatoria');
+            }
+            
+            if (!data.financiacion?.intensidad || data.financiacion.intensidad === 'null') {
+                missingFields.push('Intensidad de financiación');
+            }
+            
+            // Validar arrays
+            const emptyArrays = [];
+            const requiredArrays = [
+                {field: 'beneficiarios', label: 'Beneficiarios'},
+                {field: 'sectores', label: 'Sectores'},
+                {field: 'requisitos', label: 'Requisitos'},
+                {field: 'tags', label: 'Palabras clave'}
+            ];
+            
+            for (const req of requiredArrays) {
+                if (!data[req.field] || !Array.isArray(data[req.field]) || data[req.field].length === 0) {
+                    emptyArrays.push(req.label);
+                }
+            }
+            
+            // Generar HTML de validación
+            let html = '';
+            
+            // Alerta de validación general
+            if (missingFields.length > 0 || emptyArrays.length > 0) {
+                html += `
+                    <div class="alert alert-warning">
+                        <h6>Hay campos incompletos o vacíos</h6>
+                        <p>Se recomienda completar estos campos para una mejor calidad de datos.</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle me-2"></i>Validación básica completada</h6>
+                        <p>Todos los campos importantes están completos.</p>
+                    </div>
+                `;
+            }
+            
+            // Detalles de validación
+            html += '<div class="row">';
+            
+            // Campos faltantes
+            html += `
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Campos incompletos</h6>
+                        </div>
+                        <div class="card-body">
+            `;
+            
+            if (missingFields.length > 0) {
+                html += '<ul class="text-danger">';
+                for (const field of missingFields) {
+                    html += `<li>${field}</li>`;
+                }
+                html += '</ul>';
+            } else {
+                html += '<p class="text-success">No hay campos principales incompletos</p>';
+            }
+            
+            if (emptyArrays.length > 0) {
+                html += '<h6>Arrays vacíos o incompletos:</h6>';
+                html += '<ul class="text-warning">';
+                for (const field of emptyArrays) {
+                    html += `<li>${field}</li>`;
+                }
+                html += '</ul>';
+            }
+            
+            html += '</div></div></div>';
+            
+            // Verificación de duplicados
+            html += `
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Verificación de duplicados</h6>
+                        </div>
+                        <div class="card-body">
+            `;
+            
+            if (validationData && validationData.duplicados && validationData.duplicados.length > 0) {
+                html += `
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Posibles duplicados detectados</h6>
+                        <p>Se encontraron ${validationData.duplicados.length} posibles duplicados.</p>
+                    </div>
+                    <ul class="list-group">
+                `;
+                
+                for (const dup of validationData.duplicados) {
+                    const confianzaClass = dup.confianza === 'Muy Alta' ? 'bg-danger' : 
+                                           dup.confianza === 'Alta' ? 'bg-warning text-dark' : 
+                                           dup.confianza === 'Media-Alta' ? 'bg-info' : 'bg-secondary';
+                    
+                    html += `
+                        <li class="list-group-item">
+                            <div><strong>${dup.programa.nombre || 'Sin nombre'}</strong></div>
+                            <div class="small text-muted">${dup.programa.organismo || 'Sin organismo'}</div>
+                            ${dup.programa.codigo_bdns ? `<div class="small text-muted">BDNS: ${dup.programa.codigo_bdns}</div>` : ''}
+                            <div class="mt-1">
+                                <span class="badge ${confianzaClass}">
+                                    ${dup.confianza} (${dup.puntuacion || 0}%)
+                                </span>
+                                <small class="ms-2">${dup.motivo}</small>
+                            </div>
+                            ${dup.tipo ? `<div class="small text-info mt-1">Tipo: ${dup.tipo}</div>` : ''}
+                        </li>
+                    `;
+                }
+                
+                html += '</ul>';
+            } else {
+                html += `
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle me-2"></i>No se detectaron duplicados</h6>
+                        <p>La convocatoria parece ser única en la base de datos.</p>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div></div>';
+            html += '</div>'; // Cierre row
+            
+            container.innerHTML = html;
+        }
+        
+        // Función para obtener clase CSS de badge según estado
+        function getBadgeClass(estado) {
+            if (!estado) return 'bg-secondary';
+            
+            if (estado.includes('Abierta')) {
+                return 'bg-success';
+            } else if (estado.includes('Pendiente')) {
+                return 'bg-warning text-dark';
+            } else {
+                return 'bg-secondary';
+            }
+        }
+        
+        // Función para formatear fechas
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'null') {
+                return null;
+            }
+            
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+        
+        // Función para renderizar listas
+        function renderList(items) {
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return '<li class="text-muted">No se especifican</li>';
+            }
+            
+            return items.map(item => `<li>${item}</li>`).join('');
+        }
+        
+        // Función para renderizar etiquetas (tags)
+        function renderTags(tags, className) {
+            if (!tags || !Array.isArray(tags) || tags.length === 0) {
+                return '<span class="text-muted">No se especifican</span>';
+            }
+            
+            return tags.map(tag => `<span class="badge ${className} me-1 mb-1">${tag}</span>`).join('');
+        }
+        
+        // Función para renderizar enlaces
+        function renderLink(url, label) {
+            if (!url || url === 'null') {
+                return `<p class="text-muted">${label} no disponible</p>`;
+            }
+            
+            return `<a href="${url}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-external-link-alt me-1"></i>${label}</a>`;
+        }
+        
+        // ========================================
+        // NUEVA FUNCIONALIDAD: Autocompletar desde BDNS
+        // ========================================
+        
+        let documentosBDNS = [];  // Almacenar documentos obtenidos
+        let pdfDescargadoPath = null;  // Ruta del PDF descargado
+        
+        // Botón para obtener datos de BDNS
+        document.getElementById('obtener-bdns-btn').addEventListener('click', async function() {
+            const urlBdnsInput = document.getElementById('url-bdns-input');
+            const urlBdns = urlBdnsInput.value.trim();
+            
+            if (!urlBdns) {
+                showError('Por favor, introduce la URL de BDNS o el código');
+                return;
+            }
+            
+            // Mostrar loading
+            const loadingDiv = document.getElementById('bdns-loading');
+            loadingDiv.classList.remove('d-none');
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('/api/obtener-info-bdns', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url_bdns: urlBdns
+                    })
+                });
+                
+                const data = await response.json();
+                
+                console.log('Respuesta de BDNS:', data);  // DEBUG
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Error al obtener información de BDNS');
+                }
+                
+                // Guardar datos
+                documentosBDNS = data.documentos || [];
+                
+                console.log('Documentos BDNS:', documentosBDNS);  // DEBUG
+                
+                // Autocompletar campos básicos
+                document.getElementById('codigo-bdns').value = data.codigo_bdns;
+                document.getElementById('bases-url').value = data.url_bases;
+                
+                // Si hay documentos
+                if (documentosBDNS.length === 0) {
+                    showError('No se encontraron documentos en la convocatoria. Completa los campos manualmente.');
+                } else if (documentosBDNS.length === 1) {
+                    // Un solo documento: autocompletar directamente
+                    autocompletarConDocumento(documentosBDNS[0]);
+                    
+                    console.log('Documento seleccionado:', documentosBDNS[0]);  // DEBUG
+                    console.log('¿Tiene pdf_path?', documentosBDNS[0].pdf_path);  // DEBUG
+                    
+                    // Si tiene PDF descargado, mostrar botón para extraer
+                    if (documentosBDNS[0].pdf_path) {
+                        pdfDescargadoPath = documentosBDNS[0].pdf_path;
+                        console.log('PDF descargado en:', pdfDescargadoPath);  // DEBUG
+                        mostrarBotonExtraerPDF();
+                    } else {
+                        console.warn('No se encontró pdf_path en el documento');  // DEBUG
+                    }
+                    
+                    alert('✅ Campos autocompletados correctamente desde BDNS');
+                } else {
+                    // Múltiples documentos: mostrar selector
+                    mostrarSelectorDocumentos(documentosBDNS);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al obtener información de BDNS: ' + error.message);
+            } finally {
+                loadingDiv.classList.add('d-none');
+                this.disabled = false;
+            }
+        });
+        
+        // Mostrar selector de documentos
+        function mostrarSelectorDocumentos(documentos) {
+            const selectorDiv = document.getElementById('selector-documentos');
+            const select = document.getElementById('documento-select');
+            
+            // Limpiar opciones anteriores
+            select.innerHTML = '<option value="">-- Selecciona un documento --</option>';
+            
+            // Añadir documentos
+            documentos.forEach((doc, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                // Descripción del documento según tipo
+                let descripcion = '';
+                if (doc.tipo === 'convocatoria') {
+                    descripcion = `📄 Convocatoria: ${doc.titulo} (${doc.fecha_publicacion || 'Sin fecha'})`;
+                } else if (doc.tipo === 'bases_reguladoras') {
+                    descripcion = `📜 Bases reguladoras (${doc.fecha_publicacion || 'Sin fecha'})`;
+                } else {
+                    descripcion = `${doc.titulo || 'Documento ' + (index + 1)} - ${doc.fecha_publicacion || 'Sin fecha'}`;
+                }
+                
+                option.textContent = descripcion;
+                select.appendChild(option);
+            });
+            
+            // Mostrar selector
+            selectorDiv.classList.remove('d-none');
+            
+            // Manejar selección
+            select.onchange = function() {
+                const selectedIndex = this.value;
+                if (selectedIndex !== '') {
+                    const documentoSeleccionado = documentos[selectedIndex];
+                    
+                    console.log('Documento seleccionado del selector:', documentoSeleccionado);  // DEBUG
+                    
+                    autocompletarConDocumento(documentoSeleccionado);
+                    selectorDiv.classList.add('d-none');
+                    
+                    // Si tiene PDF descargado, mostrar botón para extraer
+                    if (documentoSeleccionado.pdf_path) {
+                        pdfDescargadoPath = documentoSeleccionado.pdf_path;
+                        console.log('PDF del documento seleccionado:', pdfDescargadoPath);  // DEBUG
+                        mostrarBotonExtraerPDF();
+                    }
+                    
+                    alert('✅ Campos autocompletados con el documento seleccionado');
+                }
+            };
+        }
+        
+        // Autocompletar campos con un documento específico
+        function autocompletarConDocumento(documento) {
+            // Fecha de publicación
+            if (documento.fecha_publicacion) {
+                document.getElementById('fecha-publicacion').value = documento.fecha_publicacion;
+            }
+            
+            // URL de la convocatoria (documento)
+            if (documento.url) {
+                document.getElementById('convocatoria-url').value = documento.url;
+            }
+        }
+        
+        // Mostrar botón para extraer información del PDF descargado
+        function mostrarBotonExtraerPDF() {
+            // Crear alert con el botón
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'alerta-pdf-descargado';
+            alertDiv.className = 'alert alert-success mt-3';
+            alertDiv.innerHTML = `
+                <h6><i class="fas fa-check-circle me-2"></i>PDF Descargado</h6>
+                <p class="mb-2">El documento de la convocatoria se ha descargado automáticamente.</p>
+                <button class="btn btn-primary btn-sm" id="extraer-pdf-bdns-btn">
+                    <i class="fas fa-magic me-1"></i>Extraer información del PDF
+                </button>
+            `;
+            
+            // Insertar después del selector de documentos
+            const selectorDiv = document.getElementById('selector-documentos');
+            selectorDiv.parentNode.insertBefore(alertDiv, selectorDiv.nextSibling);
+            
+            // Añadir evento al botón
+            document.getElementById('extraer-pdf-bdns-btn').addEventListener('click', extraerInformacionPDF);
+        }
+        
+        // Extraer información del PDF descargado
+        async function extraerInformacionPDF() {
+            if (!pdfDescargadoPath) {
+                showError('No hay ningún PDF descargado');
+                return;
+            }
+            
+            const boton = document.getElementById('extraer-pdf-bdns-btn');
+            boton.disabled = true;
+            boton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Extrayendo...';
+            
+            try {
+                const response = await fetch('/api/extraer-desde-pdf-bdns', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pdf_path: pdfDescargadoPath,
+                        codigo_bdns: document.getElementById('codigo-bdns').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Poner el texto extraído en el textarea
+                    document.getElementById('convocatoria-text').value = data.texto_extraido;
+                    
+                    // Cambiar a la pestaña de texto
+                    const textTab = document.getElementById('text-tab');
+                    bootstrap.Tab.getOrCreateInstance(textTab).show();
+                    
+                    alert('✅ Texto extraído correctamente. Ahora puedes hacer clic en "Extraer Información"');
+                } else {
+                    throw new Error(data.error || 'Error al extraer texto del PDF');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al extraer información del PDF: ' + error.message);
+            } finally {
+                boton.disabled = false;
+                boton.innerHTML = '<i class="fas fa-magic me-1"></i>Extraer información del PDF';
+            }
+        }
+        
+    });
+</script>
+{% endblock %}

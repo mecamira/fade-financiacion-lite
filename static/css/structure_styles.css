@@ -1,0 +1,122 @@
+/* Estilos específicos para la sección de estructura de proyectos */
+
+/* Estilos para tarjetas de herramientas */
+.structure-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.structure-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Iconos de secciones */
+.section-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #0d6efd;
+}
+
+/* Estilos para listas de verificación */
+.checklist-item {
+    transition: background-color 0.2s ease;
+}
+
+.checklist-item:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.checklist-check:checked + label {
+    text-decoration: none;
+    color: #198754;
+    font-weight: bold;
+}
+
+.toggle-recommendation {
+    color: #6c757d;
+    text-decoration: none;
+}
+
+.toggle-recommendation:hover {
+    color: #0d6efd;
+}
+
+/* Badges en acordeones */
+.section-progress {
+    font-size: 0.8rem;
+}
+
+/* Estilos para elementos de metodología */
+.methodology-phase {
+    border-left: 3px solid #0d6efd;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.methodology-phase-title {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+/* Ejemplos de redacción */
+.example-box {
+    border-left: 4px solid #198754;
+    padding: 15px;
+    background-color: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+.example-box-title {
+    color: #198754;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Tablas comparativas */
+.comparison-table th {
+    background-color: #e9ecef;
+}
+
+.comparison-table td {
+    vertical-align: middle;
+}
+
+/* Estilos para consejos */
+.tip-card {
+    border-radius: 10px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.tip-card-header {
+    background-color: #e9ecef;
+    padding: 10px 15px;
+    font-weight: bold;
+}
+
+.tip-card-body {
+    padding: 15px;
+}
+
+/* Estilos para errores y correcciones */
+.error-example {
+    color: #dc3545;
+    font-style: italic;
+}
+
+.correction-example {
+    color: #198754;
+    font-weight: normal;
+}
+
+/* Adaptaciones para móviles */
+@media (max-width: 768px) {
+    .section-icon {
+        font-size: 2rem;
+    }
+    
+    .section-progress {
+        display: none;
+    }
+}

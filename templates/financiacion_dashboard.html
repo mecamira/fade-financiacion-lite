@@ -1,0 +1,1447 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard de Financiación{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary text-center">Dashboard de Financiación</h1>
+            <p class="text-center lead">Explora y encuentra programas de financiación para tu empresa o proyecto</p>
+        </div>
+    </div>
+
+    <!-- Tarjetas de resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Programas Totales</h5>
+                    <h2 id="stats-total">{{ stats.total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Convocatorias Abiertas</h5>
+                    <h2 id="stats-abiertas">{{ stats.estados.Abierta }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Convocatorias Pendientes</h5>
+                    <h2 id="stats-pendientes">{{ stats.estados.Pendiente }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Convocatorias Cerradas</h5>
+                    <h2 id="stats-cerradas">{{ stats.estados.Cerrada }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de filtros -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form id="filter-form">
+                        <!-- Búsqueda general -->
+                        <div class="mb-3">
+                            <label for="search" class="form-label">Buscar:</label>
+                            <input type="text" class="form-control" id="search" placeholder="Palabra clave...">
+                        </div>
+                        
+                        <!-- Estado -->
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Estado:</label>
+                            <select class="form-select" id="estado">
+                                <option value="">Todos</option>
+                                {% for estado in filter_options.estados %}
+                                <option value="{{ estado }}">{{ estado }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Organismo -->
+                        <div class="mb-3">
+                            <label for="organismo" class="form-label">Organismo:</label>
+                            <select class="form-select" id="organismo">
+                                <option value="">Todos</option>
+                                {% for org in filter_options.organismos %}
+                                <option value="{{ org }}">{{ org }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- BDNS (Base de Datos Nacional de Subvenciones) -->
+                        <div class="mb-3">
+                            <label for="bdns" class="form-label">BDNS:</label>
+                            <input type="text" class="form-control" id="bdns" placeholder="Código BDNS...">
+                        </div>
+                        
+                        <!-- Tipo de ayuda -->
+                        <div class="mb-3">
+                            <label for="tipo_ayuda" class="form-label">Tipo de ayuda:</label>
+                            <select class="form-select" id="tipo_ayuda">
+                                <option value="">Todos</option>
+                                {% for tipo in filter_options.tipos_ayuda %}
+                                <option value="{{ tipo }}">{{ tipo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Ámbito -->
+                        <div class="mb-3">
+                            <label for="ambito" class="form-label">Ámbito:</label>
+                            <select class="form-select" id="ambito">
+                                <option value="">Todos</option>
+                                {% for amb in filter_options.ambitos %}
+                                <option value="{{ amb }}">{{ amb }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Beneficiario -->
+                        <div class="mb-3">
+                            <label for="beneficiario" class="form-label">Beneficiario:</label>
+                            <select class="form-select" id="beneficiario">
+                                <option value="">Todos</option>
+                                {% for ben in filter_options.beneficiarios %}
+                                <option value="{{ ben }}">{{ ben }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Sector -->
+                        <div class="mb-3">
+                            <label for="sector" class="form-label">Sector:</label>
+                            <select class="form-select" id="sector">
+                                <option value="">Todos</option>
+                                {% for sec in filter_options.sectores %}
+                                <option value="{{ sec }}">{{ sec }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Presupuesto -->
+                        <div class="mb-3">
+                            <label class="form-label">Presupuesto proyecto:</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control" id="presupuesto_min" placeholder="Min">
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" id="presupuesto_max" placeholder="Max">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Aplicar filtros</button>
+                        <button type="button" id="reset-filters" class="btn btn-outline-secondary w-100">Limpiar filtros</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resultados -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <ul class="nav nav-tabs card-header-tabs" id="view-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="cards-tab" data-bs-toggle="tab" data-bs-target="#cards-view" type="button" role="tab" aria-controls="cards-view" aria-selected="true">
+                                <i class="fas fa-th-large me-1"></i> Tarjetas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="visualizations-tab" data-bs-toggle="tab" data-bs-target="#visualizations-view" type="button" role="tab" aria-controls="visualizations-view" aria-selected="false">
+                                <i class="fas fa-chart-pie me-1"></i> Visualizaciones
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <button id="export-excel" class="btn btn-sm btn-outline-success me-2">
+                                <i class="fas fa-file-excel me-1"></i> Exportar a Excel
+                            </button>
+                            <button id="export-pdf" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-file-pdf me-1"></i> Exportar a PDF
+                            </button>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownSortButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ordenar por
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownSortButton">
+                                <li><a class="dropdown-item sort-option" data-sort="nombre">Nombre</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="organismo">Organismo</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="fecha_cierre">Fecha de cierre</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="importe_maximo">Importe máximo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="view-tabs-content">
+                        <!-- Vista de tarjetas (actual) -->
+                        <div class="tab-pane fade show active" id="cards-view" role="tabpanel" aria-labelledby="cards-tab">
+                            <div id="loading" class="text-center my-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando programas de financiación...</p>
+                            </div>
+                            
+                            <div id="results-container" class="row" style="display: none;">
+                                <!-- Las tarjetas de programas se cargarán aquí mediante JavaScript -->
+                            </div>
+                            
+                            <div id="no-results" class="text-center my-5" style="display: none;">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <h5>No se encontraron programas que coincidan con tus filtros</h5>
+                                <p>Intenta cambiar los criterios de búsqueda o eliminar algunos filtros.</p>
+                                <button id="clear-all-filters" class="btn btn-outline-primary">Limpiar todos los filtros</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Nueva vista de visualizaciones -->
+                        <div class="tab-pane fade" id="visualizations-view" role="tabpanel" aria-labelledby="visualizations-view">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Distribución por Organismo</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="organismos-chart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Distribución por Sector</h5>
+                                        </div>
+                                        <div class="card-body" style="max-height: 400px; overflow: auto;">
+                                            <canvas id="sectores-chart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Cronograma de Convocatorias</h5>
+                                        </div>
+                                        <div class="card-body" style="max-height: 400px; overflow: auto;">
+                                            <canvas id="timeline-chart" height="150"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de vista previa -->
+<div class="modal fade" id="preview-modal" tabindex="-1" aria-labelledby="preview-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preview-modal-label">Vista previa del programa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="preview-modal-content">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-3">Cargando información del programa...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <a href="#" class="btn btn-primary" id="preview-details-link">Ver detalles completos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de comparación -->
+<div class="modal fade" id="compare-modal" tabindex="-1" aria-labelledby="compare-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="compare-modal-label">Comparar programas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="compare-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Características</th>
+                                <th id="compare-program-1" style="width: 40%">Programa 1</th>
+                                <th id="compare-program-2" style="width: 40%">Programa 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- La comparación se llenará mediante JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="export-comparison">Exportar comparación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra flotante de comparación -->
+<div id="compare-bar" class="position-fixed bottom-0 start-0 w-100 bg-dark text-white py-2 px-3 d-none">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-primary rounded-pill me-2" id="compare-count">0</span>
+                <span>programas seleccionados para comparar</span>
+            </div>
+            <div>
+                <button id="compare-button" class="btn btn-primary btn-sm me-2" disabled>Comparar programas</button>
+                <button id="compare-clear" class="btn btn-outline-light btn-sm">Limpiar selección</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="programa-card-template">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm programa-card" data-programa-id="">
+            <div class="card-header py-3">
+                <span class="badge float-end"></span>
+                <h5 class="card-title programa-nombre mb-0 text-truncate"></h5>
+                <div class="small text-muted programa-organismo"></div>
+            </div>
+            <div class="card-body">
+                <!-- Mejorar visualización del resumen -->
+                <div class="programa-resumen mb-3"></div>
+                
+                <!-- Mostrar fechas de forma más destacada -->
+                <div class="programa-fecha mb-3"></div>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Tipo de ayuda:</small>
+                        <div class="programa-tipo-ayuda"></div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Ámbito:</small>
+                        <div class="programa-ambito"></div>
+                    </div>
+                </div>
+                
+                <!-- Mostrar también importe máximo si existe -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <small class="text-muted d-block">Importe máximo:</small>
+                        <div class="programa-importe"></div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <small class="text-muted d-block">Beneficiarios:</small>
+                        <div class="programa-beneficiarios"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="#" class="btn btn-primary btn-sm programa-detalle">Ver detalles</a>
+                        <button type="button" class="btn btn-outline-secondary btn-sm ms-2 programa-preview">
+                            <i class="fas fa-eye"></i> Vista previa
+                        </button>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input programa-comparar" type="checkbox" value="">
+                        <label class="form-check-label small">
+                            Comparar
+                        </label>
+                    </div>
+                </div>
+                <span class="text-muted float-end small programa-intensidad mt-2"></span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+    /* Estilos para el dashboard de financiación */
+    .programa-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .programa-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .card-header .badge {
+        font-size: 0.75rem;
+    }
+    
+    /* Personalizar scrollbar para listas largas de filtros */
+    select.form-select {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    /* Barra de comparación */
+    #compare-bar {
+        z-index: 1040;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Tooltips personalizados */
+    .tooltip-inner {
+        max-width: 300px;
+        text-align: left;
+    }
+    
+    /* Estilos para la vista previa */
+    .programa-preview-card {
+        border-left: 4px solid #3498db;
+    }
+    
+    /* Mejorar visualización de fechas */
+    .fecha-alerta {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    /* Efecto para destacar tarjetas seleccionadas para comparar */
+    .programa-card.selected-for-compare {
+        border: 2px solid #3498db !important;
+        box-shadow: 0 0 10px rgba(52, 152, 219, 0.5) !important;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variables para ordenación
+        let sortField = 'nombre';
+        let sortDirection = 'asc';
+        
+        // Variable para almacenar programas cargados (global para usar en exportación)
+        let programasCargados = [];
+        
+        // Lista de programas para comparar (persistente entre filtros)
+        const programasParaComparar = [];
+        // Variable para guardar todos los programas seleccionados con su información completa
+        let programasSeleccionadosInfo = [];
+        
+        // Contenedores de chart.js
+        let organismoChart = null;
+        let sectorChart = null;
+        let timelineChart = null;
+        
+        // Cargar programas al inicio
+        loadPrograms();
+        
+        // Manejar envío del formulario de filtros
+        document.getElementById('filter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            loadPrograms();
+        });
+        
+        // Manejar reset de filtros
+        document.getElementById('reset-filters').addEventListener('click', function() {
+            document.getElementById('filter-form').reset();
+            loadPrograms();
+        });
+        
+        // Manejar clear all filters desde no-results
+        document.getElementById('clear-all-filters').addEventListener('click', function() {
+            document.getElementById('filter-form').reset();
+            loadPrograms();
+        });
+        
+        // Manejar ordenación
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const newSortField = this.getAttribute('data-sort');
+                
+                // Si el campo es el mismo, cambia la dirección
+                if (newSortField === sortField) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortField = newSortField;
+                    sortDirection = 'asc';
+                }
+                
+                // Actualiza el texto del botón
+                document.getElementById('dropdownSortButton').textContent = 
+                    'Ordenar por: ' + this.textContent + ' (' + (sortDirection === 'asc' ? 'A-Z' : 'Z-A') + ')';
+                
+                // Reordenar programas ya cargados
+                sortAndRenderPrograms(programasCargados);
+            });
+        });
+        
+        // Exportar a Excel
+        document.getElementById('export-excel').addEventListener('click', function() {
+            exportToExcel(programasCargados);
+        });
+        
+        // Exportar a PDF (pendiente de implementación)
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            alert('Funcionalidad de exportación a PDF en desarrollo');
+        });
+        
+        // Manejar comparación de programas
+        document.getElementById('compare-button').addEventListener('click', function() {
+            comparePrograms();
+        });
+        
+        // Limpiar selección de comparación
+        document.getElementById('compare-clear').addEventListener('click', function() {
+            clearCompareSelection();
+        });
+        
+        // Manejar exportación de comparación
+        document.getElementById('export-comparison').addEventListener('click', function() {
+            exportComparison();
+        });
+        
+        // Función para cargar programas con filtros
+        function loadPrograms() {
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-container').style.display = 'none';
+            document.getElementById('no-results').style.display = 'none';
+            
+            // Recoger valores de filtros
+            const search = document.getElementById('search').value;
+            const estado = document.getElementById('estado').value;
+            const organismo = document.getElementById('organismo').value;
+            const tipo_ayuda = document.getElementById('tipo_ayuda').value;
+            const ambito = document.getElementById('ambito').value;
+            const beneficiario = document.getElementById('beneficiario').value;
+            const sector = document.getElementById('sector').value;
+            const presupuesto_min = document.getElementById('presupuesto_min').value;
+            const presupuesto_max = document.getElementById('presupuesto_max').value;
+            const bdns = document.getElementById('bdns').value;
+            
+            // Construir URL de la API con parámetros
+            let url = '/api/programas-financiacion?';
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (estado) url += `estado=${encodeURIComponent(estado)}&`;
+            if (organismo) url += `organismo=${encodeURIComponent(organismo)}&`;
+            if (tipo_ayuda) url += `tipo_ayuda=${encodeURIComponent(tipo_ayuda)}&`;
+            if (ambito) url += `ambito=${encodeURIComponent(ambito)}&`;
+            if (beneficiario) url += `beneficiario=${encodeURIComponent(beneficiario)}&`;
+            if (sector) url += `sector=${encodeURIComponent(sector)}&`;
+            if (presupuesto_min) url += `presupuesto_min=${encodeURIComponent(presupuesto_min)}&`;
+            if (presupuesto_max) url += `presupuesto_max=${encodeURIComponent(presupuesto_max)}&`;
+            // Añadir parámetro BDNS
+            if (bdns) url += `bdns=${encodeURIComponent(bdns)}&`;
+            
+            // Hacer petición a la API
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Extraer programas del objeto de respuesta
+                    const programas = data.programas || data || [];
+                    
+                    // Guardar los programas cargados en la variable global
+                    programasCargados = programas;
+                    
+                    // Ordenar y mostrar los programas
+                    sortAndRenderPrograms(programas);
+                    
+                    // Generar visualizaciones si hay resultados
+                    if (programas.length > 0) {
+                        generateVisualizations(programas);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar programas:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('no-results').style.display = 'block';
+                    document.getElementById('no-results').querySelector('h5').textContent = 'Error al cargar los programas';
+                    document.getElementById('no-results').querySelector('p').textContent = 'Por favor, inténtalo de nuevo.';
+                });
+        }
+        
+        // Función para ordenar y renderizar programas
+        function sortAndRenderPrograms(programas) {
+            // Ordenar primero por estado (abiertas primero)
+            programas.sort((a, b) => {
+                // Primero ordenar por estado (abiertas primero)
+                const estadoA = a.convocatoria?.estado || '';
+                const estadoB = b.convocatoria?.estado || '';
+                
+                const isAbiertoA = estadoA.includes('Abierta');
+                const isAbiertoB = estadoB.includes('Abierta');
+                
+                // Si uno está abierto y el otro no, el abierto va primero
+                if (isAbiertoA && !isAbiertoB) return -1;
+                if (!isAbiertoA && isAbiertoB) return 1;
+                
+                // Si ambos tienen el mismo estado, usar el criterio de ordenación seleccionado
+                let valueA, valueB;
+                
+                if (sortField === 'nombre') {
+                    valueA = a.nombre || '';
+                    valueB = b.nombre || '';
+                } else if (sortField === 'organismo') {
+                    valueA = a.organismo || '';
+                    valueB = b.organismo || '';
+                } else if (sortField === 'fecha_cierre') {
+                    // Para fechas
+                    valueA = a.convocatoria && a.convocatoria.fecha_cierre ? a.convocatoria.fecha_cierre : '9999-12-31';
+                    valueB = b.convocatoria && b.convocatoria.fecha_cierre ? b.convocatoria.fecha_cierre : '9999-12-31';
+                } else if (sortField === 'importe_maximo') {
+                    // Para importes
+                    valueA = a.financiacion && a.financiacion.importe_maximo ? 
+                                (isNaN(a.financiacion.importe_maximo) ? 0 : parseFloat(a.financiacion.importe_maximo)) : 0;
+                    valueB = b.financiacion && b.financiacion.importe_maximo ? 
+                                (isNaN(b.financiacion.importe_maximo) ? 0 : parseFloat(b.financiacion.importe_maximo)) : 0;
+                } else {
+                    valueA = a[sortField] || '';
+                    valueB = b[sortField] || '';
+                }
+                
+                // Dirección de ordenación
+                if (sortDirection === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            // Renderizar resultados
+            renderPrograms(programas);
+        }
+        
+        // Función para renderizar programas en la UI
+        function renderPrograms(programas) {
+            // Ocultar loading
+            document.getElementById('loading').style.display = 'none';
+            
+            // Si no hay resultados
+            if (programas.length === 0) {
+                document.getElementById('no-results').style.display = 'block';
+                return;
+            }
+            
+            // Actualizar estadísticas
+            updateStatistics(programas);
+            
+            // Preparar todos los programas a mostrar (incluidos los seleccionados para comparar)
+            let programasAMostrar = [...programas];
+            
+            // Añadir programas seleccionados que no estén ya en los resultados del filtro
+            for (const programaSeleccionado of programasSeleccionadosInfo) {
+                if (!programasAMostrar.some(p => p.id === programaSeleccionado.id)) {
+                    programasAMostrar.push(programaSeleccionado);
+                }
+            }
+            
+            // Limpiar y mostrar contenedor de resultados
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            container.style.display = 'flex';
+            container.style.flexWrap = 'wrap';
+            
+            // Template para las tarjetas
+            const template = document.getElementById('programa-card-template');
+            
+            // Crear una tarjeta para cada programa
+            programasAMostrar.forEach(programa => {
+                // Verificar si este programa está seleccionado para comparar
+                const isSelected = programasParaComparar.includes(programa.id);
+                // Clonar template
+                const card = template.content.cloneNode(true);
+                
+                // Guardar ID del programa en la tarjeta
+                card.querySelector('.programa-card').setAttribute('data-programa-id', programa.id);
+                
+                // Establecer valores
+                card.querySelector('.programa-nombre').textContent = programa.nombre || 'Programa sin nombre';
+                card.querySelector('.programa-organismo').textContent = programa.organismo || 'Organismo no especificado';
+                
+                // Mejorar resumen
+                const resumenEl = card.querySelector('.programa-resumen');
+                resumenEl.textContent = programa.resumen_breve || 'Sin descripción disponible';
+                
+                card.querySelector('.programa-tipo-ayuda').textContent = programa.tipo_ayuda || 'No especificado';
+                card.querySelector('.programa-ambito').textContent = programa.ambito || 'No especificado';
+                
+                // Importe máximo
+                const importeEl = card.querySelector('.programa-importe');
+                if (programa.financiacion && programa.financiacion.importe_maximo && programa.financiacion.importe_maximo !== 'nan') {
+                    importeEl.textContent = programa.financiacion.importe_maximo;
+                } else {
+                    importeEl.textContent = 'No especificado';
+                }
+                
+                // Beneficiarios
+                const beneficiariosEl = card.querySelector('.programa-beneficiarios');
+                if (programa.beneficiarios && programa.beneficiarios.length > 0) {
+                    // Mostrar los primeros 3 y un +X más si hay más
+                    const visibleBeneficiarios = programa.beneficiarios.slice(0, 3);
+                    const resto = programa.beneficiarios.length - 3;
+                    
+                    beneficiariosEl.innerHTML = visibleBeneficiarios.map(b => 
+                        `<span class="badge bg-light text-dark me-1 mb-1" data-bs-toggle="tooltip" title="${b}">${b}</span>`
+                    ).join('');
+                    
+                    if (resto > 0) {
+                        beneficiariosEl.innerHTML += `<span class="badge bg-secondary text-white me-1 mb-1" data-bs-toggle="tooltip" title="Y ${resto} beneficiarios más">+${resto} más</span>`;
+                    }
+                } else {
+                    beneficiariosEl.textContent = 'No especificados';
+                }
+                
+                // Estado de la convocatoria (badge)
+                const badge = card.querySelector('.badge');
+                if (programa.convocatoria && programa.convocatoria.estado) {
+                    badge.textContent = programa.convocatoria.estado;
+                    
+                    if (programa.convocatoria.estado.includes('Abierta')) {
+                        badge.classList.add('bg-success');
+                    } else if (programa.convocatoria.estado.includes('Pendiente')) {
+                        badge.classList.add('bg-warning', 'text-dark');
+                    } else {
+                        badge.classList.add('bg-secondary');
+                    }
+                } else {
+                    badge.textContent = 'Estado desconocido';
+                    badge.classList.add('bg-secondary');
+                }
+                
+                // Fecha con mejor visualización
+                const fechaEl = card.querySelector('.programa-fecha');
+                if (programa.convocatoria) {
+                    const fechaCierre = programa.convocatoria.fecha_cierre;
+                    const fechaApertura = programa.convocatoria.fecha_apertura;
+                    
+                    let fechaHTML = '';
+                    
+                    // Caso: Convocatoria abierta todo el año
+                    if (programa.convocatoria.estado === 'Abierta (Todo el año)') {
+                        fechaHTML = `<div class="alert alert-success py-1 px-2"><i class="fas fa-calendar-check me-1"></i> Convocatoria abierta todo el año</div>`;
+                    }
+                    // Caso: Convocatoria con fecha de cierre
+                    else if (fechaCierre && fechaCierre !== 'null') {
+                        try {
+                            const date = new Date(fechaCierre);
+                            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                            const formattedDate = date.toLocaleDateString('es-ES', options);
+                            
+                            // Si faltan menos de 30 días, mostrar alerta
+                            const daysRemaining = Math.floor((date - new Date()) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysRemaining < 0) {
+                                fechaHTML = `<div class="alert alert-secondary py-1 px-2"><i class="fas fa-calendar-times me-1"></i> Convocatoria cerrada</div>`;
+                            } else if (daysRemaining < 30) {
+                                fechaHTML = `<div class="alert alert-warning py-1 px-2"><i class="fas fa-exclamation-triangle me-1"></i> Cierra pronto: <strong>${formattedDate}</strong> (${daysRemaining} días)</div>`;
+                            } else {
+                                fechaHTML = `<div class="alert alert-info py-1 px-2"><i class="fas fa-calendar-alt me-1"></i> Cierre: <strong>${formattedDate}</strong></div>`;
+                            }
+                        } catch (e) {
+                            fechaHTML = `<small class="text-muted">Fecha de cierre: ${fechaCierre}</small>`;
+                        }
+                    }
+                    // Caso: Fecha de apertura futura
+                    else if (fechaApertura && programa.convocatoria.estado.includes('Pendiente')) {
+                        try {
+                            const date = new Date(fechaApertura);
+                            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                            fechaHTML = `<div class="alert alert-warning py-1 px-2"><i class="fas fa-clock me-1"></i> Apertura prevista: <strong>${date.toLocaleDateString('es-ES', options)}</strong></div>`;
+                        } catch (e) {
+                            fechaHTML = `<small class="text-muted">Fecha de apertura: ${fechaApertura}</small>`;
+                        }
+                    }
+                    
+                    fechaEl.innerHTML = fechaHTML;
+                }
+                
+                // Intensidad de financiación
+                const intensidadEl = card.querySelector('.programa-intensidad');
+                if (programa.financiacion && programa.financiacion.intensidad && programa.financiacion.intensidad !== 'nan') {
+                    intensidadEl.textContent = programa.financiacion.intensidad;
+                } else {
+                    intensidadEl.textContent = '';
+                }
+                
+                // Enlace al detalle
+                const detalleLink = card.querySelector('.programa-detalle');
+                detalleLink.href = `/financiacion/programa/${programa.id}`;
+                
+                // Configurar checkbox de comparación
+                const compareCheckbox = card.querySelector('.programa-comparar');
+                compareCheckbox.value = programa.id;
+                
+                // Marcar checkbox si ya está seleccionado
+                if (isSelected) {
+                    compareCheckbox.checked = true;
+                    card.querySelector('.programa-card').classList.add('selected-for-compare');
+                }
+                
+                compareCheckbox.addEventListener('change', function() {
+                    const cardElement = this.closest('.programa-card');
+                    if (this.checked) {
+                        // Añadir a comparación
+                        if (addToCompare(programa.id)) {
+                            cardElement.classList.add('selected-for-compare');
+                        } else {
+                            this.checked = false;
+                        }
+                    } else {
+                        // Quitar de comparación
+                        removeFromCompare(programa.id);
+                        cardElement.classList.remove('selected-for-compare');
+                    }
+                });
+                
+                // Configurar vista previa
+                const previewButton = card.querySelector('.programa-preview');
+                previewButton.addEventListener('click', function() {
+                    showProgramPreview(programa.id);
+                });
+                
+                // Mostrar BDNS si existe
+                if (programa.codigo_bdns) {
+                    // Convertir a entero para eliminar decimales
+                    let formattedBdns;
+                    if (typeof programa.codigo_bdns === 'number') {
+                        formattedBdns = Math.floor(programa.codigo_bdns).toString();
+                    } else if (typeof programa.codigo_bdns === 'string' && programa.codigo_bdns.includes('.')) {
+                        // Si es una cadena con punto decimal, convertir a número y luego a entero
+                        formattedBdns = Math.floor(parseFloat(programa.codigo_bdns)).toString();
+                    } else {
+                        formattedBdns = programa.codigo_bdns;
+                    }
+                    
+                    const bdnsHtml = `
+                    <div class="mt-2">
+                        <small class="text-muted d-block">Código BDNS:</small>
+                        <div class="fw-bold">${formattedBdns}</div>
+                    </div>`;
+                    
+                    // Añadir al final del contenido
+                    const contentElement = card.querySelector('.programa-fecha');
+                    contentElement.insertAdjacentHTML('afterend', bdnsHtml);
+                }
+                
+                // Añadir a contenedor
+                container.appendChild(card);
+            });
+            
+            // Inicializar tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+        
+        // Actualizar estadísticas
+        function updateStatistics(programas) {
+            // Contar estados
+            let estados = {
+                'Abierta': 0,
+                'Pendiente': 0,
+                'Cerrada': 0
+            };
+            
+            // Contar por estado
+            programas.forEach(programa => {
+                if (programa.convocatoria && programa.convocatoria.estado) {
+                    const estado = programa.convocatoria.estado;
+                    if (estado.includes('Abierta')) {
+                        estados['Abierta']++;
+                    } else if (estado.includes('Pendiente')) {
+                        estados['Pendiente']++;
+                    } else {
+                        estados['Cerrada']++;
+                    }
+                }
+            });
+            
+            // Actualizar DOM
+            document.getElementById('stats-total').textContent = programas.length;
+            document.getElementById('stats-abiertas').textContent = estados['Abierta'];
+            document.getElementById('stats-pendientes').textContent = estados['Pendiente'];
+            document.getElementById('stats-cerradas').textContent = estados['Cerrada'];
+        }
+        
+        // Generar visualizaciones
+        function generateVisualizations(programas) {
+            // Destruir charts existentes si ya se crearon
+            if (organismoChart) organismoChart.destroy();
+            if (sectorChart) sectorChart.destroy();
+            if (timelineChart) timelineChart.destroy();
+            
+            // 1. Gráfico de organismos
+            const organismos = {};
+            programas.forEach(p => {
+                if (p.organismo) {
+                    // Simplificar nombre del organismo (tomar primera palabra)
+                    const nombreSimple = p.organismo.split(' ')[0];
+                    organismos[nombreSimple] = (organismos[nombreSimple] || 0) + 1;
+                }
+            });
+            
+            // Ordenar por cantidad
+            const organismosOrdenados = Object.entries(organismos)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Mostrar top 10
+            
+            const organismosCtx = document.getElementById('organismos-chart').getContext('2d');
+            organismoChart = new Chart(organismosCtx, {
+                type: 'bar',
+                data: {
+                    labels: organismosOrdenados.map(e => e[0]),
+                    datasets: [{
+                        label: 'Número de programas',
+                        data: organismosOrdenados.map(e => e[1]),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 2. Gráfico de sectores
+            const sectores = {};
+            programas.forEach(p => {
+                if (p.sectores && p.sectores.length) {
+                    p.sectores.forEach(sector => {
+                        sectores[sector] = (sectores[sector] || 0) + 1;
+                    });
+                }
+            });
+            
+            // Ordenar por cantidad
+            const sectoresOrdenados = Object.entries(sectores)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Mostrar top 10
+            
+            const sectoresCtx = document.getElementById('sectores-chart').getContext('2d');
+            sectorChart = new Chart(sectoresCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: sectoresOrdenados.map(e => e[0]),
+                    datasets: [{
+                        data: sectoresOrdenados.map(e => e[1]),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)',
+                            'rgba(255, 159, 64, 0.5)',
+                            'rgba(199, 199, 199, 0.5)',
+                            'rgba(83, 102, 255, 0.5)',
+                            'rgba(40, 159, 64, 0.5)',
+                            'rgba(210, 199, 199, 0.5)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)',
+                            'rgba(83, 102, 255, 1)',
+                            'rgba(40, 159, 64, 1)',
+                            'rgba(210, 199, 199, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // 3. Cronograma de fechas de cierre
+            const convocatorias = [];
+            const hoy = new Date();
+            const seisProximosMeses = new Date();
+            seisProximosMeses.setMonth(hoy.getMonth() + 6);
+
+            programas.forEach(p => {
+                if (p.convocatoria && p.convocatoria.fecha_cierre && p.convocatoria.fecha_cierre !== 'null') {
+                    try {
+                        const fechaCierre = new Date(p.convocatoria.fecha_cierre);
+                        // Filtrar solo fechas futuras en los próximos 6 meses
+                        if (fechaCierre > hoy && fechaCierre < seisProximosMeses) {
+                            convocatorias.push({
+                                id: p.id,
+                                nombre: p.nombre,
+                                fecha: fechaCierre,
+                                estado: p.convocatoria.estado,
+                                organismo: p.organismo
+                            });
+                        }
+                    } catch (e) {
+                        // Ignorar fechas inválidas
+                    }
+                }
+            });
+
+            // Ordenar por fecha
+            convocatorias.sort((a, b) => a.fecha - b.fecha);
+
+            // Agrupar por meses para simplificar la visualización
+            const meses = {};
+            convocatorias.forEach(conv => {
+                const mesKey = conv.fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+                if (!meses[mesKey]) {
+                    meses[mesKey] = [];
+                }
+                meses[mesKey].push(conv);
+            });
+
+            const mesesLabels = Object.keys(meses);
+            const convocatoriasPorMes = mesesLabels.map(mes => meses[mes].length);
+
+            const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+            timelineChart = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: mesesLabels,
+                    datasets: [{
+                        label: 'Número de convocatorias que cierran',
+                        data: convocatoriasPorMes,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                afterTitle: function(tooltipItems) {
+                                    const mesKey = tooltipItems[0].label;
+                                    return meses[mesKey].length + ' convocatorias';
+                                },
+                                label: function(context) {
+                                    return ''; // No mostrar etiqueta por defecto
+                                },
+                                afterLabel: function(context) {
+                                    const mesKey = context.label;
+                                    return meses[mesKey].map(conv => 
+                                        '- ' + conv.nombre + ' (' + conv.fecha.toLocaleDateString('es-ES') + ')'
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Exportar a Excel
+        function exportToExcel(programas) {
+            if (!programas || programas.length === 0) {
+                alert('No hay programas para exportar');
+                return;
+            }
+            
+            // Crear matriz de datos para Excel
+            const data = [
+                ['Nombre', 'Organismo', 'Tipo de Ayuda', 'Estado', 'Fecha Cierre', 'Beneficiarios', 'Importe Máximo', 'Intensidad']
+            ];
+            
+            programas.forEach(p => {
+                const row = [
+                    p.nombre || '',
+                    p.organismo || '',
+                    p.tipo_ayuda || '',
+                    p.convocatoria?.estado || '',
+                    p.convocatoria?.fecha_cierre || '',
+                    (p.beneficiarios || []).join(', '),
+                    p.financiacion?.importe_maximo || '',
+                    p.financiacion?.intensidad || ''
+                ];
+                data.push(row);
+            });
+            
+            // Convertir a workbook
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Programas");
+            
+            // Generar archivo y descargarlo
+            XLSX.writeFile(wb, "programas_financiacion.xlsx");
+        }
+        
+        // Exportar comparación
+        function exportComparison() {
+            // Obtener tabla de comparación
+            const table = document.getElementById('compare-table');
+            if (!table) return;
+            
+            // Crear una matriz con los datos de la tabla
+            const data = [];
+            
+            // Cabeceras
+            const headers = [];
+            const headerCells = table.querySelectorAll('thead th');
+            headerCells.forEach(cell => {
+                headers.push(cell.textContent);
+            });
+            data.push(headers);
+            
+            // Filas de datos
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td, th');
+                cells.forEach(cell => {
+                    rowData.push(cell.textContent);
+                });
+                data.push(rowData);
+            });
+            
+            // Convertir a workbook
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Comparación");
+            
+            // Generar archivo y descargarlo
+            XLSX.writeFile(wb, "comparacion_programas.xlsx");
+        }
+        
+        // Función para añadir programa a comparación
+        function addToCompare(programaId) {
+            // Verificar si ya está en la lista
+            if (programasParaComparar.includes(programaId)) {
+                return true;
+            }
+            
+            // Verificar si hay espacio (máximo 3)
+            if (programasParaComparar.length >= 3) {
+                alert('Solo puede comparar hasta 3 programas a la vez');
+                return false;
+            }
+            
+            // Añadir a la lista
+            programasParaComparar.push(programaId);
+            
+            // Guardar la información completa del programa
+            const programa = programasCargados.find(p => p.id === programaId);
+            if (programa) {
+                // Si ya existe, actualizar, si no, añadir
+                const existingIndex = programasSeleccionadosInfo.findIndex(p => p.id === programaId);
+                if (existingIndex >= 0) {
+                    programasSeleccionadosInfo[existingIndex] = {...programa};
+                } else {
+                    programasSeleccionadosInfo.push({...programa});
+                }
+            }
+            
+            // Actualizar interfaz
+            updateCompareInterface();
+            
+            return true;
+        }
+        
+        // Función para quitar programa de comparación
+        function removeFromCompare(programaId) {
+            const index = programasParaComparar.indexOf(programaId);
+            if (index !== -1) {
+                programasParaComparar.splice(index, 1);
+                
+                // Eliminar también de programasSeleccionadosInfo
+                const infoIndex = programasSeleccionadosInfo.findIndex(p => p.id === programaId);
+                if (infoIndex !== -1) {
+                    programasSeleccionadosInfo.splice(infoIndex, 1);
+                }
+                
+                updateCompareInterface();
+            }
+        }
+        
+        // Función para limpiar selección de comparación
+        function clearCompareSelection() {
+            // Limpiar arrays
+            programasParaComparar.length = 0;
+            programasSeleccionadosInfo.length = 0;
+            
+            // Quitar selección visual
+            document.querySelectorAll('.programa-card.selected-for-compare').forEach(card => {
+                card.classList.remove('selected-for-compare');
+            });
+            
+            // Desmarcar checkboxes
+            document.querySelectorAll('.programa-comparar').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Actualizar interfaz
+            updateCompareInterface();
+        }
+        
+        // Actualizar interfaz con programas seleccionados
+        function updateCompareInterface() {
+            // Mostrar barra de comparación si hay programas seleccionados
+            const compareBar = document.getElementById('compare-bar');
+            
+            if (programasParaComparar.length > 0) {
+                compareBar.classList.remove('d-none');
+                
+                // Actualizar contador
+                document.getElementById('compare-count').textContent = programasParaComparar.length;
+                
+                // Habilitar botón de comparar si hay al menos 2 programas
+                document.getElementById('compare-button').disabled = programasParaComparar.length < 2;
+            } else {
+                compareBar.classList.add('d-none');
+            }
+        }
+        
+        // Función para comparar programas
+        function comparePrograms() {
+            if (programasParaComparar.length < 2) {
+                alert('Seleccione al menos 2 programas para comparar');
+                return;
+            }
+            
+            // Usar programas almacenados en programasSeleccionadosInfo
+            const programasSeleccionados = programasSeleccionadosInfo.filter(p => 
+                programasParaComparar.includes(p.id)
+            );
+            
+            if (programasSeleccionados.length < 2) {
+                alert('No se encontraron todos los programas seleccionados. Por favor, vuelva a seleccionarlos.');
+                return;
+            }
+            
+            // Actualizar encabezados de la tabla
+            for (let i = 0; i < programasSeleccionados.length; i++) {
+                const headerEl = document.getElementById(`compare-program-${i+1}`);
+                if (headerEl) {
+                    headerEl.textContent = programasSeleccionados[i].nombre;
+                }
+            }
+            
+            // Crear y mostrar modal de comparación
+            const modal = new bootstrap.Modal(document.getElementById('compare-modal'));
+            
+            // Llenar tabla de comparación
+            const compareTable = document.getElementById('compare-table').querySelector('tbody');
+            compareTable.innerHTML = '';
+            
+            // Campos a comparar
+            const fields = [
+                { label: 'Organismo', key: 'organismo' },
+                { label: 'Tipo de Ayuda', key: 'tipo_ayuda' },
+                { label: 'Estado', key: 'convocatoria.estado', nested: true },
+                { label: 'Fecha Cierre', key: 'convocatoria.fecha_cierre', nested: true, isDate: true },
+                { label: 'Importe Máximo', key: 'financiacion.importe_maximo', nested: true },
+                { label: 'Intensidad', key: 'financiacion.intensidad', nested: true },
+                { label: 'Beneficiarios', key: 'beneficiarios', isArray: true },
+                { label: 'Sectores', key: 'sectores', isArray: true },
+                { label: 'Requisitos', key: 'requisitos', isArray: true },
+                { label: 'Resumen', key: 'resumen_breve' }
+            ];
+            
+            // Crear filas de la tabla
+            fields.forEach(field => {
+                const row = document.createElement('tr');
+                
+                // Etiqueta del campo
+                const labelCell = document.createElement('th');
+                labelCell.textContent = field.label;
+                row.appendChild(labelCell);
+                
+                // Valores para cada programa
+                programasSeleccionados.forEach(programa => {
+                    const cell = document.createElement('td');
+                    
+                    // Obtener valor según el tipo de campo
+                    let value;
+                    if (field.nested) {
+                        const parts = field.key.split('.');
+                        value = programa[parts[0]] ? programa[parts[0]][parts[1]] : null;
+                    } else {
+                        value = programa[field.key];
+                    }
+                    
+                    // Formatear valor
+                    if (field.isArray && Array.isArray(value)) {
+                        cell.innerHTML = '<ul class="mb-0 ps-3">' + 
+                            value.map(v => `<li>${v}</li>`).join('') + 
+                            '</ul>';
+                    } else if (field.isDate && value) {
+                        try {
+                            const date = new Date(value);
+                            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                            cell.textContent = date.toLocaleDateString('es-ES', options);
+                        } catch(e) {
+                            cell.textContent = value;
+                        }
+                    } else if (value) {
+                        cell.textContent = value;
+                    } else {
+                        cell.textContent = 'No especificado';
+                        cell.classList.add('text-muted');
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                compareTable.appendChild(row);
+            });
+            
+            // Mostrar modal
+            modal.show();
+        }
+        
+        // Función para mostrar vista previa de programa
+        function showProgramPreview(programaId) {
+            // Inicializar modal
+            const previewModal = new bootstrap.Modal(document.getElementById('preview-modal'));
+            const previewContent = document.getElementById('preview-modal-content');
+            const detailsLink = document.getElementById('preview-details-link');
+            
+            // Mostrar contenido de carga
+            previewContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-3">Cargando información del programa...</p>
+                </div>
+            `;
+            
+            // Actualizar enlace de detalles
+            detailsLink.href = `/financiacion/programa/${programaId}`;
+            
+            // Mostrar modal
+            previewModal.show();
+            
+            // Buscar programa en la lista cargada
+            const programa = programasCargados.find(p => p.id === programaId);
+            
+            if (programa) {
+                // Llenar contenido
+                let content = `
+                    <div class="card border-0 programa-preview-card">
+                        <div class="card-body">
+                            <h6>Resumen</h6>
+                            <p>${programa.resumen_breve || 'Sin resumen disponible'}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Organismo</h6>
+                                    <p>${programa.organismo || 'No especificado'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Tipo de ayuda</h6>
+                                    <p>${programa.tipo_ayuda || 'No especificado'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Estado</h6>
+                                    <p>${programa.convocatoria?.estado || 'No especificado'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Fecha de cierre</h6>
+                                    <p>${programa.convocatoria?.fecha_cierre || 'No especificado'}</p>
+                                </div>
+                            </div>
+                            
+                            <h6>Descripción detallada</h6>
+                            <p>${programa.descripcion_detallada || 'Sin descripción detallada disponible'}</p>
+                            
+                            <h6>Requisitos</h6>
+                `;
+                
+                if (programa.requisitos && programa.requisitos.length > 0) {
+                    content += '<ul>';
+                    programa.requisitos.forEach(req => {
+                        content += `<li>${req}</li>`;
+                    });
+                    content += '</ul>';
+                } else {
+                    content += '<p>No se especifican requisitos</p>';
+                }
+                
+                content += `</div></div>`;
+                
+                previewContent.innerHTML = content;
+            } else {
+                previewContent.innerHTML = `
+                    <div class="alert alert-warning">
+                        No se encontró información del programa
+                    </div>
+                `;
+            }
+        }
+    });
+</script>
+{% endblock %}

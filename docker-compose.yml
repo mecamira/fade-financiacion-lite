@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Aplicación Flask
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fade-financiacion-app
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - DATABASE_PATH=/app/data/programas_financiacion.json
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - LOG_DIR=/var/log/fade-financiacion
+    volumes:
+      - ./data:/app/data
+      - ./logs:/var/log/fade-financiacion
+      - ./uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      - selenium
+    networks:
+      - fade-network
+    command: gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 --access-logfile - --error-logfile - app:app
+
+  # Selenium con Chrome headless
+  selenium:
+    build:
+      context: ./docker/selenium
+      dockerfile: Dockerfile
+    container_name: fade-selenium
+    restart: unless-stopped
+    shm_size: 2gb
+    environment:
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_SESSION_TIMEOUT=300
+    ports:
+      - "4444:4444"
+    networks:
+      - fade-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: fade-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./static:/var/www/static:ro
+    depends_on:
+      - flask-app
+    networks:
+      - fade-network
+
+networks:
+  fade-network:
+    driver: bridge
+
+volumes:
+  data:
+  logs:
+  uploads:

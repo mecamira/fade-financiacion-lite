@@ -1,0 +1,297 @@
+/* Estilos para la página de guía de herramientas */
+
+/* Estilos para el flujo de trabajo */
+.workflow-steps {
+    counter-reset: step;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.workflow-steps li {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+    counter-increment: step;
+}
+
+.workflow-steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background-color: #1a5f38;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.fa-stack {
+    line-height: 1.7em;
+}
+
+.card .card-title {
+    color: #1a5f38;
+}
+
+/* Estilos específicos para los cuadros de herramientas */
+.tool-box {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tool-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.tool-icon-wrapper {
+    height: 70px;
+    width: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    background-color: #f0f7ff;
+    border-radius: 50%;
+}
+
+.tool-icon {
+    font-size: 2rem;
+    color: #1a5f38;
+}
+
+/* Estilos para el selector de necesidades */
+.needs-selector {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #fff;
+    border: none;
+    margin-bottom: 30px;
+}
+
+.needs-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.need-option {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.need-option:hover {
+    border-color: #1a5f38;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.need-option.selected {
+    background-color: #e8f4eb;
+    border-color: #1a5f38;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.need-option i {
+    font-size: 2rem;
+    color: #1a5f38;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.need-option h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.need-option p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.tool-recommendation {
+    background-color: #e8f4eb;
+    border-radius: 10px;
+    padding: 20px;
+    display: none;
+}
+
+.tool-recommendation.active {
+    display: block;
+}
+
+.tool-card {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.tool-badge {
+    display: inline-block;
+    background-color: #f0f7ff;
+    color: #1a5f38;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 30px;
+    margin-right: 10px;
+}
+
+/* Estilos para las pestañas de herramientas */
+.tools-nav .nav-link {
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    color: #555;
+    border-radius: 0;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tools-nav .nav-link.active {
+    color: #1a5f38;
+    border-bottom: 3px solid #1a5f38;
+    background-color: transparent;
+}
+
+.tools-nav .nav-link:hover:not(.active) {
+    background-color: #f8f9fa;
+    border-bottom: 3px solid #e9ecef;
+}
+
+.tools-nav .nav-link i {
+    margin-right: 10px;
+}
+
+.tool-content {
+    padding: 1.5rem;
+}
+
+.tool-header {
+    margin-bottom: 1.5rem;
+}
+
+.tool-title {
+    color: #1a5f38;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.tool-subtitle {
+    color: #6c757d;
+    font-weight: normal;
+}
+
+.screenshot-gallery {
+    margin-top: 1.5rem;
+}
+
+.screenshot-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.screenshot-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.screenshot-item:hover img {
+    transform: scale(1.05);
+}
+
+.screenshot-caption {
+    padding: 0.8rem;
+    background-color: #f8f9fa;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-3px);
+}
+
+.feature-icon {
+    background-color: #e8f4eb;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.feature-icon i {
+    color: #1a5f38;
+    font-size: 1.2rem;
+}
+
+.feature-content h5 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+}
+
+.feature-content p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* Para mejorar la visualización en móviles */
+@media (max-width: 768px) {
+    .workflow-steps li {
+        padding-left: 35px;
+    }
+    
+    .workflow-steps li::before {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+    
+    .needs-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .tools-nav .nav-link {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+}

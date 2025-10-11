@@ -1,0 +1,381 @@
+/* Estilos para la página de resultados de financiación */
+
+/* Tarjetas de programas de financiación */
+.program-card {
+    border-radius: 0.8rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: none;
+    background-color: #fff;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Estilos para tarjetas de convocatorias futuras */
+.future-program-card {
+    border-radius: 0.6rem;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.future-program-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+}
+
+.future-program-card .card-header {
+    padding: 0.75rem 1rem;
+    border-top-left-radius: 0.6rem;
+    border-top-right-radius: 0.6rem;
+}
+
+.future-program-justification {
+    font-size: 0.9rem;
+    color: #495057;
+    font-style: italic;
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #ffc107;
+}
+
+.set-alert-btn {
+    font-size: 0.85rem;
+}
+
+/* Animaciones comunes para todas las tarjetas */
+.program-card.animated,
+.future-program-card.animated {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.program-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+.program-card-header {
+    position: relative;
+    padding: 1rem 1.25rem;
+    border-top-left-radius: 0.8rem;
+    border-top-right-radius: 0.8rem;
+}
+
+/* Badges de adecuación */
+.adecuacion-badge {
+    display: inline-block;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+.adecuacion-badge.high {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.adecuacion-badge.medium {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.adecuacion-badge.low {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.adequacy-progress-bar {
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+
+.adequacy-progress {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+    transition: width 1s ease-in-out;
+}
+
+.w-90 { width: 90%; }
+.w-60 { width: 60%; }
+.w-30 { width: 30%; }
+
+/* Detalles del programa */
+.program-card-body {
+    padding: 1.25rem;
+}
+
+.details-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.program-details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+}
+
+.program-details-list li {
+    display: flex;
+    margin-bottom: 0.75rem;
+    align-items: flex-start;
+}
+
+.detail-icon {
+    margin-right: 0.75rem;
+    color: #0d6efd;
+    width: 1.25rem;
+    text-align: center;
+    margin-top: 0.15rem;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #6c757d;
+    display: block;
+    font-size: 0.85rem;
+}
+
+.detail-value {
+    display: block;
+    color: #343a40;
+    font-weight: 500;
+}
+
+/* Justificación */
+.justification-text {
+    margin-bottom: 1.25rem;
+    color: #495057;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #0d6efd;
+}
+
+/* Botones de acción */
+.action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Consejos clave */
+.key-tip {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    height: 100%;
+    border-left: 3px solid #28a745;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.key-tip:hover {
+    background-color: #f0f9f0;
+    border-left-width: 5px;
+    transform: translateX(2px);
+}
+
+/* Recordatorio de contacto */
+.reminder-card {
+    display: flex;
+    background-color: #f8f9fa;
+    border-radius: 0.8rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border-left: 4px solid #0d6efd;
+}
+
+.reminder-card:hover {
+    background-color: #e9f7fe;
+    border-left-width: 8px;
+}
+
+.reminder-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    margin-right: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.reminder-content {
+    flex: 1;
+}
+
+.reminder-content h5 {
+    margin-bottom: 0.5rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.reminder-content p {
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+}
+
+.contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Botón de información en encabezado */
+.info-button-header {
+    font-size: 0.85rem;
+    border-color: rgba(255, 255, 255, 0.5);
+    padding: 0.25rem 0.75rem;
+    margin-right: 0.75rem;
+    transition: all 0.2s;
+}
+
+.info-button-header:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: white;
+}
+
+/* Botón de información */
+.info-button {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.info-button:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Notificaciones */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    z-index: 9999;
+    max-width: 350px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.toast-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-icon {
+    color: #28a745;
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #212529;
+}
+
+/* Estilos para impresión */
+@media print {
+    .action-buttons, 
+    .btn,
+    .reminder-card {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+    
+    .program-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .program-card-header {
+        color: #000 !important;
+        background-color: #f8f9fa !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Alerta de herramienta orientativa */
+.alert-info {
+    background-color: #f1f7fc;
+    border-color: #b8daff;
+    color: #004085;
+}
+
+.alert-info .fa-info-circle {
+    color: #0c7cd5;
+}
+
+.alert-info h4 {
+    color: #0c7cd5;
+    font-weight: 600;
+}
+
+/* Responsive fixes */
+@media (max-width: 767.98px) {
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .reminder-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .reminder-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+    
+    .contact-info {
+        justify-content: center;
+    }
+}

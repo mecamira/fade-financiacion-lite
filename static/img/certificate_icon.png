@@ -1,0 +1,6 @@
+<!-- Esta imagen es un marcador de posición para un icono de certificación -->
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+  <circle cx="25" cy="25" r="24" fill="#ffffff" stroke="#28a745" stroke-width="2" />
+  <circle cx="25" cy="25" r="15" fill="#28a745" />
+  <path d="M20 25 L23 29 L30 21" stroke="#ffffff" stroke-width="3" fill="none" />
+</svg>

@@ -1,0 +1,30 @@
+# FADE Financiación - Dependencias Producción Lite
+# Solo incluye lo necesario para los 3 módulos
+
+# Flask y extensiones
+Flask==2.3.3
+Werkzeug==2.3.7
+gunicorn==21.2.0
+
+# Google Gemini AI (para extracción de convocatorias y análisis)
+google-generativeai==0.8.5
+
+# Selenium (para scraping BDNS)
+selenium==4.16.0
+webdriver-manager==4.0.1
+
+# Procesamiento de PDFs
+PyPDF2==3.0.1
+pdfplumber==0.10.3
+
+# HTTP y scraping
+requests==2.31.0
+beautifulsoup4==4.12.3
+# lxml==5.1.0  # Comentado - no disponible para Python 3.13, BeautifulSoup usará html.parser
+
+# Utilidades
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+
+# Seguridad
+cryptography==41.0.7

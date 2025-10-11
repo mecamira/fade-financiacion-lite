@@ -1,0 +1,393 @@
+/**
+ * JavaScript para la página de resultados de financiación
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para las tarjetas
+    animateProgramCards();
+    
+    // Configurar modal de contacto
+    setupContactModal();
+    
+    // Configurar modales informativos
+    setupInfoModals();
+    
+    // Configurar impresión
+    setupPrintFunctionality();
+    
+    // Formatear texto original (si existe)
+    formatOriginalResponse();
+});
+
+/**
+ * Anima las tarjetas de programas con un efecto de entrada
+ */
+function animateProgramCards() {
+    const cards = document.querySelectorAll('.program-card');
+    
+    if (cards.length === 0) return;
+    
+    // Añadir las animaciones con un pequeño retraso entre cada tarjeta
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.classList.add('animated');
+        }, 100 + (index * 150)); // 100ms iniciales + 150ms por tarjeta
+    });
+}
+
+/**
+ * Configura el modal de contacto con asesor
+ */
+function setupContactModal() {
+    const contactBtn = document.querySelector('.contact-advisor-btn');
+    
+    if (!contactBtn) return;
+    
+    contactBtn.addEventListener('click', function() {
+        // Verificar si ya existe el modal, si no, crearlo
+        let contactModal = document.getElementById('contactModal');
+        
+        if (!contactModal) {
+            // Crear el modal dinámicamente
+            contactModal = createContactModal();
+            document.body.appendChild(contactModal);
+            
+            // Inicializar el modal de Bootstrap
+            new bootstrap.Modal(contactModal);
+        }
+        
+        // Abrir el modal
+        const bsModal = bootstrap.Modal.getInstance(contactModal) || new bootstrap.Modal(contactModal);
+        bsModal.show();
+    });
+}
+
+/**
+ * Crea el HTML para el modal de contacto
+ */
+function createContactModal() {
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal fade';
+    modalDiv.id = 'contactModal';
+    modalDiv.tabIndex = '-1';
+    modalDiv.setAttribute('aria-labelledby', 'contactModalLabel');
+    modalDiv.setAttribute('aria-hidden', 'true');
+    
+    modalDiv.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactModalLabel">Contactar con asesor especializado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Complete el formulario y un asesor se pondrá en contacto con usted para analizar en detalle sus opciones de financiación.</p>
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="contactName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="contactEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactPhone" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="contactPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactMessage" class="form-label">Consulta</label>
+                            <textarea class="form-control" id="contactMessage" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="sendContactBtn">Enviar consulta</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Configurar el envío del formulario
+    setTimeout(() => {
+        const sendBtn = modalDiv.querySelector('#sendContactBtn');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                const form = document.getElementById('contactForm');
+                if (form.checkValidity()) {
+                    // Simulamos el envío
+                    bootstrap.Modal.getInstance(modalDiv).hide();
+                    showNotification('Su consulta ha sido enviada. Un asesor se pondrá en contacto con usted en breve.');
+                } else {
+                    form.reportValidity();
+                }
+            });
+        }
+    }, 500);
+    
+    return modalDiv;
+}
+
+/**
+ * Configura modales informativos para programas
+ */
+function setupInfoModals() {
+    // Añadir botones de información a cada programa
+    const programCards = document.querySelectorAll('.program-card');
+    
+    programCards.forEach((card, index) => {
+        // Obtener datos del programa
+        const header = card.querySelector('.program-card-header h4');
+        const programName = header ? header.textContent.trim() : `Programa ${index + 1}`;
+        
+        // Crear botón de más información
+        const infoBtn = document.createElement('button');
+        infoBtn.type = 'button';
+        infoBtn.className = 'btn btn-sm btn-outline-light position-absolute';
+        infoBtn.style.right = '10px';
+        infoBtn.style.top = '10px';
+        infoBtn.innerHTML = '<i class="fas fa-info-circle"></i>';
+        infoBtn.title = 'Más información';
+        infoBtn.dataset.program = programName;
+        
+        // Añadir botón al encabezado
+        const cardHeader = card.querySelector('.program-card-header');
+        if (cardHeader) {
+            cardHeader.style.position = 'relative';
+            cardHeader.appendChild(infoBtn);
+            
+            // Configurar evento de clic
+            infoBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showProgramInfoModal(programName, card);
+            });
+        }
+    });
+}
+
+/**
+ * Muestra modal con información detallada de un programa
+ */
+function showProgramInfoModal(programName, card) {
+    // Recopilar información del programa desde la tarjeta
+    const organismo = getCardDetail(card, 'Organismo');
+    const tipoAyuda = getCardDetail(card, 'Tipo de ayuda');
+    const intensidad = getCardDetail(card, 'Intensidad');
+    const convocatoria = getCardDetail(card, 'Convocatoria');
+    const justificacion = card.querySelector('.justification-text')?.textContent || '';
+    const descripcion = card.querySelector('.program-description p')?.textContent || '';
+    
+    // Extraer/Generar información adicional util
+    const requisitosInfo = extraerRequisitos(descripcion);
+    const plazosSolicitud = extraerPlazos(convocatoria, descripcion);
+    const documentacionInfo = generarInfoDocumentacion(tipoAyuda, descripcion);
+    const ejemplosProyectos = generarEjemplosProyectos(programName, tipoAyuda);
+    const consejosPresentacion = generarConsejosPresentacion(programName, tipoAyuda);
+    
+    // Crear modal
+    let infoModal = document.getElementById('programInfoModal');
+    
+    if (!infoModal) {
+        infoModal = document.createElement('div');
+        infoModal.className = 'modal fade';
+        infoModal.id = 'programInfoModal';
+        infoModal.tabIndex = '-1';
+        document.body.appendChild(infoModal);
+    }
+    
+    // Actualizar contenido
+    infoModal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Información detallada: ${programName}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Pestañas de navegación -->
+                    <ul class="nav nav-tabs" id="programInfoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info"
+                                type="button" role="tab" aria-controls="info" aria-selected="true">
+                                <i class="fas fa-info-circle me-1"></i>Resumen
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="requisitos-tab" data-bs-toggle="tab" data-bs-target="#requisitos"
+                                type="button" role="tab" aria-controls="requisitos" aria-selected="false">
+                                <i class="fas fa-clipboard-check me-1"></i>Requisitos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="documentacion-tab" data-bs-toggle="tab" data-bs-target="#documentacion"
+                                type="button" role="tab" aria-controls="documentacion" aria-selected="false">
+                                <i class="fas fa-file-alt me-1"></i>Documentación
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="consejos-tab" data-bs-toggle="tab" data-bs-target="#consejos"
+                                type="button" role="tab" aria-controls="consejos" aria-selected="false">
+                                <i class="fas fa-lightbulb me-1"></i>Consejos
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Contenido de las pestañas -->
+                    <div class="tab-content pt-3" id="programInfoTabsContent">
+                        <!-- Pestaña de Información General -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <div class="alert alert-primary">
+                                <div class="d-flex">
+                                    <div class="me-2"><i class="fas fa-bookmark fa-2x"></i></div>
+                                    <div>
+                                        <h5 class="alert-heading">Programa: ${programName}</h5>
+                                        <p class="mb-0">Gestionado por ${organismo}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">Detalles básicos</div>
+                                        <div class="card-body">
+                                            <dl class="row mb-0">
+                                                <dt class="col-sm-4">Tipo:</dt>
+                                                <dd class="col-sm-8">${tipoAyuda}</dd>
+                                                
+                                                <dt class="col-sm-4">Intensidad:</dt>
+                                                <dd class="col-sm-8">${intensidad}</dd>
+                                                
+                                                <dt class="col-sm-4">Convocatoria:</dt>
+                                                <dd class="col-sm-8">${convocatoria}</dd>
+                                                
+                                                ${plazosSolicitud ? `<dt class="col-sm-4">Plazos:</dt>
+                                                <dd class="col-sm-8">${plazosSolicitud}</dd>` : ''}
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">Adecuación a su proyecto</div>
+                                        <div class="card-body">
+                                            <p>${justificacion}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-0">
+                                <div class="card-header bg-light">Descripción completa</div>
+                                <div class="card-body">
+                                    <p>${descripcion}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pestaña de Requisitos y Elegibilidad -->
+                        <div class="tab-pane fade" id="requisitos" role="tabpanel" aria-labelledby="requisitos-tab">
+                            <div class="alert alert-warning">
+                                <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Requisitos de elegibilidad</h5>
+                                <p>Para acceder a este programa, deberá cumplir con los siguientes requisitos:</p>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    ${requisitosInfo}
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-0">
+                                <div class="card-header bg-light">Ejemplos de proyectos financiables</div>
+                                <div class="card-body">
+                                    ${ejemplosProyectos}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pestaña de Documentación -->
+                        <div class="tab-pane fade" id="documentacion" role="tabpanel" aria-labelledby="documentacion-tab">
+                            <div class="alert alert-info">
+                                <h5 class="alert-heading"><i class="fas fa-file-alt me-2"></i>Documentación necesaria</h5>
+                                <p>Para solicitar esta ayuda, generalmente necesitará presentar los siguientes documentos:</p>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    ${documentacionInfo}
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-0">
+                                <div class="card-header bg-light">Enlaces de interés</div>
+                                <div class="card-body">
+                                    <p>Para más información sobre este programa, visite la web oficial del organismo correspondiente:</p>
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <a href="#" class="btn btn-outline-primary" target="_blank" 
+                                           onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(programName + ' ' + organismo)}', '_blank'); return false;">
+                                            <i class="fas fa-external-link-alt me-1"></i> Buscar información oficial
+                                        </a>
+                                        <a href="#" class="btn btn-outline-secondary" target="_blank" 
+                                           onclick="alert('Esta funcionalidad estará disponible próximamente.'); return false;">
+                                            <i class="fas fa-file-pdf me-1"></i> Bases reguladoras
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pestaña de Consejos -->
+                        <div class="tab-pane fade" id="consejos" role="tabpanel" aria-labelledby="consejos-tab">
+                            <div class="alert alert-success">
+                                <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Consejos para su solicitud</h5>
+                                <p>Recomendaciones para aumentar sus posibilidades de éxito en este programa:</p>
+                            </div>
+                            
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    ${consejosPresentacion}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary contact-advisor-btn">
+                        <i class="fas fa-user-tie me-1"></i> Contactar asesor
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Inicializar y mostrar modal
+    const modalInstance = new bootstrap.Modal(infoModal);
+    modalInstance.show();
+    
+    // Configurar botón de contacto en el modal
+    setTimeout(() => {
+        const contactBtn = infoModal.querySelector('.contact-advisor-btn');
+        if (contactBtn) {
+            contactBtn.addEventListener('click', function() {
+                modalInstance.hide();
+                document.querySelector('.contact-advisor-btn').click();
+            });
+        }
+    }, 500);
+}
+
+/**
+ * Obtiene un detalle específico de la tarjeta de programa
+ */
+function getCardDetail(card, label) {
+    const items = card.querySelectorAll('.detail-label');
+    for (let item of items) {
+        if (item.textContent.includes(label)) {
+            return item.nextElementSibling?.textContent || 'No especificado';
+        }
+    }
+    return 'No especificado';
+}

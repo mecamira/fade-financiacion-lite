@@ -1,0 +1,10 @@
+<!-- Esta imagen es un marcador de posición para un icono de IMV -->
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+  <circle cx="25" cy="25" r="24" fill="#ffffff" stroke="#0d6efd" stroke-width="2" />
+  <rect x="15" y="12" width="20" height="26" fill="#0d6efd" />
+  <rect x="18" y="16" width="14" height="2" fill="#ffffff" />
+  <rect x="18" y="20" width="14" height="2" fill="#ffffff" />
+  <rect x="18" y="24" width="14" height="2" fill="#ffffff" />
+  <rect x="18" y="28" width="14" height="2" fill="#ffffff" />
+  <rect x="18" y="32" width="8" height="2" fill="#ffffff" />
+</svg>

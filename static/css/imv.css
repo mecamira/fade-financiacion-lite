@@ -1,0 +1,58 @@
+/* Estilos para la página de IMV */
+
+/* Línea de tiempo */
+.timeline {
+    position: relative;
+    padding-left: 50px;
+    list-style: none;
+    margin-left: 0;
+    padding-bottom: 1px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #007bff;
+    z-index: 2;
+}
+
+.timeline-marker:before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -30px;
+    height: 30px;
+    width: 3px;
+    background-color: #e0e0e0;
+    transform: translateX(-50%);
+    z-index: -1;
+}
+
+.timeline-item:last-child .timeline-marker:before {
+    display: none;
+}
+
+.timeline-content {
+    margin-bottom: 10px;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 767px) {
+    .timeline {
+        padding-left: 30px;
+    }
+    
+    .timeline-marker {
+        left: -25px;
+        width: 16px;
+        height: 16px;
+    }
+}
