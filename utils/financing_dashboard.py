@@ -506,3 +506,98 @@ def get_total_programas():
 def get_programa_by_id(programa_id):
     """Obtiene un programa por su ID (alias para compatibilidad)"""
     return get_financing_program_by_id(programa_id)
+
+def actualizar_programa(programa_id, datos_actualizados):
+    """
+    Actualiza un programa existente en el archivo JSON
+    
+    Args:
+        programa_id: ID del programa a actualizar
+        datos_actualizados: Diccionario con los datos actualizados
+    
+    Returns:
+        True si se actualizó correctamente, False si no se encontró
+    """
+    try:
+        # Obtener la ruta al archivo JSON
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
+        
+        # Cargar programas existentes
+        with open(json_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        
+        # Buscar el programa por ID
+        programa_encontrado = False
+        for i, programa in enumerate(data['programas']):
+            if programa.get('id') == programa_id:
+                # Mantener el ID original
+                datos_actualizados['id'] = programa_id
+                # Reemplazar el programa
+                data['programas'][i] = datos_actualizados
+                programa_encontrado = True
+                break
+        
+        if not programa_encontrado:
+            print(f"Programa con ID {programa_id} no encontrado")
+            return False
+        
+        # Actualizar fecha de última actualización
+        data['ultima_actualizacion'] = datetime.now().isoformat()
+        
+        # Guardar el archivo JSON actualizado
+        with open(json_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        
+        print(f"Programa {programa_id} actualizado exitosamente")
+        return True
+        
+    except Exception as e:
+        print(f"Error al actualizar programa: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return False
+
+def eliminar_programa(programa_id):
+    """
+    Elimina un programa del archivo JSON
+    
+    Args:
+        programa_id: ID del programa a eliminar
+    
+    Returns:
+        True si se eliminó correctamente, False si no se encontró
+    """
+    try:
+        # Obtener la ruta al archivo JSON
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
+        
+        # Cargar programas existentes
+        with open(json_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        
+        # Buscar y eliminar el programa por ID
+        programas_originales = len(data['programas'])
+        data['programas'] = [p for p in data['programas'] if p.get('id') != programa_id]
+        
+        if len(data['programas']) == programas_originales:
+            print(f"Programa con ID {programa_id} no encontrado")
+            return False
+        
+        # Actualizar metadatos
+        data['ultima_actualizacion'] = datetime.now().isoformat()
+        data['total_programas'] = len(data['programas'])
+        
+        # Guardar el archivo JSON actualizado
+        with open(json_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        
+        print(f"Programa {programa_id} eliminado exitosamente")
+        return True
+        
+    except Exception as e:
+        print(f"Error al eliminar programa: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return False

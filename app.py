@@ -199,6 +199,19 @@ def gestionar_convocatorias():
         return jsonify({'error': 'Error al cargar gestión'}), 500
 
 
+@app.route('/financiacion/editar-convocatorias')
+@login_required
+def editar_convocatorias():
+    """Panel de edición manual de convocatorias (solo admin)"""
+    try:
+        # Obtener opciones para filtros
+        filter_options = financing_dashboard.get_financing_filter_options()
+        return render_template('financiacion_editar.html', filter_options=filter_options)
+    except Exception as e:
+        logger.error(f"Error en edición convocatorias: {str(e)}")
+        return jsonify({'error': 'Error al cargar edición'}), 500
+
+
 @app.route('/api/extraer-convocatoria', methods=['POST'])
 @login_required
 def extraer_convocatoria():
@@ -378,6 +391,78 @@ def guardar_programa():
         
     except Exception as e:
         logger.error(f"Error al guardar programa: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/programa/<programa_id>', methods=['GET'])
+@login_required
+def obtener_programa(programa_id):
+    """Obtener datos de un programa específico"""
+    try:
+        programa = financing_dashboard.get_programa_by_id(programa_id)
+        
+        if not programa:
+            return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404
+        
+        return jsonify({
+            'success': True,
+            'programa': programa
+        })
+        
+    except Exception as e:
+        logger.error(f"Error al obtener programa: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/programa/<programa_id>', methods=['PUT'])
+@login_required
+def actualizar_programa(programa_id):
+    """Actualizar un programa existente"""
+    try:
+        data = request.get_json()
+        
+        # Validar datos requeridos
+        campos_requeridos = ['nombre', 'organismo', 'tipo_ayuda']
+        for campo in campos_requeridos:
+            if not data.get(campo):
+                return jsonify({'success': False, 'error': f'Falta el campo: {campo}'}), 400
+        
+        # Actualizar en base de datos
+        success = financing_dashboard.actualizar_programa(programa_id, data)
+        
+        if not success:
+            return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404
+        
+        logger.info(f"Programa actualizado exitosamente: {programa_id}")
+        return jsonify({
+            'success': True,
+            'message': 'Programa actualizado exitosamente'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error al actualizar programa: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/programa/<programa_id>', methods=['DELETE'])
+@login_required
+def eliminar_programa(programa_id):
+    """Eliminar un programa"""
+    try:
+        # Eliminar de base de datos
+        success = financing_dashboard.eliminar_programa(programa_id)
+        
+        if not success:
+            return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404
+        
+        logger.info(f"Programa eliminado exitosamente: {programa_id}")
+        return jsonify({
+            'success': True,
+            'message': 'Programa eliminado exitosamente'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error al eliminar programa: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

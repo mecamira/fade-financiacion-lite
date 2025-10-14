@@ -86,11 +86,27 @@
                                 <i class="fas fa-search"></i> Dashboard de Programas
                             </a>
                         </li>
+                        {% if session.get('admin_logged_in') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {% if request.endpoint in ['gestionar_convocatorias', 'editar_convocatorias'] %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cog"></i> Administración
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('gestionar_convocatorias') }}">
+                                    <i class="fas fa-plus-circle me-2"></i>Añadir desde BDNS
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('editar_convocatorias') }}">
+                                    <i class="fas fa-edit me-2"></i>Editar Convocatorias
+                                </a></li>
+                            </ul>
+                        </li>
+                        {% else %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'gestionar_convocatorias' %}active{% endif %}" href="{{ url_for('gestionar_convocatorias') }}">
-                                <i class="fas fa-plus-circle"></i> Gestionar Convocatorias
+                            <a class="nav-link" href="{{ url_for('admin_login') }}">
+                                <i class="fas fa-lock"></i> Acceso Admin
                             </a>
                         </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'analizar_compatibilidad' %}active{% endif %}" href="{{ url_for('analizar_compatibilidad') }}">
                                 <i class="fas fa-check-circle"></i> Analizar Compatibilidad
