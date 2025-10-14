@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}{{ programa.nombre }} - Dashboard de Financiación{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ programa.nombre }}</li>
+        </ol>
+    </nav>
+
+    <!-- Encabezado del programa -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ programa.nombre }}</h2>
+            <p class="mb-0 mt-2"><strong>Organismo:</strong> {{ programa.organismo }}</p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>Resumen</h5>
+                    <p class="lead">{{ programa.resumen_breve }}</p>
+                    
+                    <h6>Descripción Detallada</h6>
+                    <p>{{ programa.descripcion_detallada }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Información Básica</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><strong>Tipo de Ayuda:</strong><br>{{ programa.tipo_ayuda }}</li>
+                                <li class="mb-2"><strong>Ámbito:</strong><br>{{ programa.ambito }}</li>
+                                <li class="mb-2">
+                                    <strong>Estado:</strong><br>
+                                    {% if programa.convocatoria and programa.convocatoria.estado %}
+                                        {% if 'Abierta' in programa.convocatoria.estado %}
+                                            <span class="badge bg-success">{{ programa.convocatoria.estado }}</span>
+                                        {% elif 'Pendiente' in programa.convocatoria.estado %}
+                                            <span class="badge bg-warning text-dark">{{ programa.convocatoria.estado }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ programa.convocatoria.estado }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">No especificado</span>
+                                    {% endif %}
+                                </li>
+                                {% if programa.codigo_bdns %}
+                                <li class="mb-2"><strong>Código BDNS:</strong><br>{{ programa.codigo_bdns }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fechas -->
+    {% if programa.convocatoria %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Fechas</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Fecha de Apertura:</strong>
+                    <p>{{ programa.convocatoria.fecha_apertura if programa.convocatoria.fecha_apertura and programa.convocatoria.fecha_apertura != 'null' else 'No especificada' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <strong>Fecha de Cierre:</strong>
+                    <p>{{ programa.convocatoria.fecha_cierre if programa.convocatoria.fecha_cierre and programa.convocatoria.fecha_cierre != 'null' else 'No especificada' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Financiación -->
+    {% if programa.financiacion %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-euro-sign me-2"></i>Financiación</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Intensidad:</strong>
+                    <p>{{ programa.financiacion.intensidad if programa.financiacion.intensidad and programa.financiacion.intensidad != 'null' else 'No especificada' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <strong>Importe Máximo:</strong>
+                    <p>
+                        {% if programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
+                            {{ "{:,.0f}".format(programa.financiacion.importe_maximo|float) }} €
+                        {% else %}
+                            No especificado
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Presupuesto Mínimo:</strong>
+                    <p>
+                        {% if programa.financiacion.presupuesto_minimo and programa.financiacion.presupuesto_minimo != 'null' %}
+                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_minimo|float) }} €
+                        {% else %}
+                            No especificado
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <strong>Presupuesto Máximo:</strong>
+                    <p>
+                        {% if programa.financiacion.presupuesto_maximo and programa.financiacion.presupuesto_maximo != 'null' %}
+                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_maximo|float) }} €
+                        {% else %}
+                            No especificado
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Beneficiarios -->
+    {% if programa.beneficiarios %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Beneficiarios</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for beneficiario in programa.beneficiarios %}
+                    <span class="badge bg-light text-dark">{{ beneficiario }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Sectores -->
+    {% if programa.sectores %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-industry me-2"></i>Sectores</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for sector in programa.sectores %}
+                    <span class="badge bg-light text-dark">{{ sector }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tipo de Proyecto -->
+    {% if programa.tipo_proyecto %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Tipo de Proyecto</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ programa.tipo_proyecto }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Requisitos -->
+    {% if programa.requisitos %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Requisitos</h5>
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for requisito in programa.requisitos %}
+                    <li>{{ requisito }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tags -->
+    {% if programa.tags %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-tags me-2"></i>Palabras Clave</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for tag in programa.tags %}
+                    <span class="badge bg-secondary">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Enlaces -->
+    {% if programa.enlaces %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-link me-2"></i>Enlaces</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    {% if programa.enlaces.bases and programa.enlaces.bases != 'null' %}
+                        <a href="{{ programa.enlaces.bases }}" target="_blank" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-file-alt me-2"></i>Bases de la Convocatoria
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="fas fa-file-alt me-2"></i>Bases no disponibles
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    {% if programa.enlaces.convocatoria and programa.enlaces.convocatoria != 'null' %}
+                        <a href="{{ programa.enlaces.convocatoria }}" target="_blank" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-external-link-alt me-2"></i>Página de la Convocatoria
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="fas fa-external-link-alt me-2"></i>Enlace no disponible
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Botón volver -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

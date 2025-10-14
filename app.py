@@ -165,6 +165,25 @@ def get_programas():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/financiacion/programa/<programa_id>')
+def detalle_programa(programa_id):
+    """Vista de detalle de un programa de financiación"""
+    try:
+        # Obtener el programa por ID
+        programa = financing_dashboard.get_programa_by_id(programa_id)
+        
+        if not programa:
+            return render_template('404.html'), 404
+        
+        return render_template('programa_detalle.html', programa=programa)
+        
+    except Exception as e:
+        logger.error(f"Error al obtener detalle del programa: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+
 # ============================================================================
 # MÓDULO 2: GESTIÓN DE CONVOCATORIAS (ADMIN)
 # ============================================================================
@@ -185,13 +204,27 @@ def gestionar_convocatorias():
 def extraer_convocatoria():
     """Extraer información de convocatoria con Gemini AI"""
     try:
+        # Obtener datos adicionales del formulario
+        codigo_bdns = None
+        fecha_publicacion = None
+        bases_url = None
+        convocatoria_url = None
+        
         # Intentar obtener datos como JSON o como form data
         if request.is_json:
             data = request.get_json()
             texto_convocatoria = data.get('texto')
+            codigo_bdns = data.get('codigo_bdns')
+            fecha_publicacion = data.get('fecha_publicacion')
+            bases_url = data.get('bases_url')
+            convocatoria_url = data.get('convocatoria_url')
         else:
             # Datos de formulario
             texto_convocatoria = request.form.get('convocatoria_text')
+            codigo_bdns = request.form.get('codigo_bdns')
+            fecha_publicacion = request.form.get('fecha_publicacion')
+            bases_url = request.form.get('bases_url')
+            convocatoria_url = request.form.get('convocatoria_url')
             
             # Si viene un PDF, extraer el texto
             if 'convocatoria_pdf' in request.files:
@@ -217,8 +250,14 @@ def extraer_convocatoria():
         if not texto_convocatoria:
             return jsonify({'success': False, 'error': 'No se proporcionó texto de la convocatoria'}), 400
         
-        # Extraer información con Gemini
-        resultado = convocatoria_extractor.extract_convocatoria_info(texto_convocatoria)
+        # Extraer información con Gemini, pasando los parámetros adicionales
+        resultado = convocatoria_extractor.extract_convocatoria_info(
+            texto_convocatoria,
+            codigo_bdns=codigo_bdns,
+            fecha_publicacion=fecha_publicacion,
+            bases_url=bases_url,
+            convocatoria_url=convocatoria_url
+        )
         
         # Verificar si hay error
         if 'error' in resultado:
