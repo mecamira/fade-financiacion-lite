@@ -439,3 +439,70 @@ def get_financing_filter_options():
             'sectores': [],
             'estados': []
         }
+
+def agregar_programa(datos_programa):
+    """
+    Añade un nuevo programa al archivo JSON de programas de financiación
+    
+    Args:
+        datos_programa: Diccionario con los datos del programa
+    
+    Returns:
+        ID del programa añadido o None si hay error
+    """
+    try:
+        # Obtener la ruta al archivo JSON
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
+        
+        # Cargar programas existentes
+        with open(json_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        
+        # Generar ID único basado en el nombre
+        nombre = datos_programa.get('nombre', 'programa')
+        programa_id = nombre.lower().replace(' ', '-').replace('/', '-').replace('(', '').replace(')', '')
+        programa_id = programa_id[:50]  # Limitar longitud
+        
+        # Asegurarse de que el ID es único
+        ids_existentes = [p.get('id') for p in data['programas']]
+        id_original = programa_id
+        contador = 1
+        while programa_id in ids_existentes:
+            programa_id = f"{id_original}-{contador}"
+            contador += 1
+        
+        # Añadir ID al programa
+        datos_programa['id'] = programa_id
+        
+        # Añadir el programa a la lista
+        data['programas'].append(datos_programa)
+        
+        # Actualizar fecha de última actualización
+        data['ultima_actualizacion'] = datetime.now().isoformat()
+        data['total_programas'] = len(data['programas'])
+        
+        # Guardar el archivo JSON actualizado
+        with open(json_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        
+        print(f"Programa añadido exitosamente con ID: {programa_id}")
+        return programa_id
+        
+    except Exception as e:
+        print(f"Error al agregar programa: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return None
+
+def get_total_programas():
+    """Obtiene el total de programas en la base de datos"""
+    try:
+        programas = load_all_financing_programs()
+        return len(programas)
+    except:
+        return 0
+
+def get_programa_by_id(programa_id):
+    """Obtiene un programa por su ID (alias para compatibilidad)"""
+    return get_financing_program_by_id(programa_id)

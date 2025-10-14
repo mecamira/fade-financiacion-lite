@@ -13755,8 +13755,84 @@
             ],
             "tipo_ayuda": "Subvención",
             "tipo_proyecto": "Contratación de personas jóvenes desempleadas para desarrollar actividades en iniciativas de investigación e innovación"
+        },
+        {
+            "ambito": "Comunidad Autónoma",
+            "beneficiarios": [
+                "Personas físicas mayores de edad",
+                "Titulares de contratos de arrendamiento o cesión de uso de vivienda o habitación",
+                "Personas con escasos medios económicos",
+                "Víctimas de violencia de género",
+                "Víctimas de trata con fines de explotación sexual",
+                "Víctimas de violencia sexual",
+                "Personas objeto de desahucio de su vivienda habitual",
+                "Personas sin hogar",
+                "Personas especialmente vulnerables (según informe de Servicios Sociales)",
+                "Personas arrendatarias en situación de vulnerabilidad sobrevenida"
+            ],
+            "codigo_bdns": null,
+            "convocatoria": {
+                "estado": "Abierta",
+                "fecha_apertura": "2025-10-02",
+                "fecha_cierre": "2025-11-02"
+            },
+            "descripcion_detallada": "La convocatoria del Principado de Asturias ofrece subvenciones para el alquiler de vivienda o habitación, divididas en tres líneas: general, para colectivos vulnerables (violencia de género, desahucio, sin hogar) y para vulnerabilidad sobrevenida. Busca facilitar el acceso a una vivienda digna a personas con medios económicos limitados, con un importe máximo de 18.000€ por beneficiario y un presupuesto total de 14.722.367,01€.",
+            "enlaces": {
+                "bases": null,
+                "convocatoria": null
+            },
+            "financiacion": {
+                "importe_maximo": 18000,
+                "intensidad": "Hasta el 50% de la renta mensual para la Línea 1; hasta 600€/mes para la Línea 2; hasta el 100% de la renta mensual para la Línea 3.",
+                "presupuesto_maximo": 14722367.01,
+                "presupuesto_minimo": null
+            },
+            "id": "convocatoria-pública-de-ayudas-al-alquiler-de-vivi",
+            "nombre": "Convocatoria Pública de Ayudas al Alquiler de Vivienda (Principado de Asturias)",
+            "organismo": "Consejería de Ordenación de Territorio, Urbanismo, Vivienda y Derechos Ciudadanos del Principado de Asturias",
+            "requisitos": [
+                "Poseer nacionalidad española, de la UE, EEE, Suiza, o no comunitario con autorización de estancia/residencia en España",
+                "Que la vivienda o habitación arrendada/cedida constituya la residencia habitual y permanente",
+                "Línea 1: Renta anual de la unidad de convivencia no superior a 3, 4 o 5 veces el IPREM (según condiciones)",
+                "Línea 1: Renta mensual de vivienda <= 600€, habitación <= 300€",
+                "Línea 2: Renta mensual de vivienda <= 600€",
+                "Línea 3: Renta anual de la unidad de convivencia antes de vulnerabilidad no superior a 5, 5.5 o 6 veces el IPREM (según condiciones)",
+                "Línea 3: Renta mensual de vivienda <= 900€",
+                "Línea 3: Ingresos netos de la unidad de convivencia reducidos al menos un 20% en los dos años anteriores a la solicitud",
+                "Línea 3: Esfuerzo para el pago de la renta > 30% de los ingresos netos",
+                "No ser propietario/usufructuario de otra vivienda en España (con excepciones)",
+                "No tener parentesco en primer o segundo grado de consanguinidad o afinidad con el arrendador/cedente (para Líneas 1 y 3)",
+                "No ser socio o partícipe del arrendador/cedente (para Líneas 1 y 3, excepto cooperativas sin ánimo de lucro)",
+                "No estar incurso en las prohibiciones del artículo 13.2 de la Ley General de Subvenciones (con excepción del 13.2.e para Líneas 2 y 3)",
+                "No ser arrendatario de vivienda titularidad del Principado de Asturias, Ayuntamientos o sus entidades",
+                "Haber presentado las justificaciones de ayudas al alquiler anteriores y no haber renunciado a pagos pendientes",
+                "No haber sido beneficiario de ayudas al alquiler revocadas por incumplimiento",
+                "No ser beneficiario del Salario Social Básico que pueda percibir el complemento vital para el alquiler",
+                "Estar al corriente de obligaciones tributarias y de Seguridad Social (excepto Líneas 2 y 3)"
+            ],
+            "resumen_breve": "Ayudas al alquiler de vivienda en el Principado de Asturias para personas con escasos recursos o en situación de vulnerabilidad, con un presupuesto de 14.7M€.",
+            "sectores": [
+                "Vivienda social",
+                "Servicios sociales"
+            ],
+            "tags": [
+                "ayudas alquiler",
+                "vivienda",
+                "Principado de Asturias",
+                "subvenciones",
+                "vulnerabilidad",
+                "violencia de género",
+                "desahucio",
+                "sin hogar",
+                "IPREM",
+                "arrendamiento",
+                "cesión de uso"
+            ],
+            "tipo_ayuda": "Subvención",
+            "tipo_proyecto": "Apoyo al alquiler de vivienda o habitación para personas con escasos recursos económicos o en situación de vulnerabilidad."
         }
     ],
     "fecha_actualizacion": "2025-10-08",
-    "total_programas": 236
+    "total_programas": 237,
+    "ultima_actualizacion": "2025-10-14T10:34:36.884572"
 }

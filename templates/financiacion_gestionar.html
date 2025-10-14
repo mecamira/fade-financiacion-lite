@@ -149,6 +149,9 @@
                                         <button id="download-json-btn" class="btn btn-sm btn-primary ms-2">
                                             <i class="fas fa-download me-1"></i> Descargar
                                         </button>
+                                        <button id="save-to-db-btn" class="btn btn-sm btn-success ms-2" style="display: none;">
+                                            <i class="fas fa-save me-1"></i> Guardar en Base de Datos
+                                        </button>
                                     </div>
                                 </div>
                                 <div id="json-editor" class="border rounded p-3 bg-light" style="min-height: 300px; max-height: 600px; overflow-y: auto;"></div>
@@ -244,6 +247,9 @@
                 fileInfo.classList.add('d-none');
             }
         });
+        // Variable global para almacenar los datos del programa actual
+        let currentProgramaData = null;
+        
         // Inicializar el editor JSON
         const container = document.getElementById('json-editor');
         const options = {
@@ -391,8 +397,14 @@ Organismo: ${jsonData.organismo || ''}`);
                     return;
                 }
                 
+                // Guardar datos actuales
+                currentProgramaData = data.data;
+                
                 // Actualizar el editor JSON
                 editor.set(data.data);
+                
+                // Mostrar botón de guardar
+                document.getElementById('save-to-db-btn').style.display = 'inline-block';
                 
                 // Generar vista previa
                 generatePreview(data.data);
@@ -418,6 +430,10 @@ Organismo: ${jsonData.organismo || ''}`);
             
             // Resetear editor JSON
             editor.set({});
+            
+            // Resetear datos actuales y ocultar botón de guardar
+            currentProgramaData = null;
+            document.getElementById('save-to-db-btn').style.display = 'none';
             
             // Resetear contenedores de resultados
             document.getElementById('preview-container').innerHTML = '<div class="text-center py-5"><p class="text-muted">Extrae la información de una convocatoria para visualizar la vista previa</p></div>';
@@ -956,6 +972,47 @@ function generatePreview(data) {
             // Añadir evento al botón
             document.getElementById('extraer-pdf-bdns-btn').addEventListener('click', extraerInformacionPDF);
         }
+        
+        // Guardar programa en base de datos
+        document.getElementById('save-to-db-btn').addEventListener('click', async function() {
+            if (!currentProgramaData) {
+                showError('No hay información para guardar');
+                return;
+            }
+            
+            if (!confirm('¿Estás seguro de que quieres guardar este programa en la base de datos?\n\nEsto añadirá la convocatoria al sistema y estará disponible públicamente.')) {
+                return;
+            }
+            
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+            
+            try {
+                const response = await fetch('/api/guardar-programa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(currentProgramaData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ¡Programa guardado exitosamente en la base de datos!\n\nID: ' + data.programa_id + '\n\nLa convocatoria ya está disponible en el dashboard público.');
+                    // Ocultar el botón tras guardar
+                    this.style.display = 'none';
+                } else {
+                    throw new Error(data.error || 'Error al guardar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al guardar en base de datos: ' + error.message);
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-save me-1"></i> Guardar en Base de Datos';
+            }
+        });
         
         // Extraer información del PDF descargado
         async function extraerInformacionPDF() {
