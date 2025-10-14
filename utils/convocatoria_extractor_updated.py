@@ -372,7 +372,7 @@ class ConvocatoriaExtractor:
                     "temperature": 0.1,  # Temperatura baja para resultados más determinísticos
                     "top_p": 0.95,
                     "top_k": 40,
-                    "max_output_tokens": 8192,
+                    "max_output_tokens": 16384,  # Aumentado para evitar JSON incompleto
                 }
             )
             
