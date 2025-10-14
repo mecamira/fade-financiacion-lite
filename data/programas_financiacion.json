@@ -13830,9 +13830,67 @@
             ],
             "tipo_ayuda": "Subvención",
             "tipo_proyecto": "Apoyo al alquiler de vivienda o habitación para personas con escasos recursos económicos o en situación de vulnerabilidad."
+        },
+        {
+            "ambito": "Principado de Asturias",
+            "beneficiarios": [
+                "Empresas con centros de trabajo en el Principado de Asturias",
+                "Empresas no dependientes ni vinculadas a administraciones, organismos o entes públicos, empresas públicas o fundaciones del sector público"
+            ],
+            "codigo_bdns": null,
+            "convocatoria": {
+                "estado": "Abierta",
+                "fecha_apertura": "2025-06-01",
+                "fecha_cierre": "2027-06-30"
+            },
+            "descripcion_detallada": "Esta convocatoria del Servicio Público de Empleo del Principado de Asturias (SEPEPA) apoya la inserción laboral de personas con discapacidad mediante ayudas de 3.907€ por contrato a tiempo completo. Dirigida a empresas asturianas, busca fomentar el empleo estable para este colectivo en el periodo de contratos elegibles del 1 de junio de 2025 al 31 de mayo de 2027.",
+            "enlaces": {
+                "bases": null,
+                "convocatoria": "https://miprincipado.asturias.es?code=AYUD0242T01"
+            },
+            "financiacion": {
+                "importe_maximo": null,
+                "intensidad": "3.907 euros por contrato indefinido a tiempo completo (proporcional para tiempo parcial)",
+                "presupuesto_maximo": 700000,
+                "presupuesto_minimo": null
+            },
+            "id": "convocatoria-de-subvenciones-a-empresas-por-la-con",
+            "nombre": "Convocatoria de subvenciones a empresas por la contratación indefinida de personas desempleadas con discapacidad",
+            "organismo": "Servicio Público de Empleo del Principado de Asturias (SEPEPA)",
+            "requisitos": [
+                "Disponer de centros de trabajo en el Principado de Asturias",
+                "No ser dependiente ni vinculada a administraciones, organismos o entes públicos, empresas públicas o fundaciones del sector público",
+                "Haber celebrado contratos indefinidos o transformaciones de temporales en indefinidos de personas con discapacidad",
+                "Contratos formalizados al amparo del Real Decreto 1451/1983, de 11 de mayo",
+                "Contratos formalizados entre el 1 de junio de 2025 y el 31 de mayo de 2027",
+                "La persona contratada debe ser desempleada con discapacidad",
+                "Cumplir con los requisitos de las bases reguladoras y la presente convocatoria",
+                "No estar incurso en las circunstancias excluyentes del artículo 13 de la Ley General de Subvenciones",
+                "Disponer de informe médico que acredite la compatibilidad de la condición de la persona contratada con el puesto a desempeñar",
+                "Presentar informe de Plantilla Media de Trabajadores en Alta de los doce meses anteriores y el del mes del contrato",
+                "Estar al corriente de las obligaciones tributarias y con la Seguridad Social",
+                "No ser deudor de la Hacienda del Principado de Asturias por deudas vencidas, líquidas y exigibles",
+                "No haber sido excluido del acceso a los beneficios de programas de empleo",
+                "No incurrir en alguna de las circunstancias excluyentes del Reglamento (UE) número 2023/2831 de minimis",
+                "Para solicitudes superiores a 30.000€, acreditar el cumplimiento de los plazos de pago previstos en la Ley 3/2004"
+            ],
+            "resumen_breve": "Subvenciones del Principado de Asturias para empresas que contraten indefinidamente o transformen contratos de personas desempleadas con discapacidad, con un presupuesto de 700.000€.",
+            "sectores": [],
+            "tags": [
+                "Empleo",
+                "Discapacidad",
+                "Contratación indefinida",
+                "Subvención",
+                "Asturias",
+                "Empresas",
+                "Fomento del empleo",
+                "Minimis"
+            ],
+            "tipo_ayuda": "Subvención directa",
+            "tipo_proyecto": "Contratación indefinida de personas desempleadas con discapacidad o transformación en indefinidos de contratos temporales de fomento de empleo para personas con discapacidad"
         }
     ],
     "fecha_actualizacion": "2025-10-08",
-    "total_programas": 237,
-    "ultima_actualizacion": "2025-10-14T10:34:36.884572"
+    "total_programas": 238,
+    "ultima_actualizacion": "2025-10-14T11:27:03.777702"
 }
