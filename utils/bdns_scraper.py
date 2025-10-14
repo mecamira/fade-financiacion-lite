@@ -42,8 +42,13 @@ class BDNSScraper:
     
     def _init_driver(self):
         """Inicializa el driver de Chrome (local o remoto según configuración)"""
+        # Si ya hay un driver abierto, cerrarlo primero
         if self.driver is not None:
-            return
+            try:
+                self.driver.quit()
+            except:
+                pass
+            self.driver = None
         
         import os
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
