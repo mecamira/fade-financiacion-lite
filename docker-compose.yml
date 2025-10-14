@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: fade-financiacion-app
+    env_file:
+      - .env
     restart: unless-stopped
     environment:
       - FLASK_ENV=production
@@ -15,10 +17,10 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - DATABASE_PATH=/app/data/programas_financiacion.json
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
-      - LOG_DIR=/var/log/fade-financiacion
+      - LOG_DIR=/app/logs
     volumes:
       - ./data:/app/data
-      - ./logs:/var/log/fade-financiacion
+      - ./logs:/app/logs
       - ./uploads:/app/uploads
     ports:
       - "8000:8000"
@@ -49,24 +51,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Nginx reverse proxy
-  nginx:
-    image: nginx:alpine
-    container_name: fade-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/sites-enabled:/etc/nginx/sites-enabled:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./static:/var/www/static:ro
-    depends_on:
-      - flask-app
-    networks:
-      - fade-network
 
 networks:
   fade-network:

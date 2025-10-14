@@ -28,12 +28,16 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Crear directorio de logs si no existe
+log_dir = app.config.get('LOG_DIR', 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(app.config.get('LOG_DIR', 'logs'), 'app.log')),
+        logging.FileHandler(os.path.join(log_dir, 'app.log')),
         logging.StreamHandler()
     ]
 )
