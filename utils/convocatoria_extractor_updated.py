@@ -691,27 +691,44 @@ class ConvocatoriaExtractor:
         Returns:
             Código BDNS normalizado o None
         """
-        if not bdns:
+        if not bdns or bdns in [None, 'null', 'nan', 'None', '']:
             return None
             
         # Convertir a string y limpiar
         bdns_str = str(bdns).strip()
         
-        # Eliminar caracteres no numéricos
-        bdns_clean = re.sub(r'[^\d]', '', bdns_str)
+        # Si está vacío después de strip
+        if not bdns_str or bdns_str.lower() in ['null', 'nan', 'none']:
+            return None
+        
+        # Eliminar caracteres no numéricos (excepto el punto decimal que quitaremos después)
+        bdns_clean = re.sub(r'[^\d.]', '', bdns_str)
         
         # Si queda vacío o muy corto, no es válido
-        if len(bdns_clean) < 6:
+        if len(bdns_clean) < 5:
             return None
-            
-        # Los códigos BDNS suelen tener longitudes específicas, normalizar
-        # Eliminar ceros a la izquierda innecesarios y luego formatear
-        bdns_int = int(bdns_clean) if bdns_clean.isdigit() else None
         
-        if bdns_int is None:
-            return None
+        # Convertir a float y luego a int para eliminar .0 y decimales
+        try:
+            # Si tiene punto decimal, convertir a float primero
+            if '.' in bdns_clean:
+                bdns_float = float(bdns_clean)
+                bdns_int = int(bdns_float)
+            else:
+                bdns_int = int(bdns_clean)
             
-        return str(bdns_int)  # Devolver sin ceros a la izquierda
+            # Devolver como string sin ceros a la izquierda innecesarios
+            return str(bdns_int)
+        except (ValueError, OverflowError):
+            # Si no se puede convertir a número, intentar limpiar más
+            # Eliminar .0 al final si existe
+            if bdns_clean.endswith('.0'):
+                bdns_clean = bdns_clean[:-2]
+            
+            # Eliminar ceros a la izquierda
+            bdns_clean = bdns_clean.lstrip('0')
+            
+            return bdns_clean if bdns_clean else None
     
     def _normalizar_texto(self, texto: str) -> str:
         """

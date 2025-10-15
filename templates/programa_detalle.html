@@ -4,13 +4,12 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ programa.nombre }}</li>
-        </ol>
-    </nav>
+    <!-- Botón Volver -->
+    <div class="mb-3">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+        </a>
+    </div>
 
     <!-- Encabezado del programa -->
     <div class="card mb-4">
@@ -240,7 +239,7 @@
     </div>
     {% endif %}
 
-    <!-- Botón volver -->
+    <!-- Botón volver al final -->
     <div class="text-center mt-4">
         <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
