@@ -474,6 +474,18 @@ def eliminar_programa(programa_id):
 def analizar_compatibilidad():
     """Vista para análisis de compatibilidad proyecto-convocatoria"""
     try:
+        # Verificar si hay un result_id en la URL
+        result_id = request.args.get('result_id')
+        
+        if result_id:
+            # Cargar el resultado del análisis
+            result = compatibility_analyzer.get_result(result_id)
+            if result:
+                return render_template('financiacion_adecuacion.html', result=result)
+            else:
+                logger.warning(f"No se encontró resultado para ID: {result_id}")
+        
+        # Si no hay result_id o no se encontró, mostrar el formulario vacío
         return render_template('financiacion_adecuacion.html')
     except Exception as e:
         logger.error(f"Error en análisis compatibilidad: {str(e)}")
@@ -497,23 +509,29 @@ def analizar_compatibilidad_api():
         convocatoria_id = request.form.get('convocatoria_id')
         pdf_file = request.files.get('convocatoria_pdf')  # Cambiado de pdf_convocatoria a convocatoria_pdf
         
-        # Obtener texto de la convocatoria
+        # Si es un ID de convocatoria, no está implementado aún
         if convocatoria_id:
-            programa = financing_dashboard.get_programa_by_id(convocatoria_id)
-            texto_convocatoria = programa.get('descripcion', '')
-        elif pdf_file:
-            texto_convocatoria = pdf_processor.extraer_texto(pdf_file)
-        else:
-            return jsonify({'success': False, 'error': 'Debe proporcionar una convocatoria'}), 400
+            return jsonify({'success': False, 'error': 'Análisis por ID de convocatoria no implementado aún'}), 400
         
-        # Realizar análisis con Gemini AI
-        analisis = compatibility_analyzer.analizar(datos_empresa, texto_convocatoria)
+        if not pdf_file:
+            return jsonify({'success': False, 'error': 'Debe proporcionar un PDF de la convocatoria'}), 400
         
+        # Realizar análisis con Gemini AI (pasarle el PDF directamente)
+        resultado = compatibility_analyzer.analyze_compatibility(
+            empresa_nombre=datos_empresa.get('nombre', ''),
+            empresa_cnae=datos_empresa.get('cnae', ''),
+            proyecto_descripcion=datos_empresa.get('descripcion_proyecto', ''),
+            convocatoria_pdf=pdf_file
+        )
+        
+        # Verificar si hubo error
+        if 'error' in resultado:
+            logger.error(f"Error en análisis: {resultado.get('error')}")
+            return jsonify({'success': False, 'error': resultado.get('error')}), 400
+        
+        # Si todo fue bien, resultado contiene {'success': True, 'result_id': '...'}
         logger.info("Análisis de compatibilidad completado")
-        return jsonify({
-            'success': True,
-            'analisis': analisis
-        })
+        return jsonify(resultado)
         
     except Exception as e:
         logger.error(f"Error en análisis: {str(e)}")

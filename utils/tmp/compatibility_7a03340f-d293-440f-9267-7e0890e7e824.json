@@ -1,0 +1,46 @@
+{
+  "compatible": false,
+  "resumen": "La convocatoria de ayudas proporcionada está destinada exclusivamente a personas físicas para subvencionar el alquiler de vivienda. Farho Domotica es una empresa (persona jurídica) y su proyecto 'toallero inteligente' es de I+D+i, lo cual es completamente incompatible con el objeto y los requisitos de beneficiario de esta convocatoria.",
+  "motivo_incertidumbre": null,
+  "convocatoria": {
+    "nombre": "Convocatoria Pública de Ayudas al Alquiler de Vivienda",
+    "organismo": "Consejería de Ordenación de Territorio, Urbanismo, Vivienda y Derechos Ciudadanos del Principado de Asturias",
+    "tipo_ayuda": "Subvenciones al alquiler de vivienda (ayudas directas a personas arrendatarias o cesionarias)",
+    "ambito": "Principado de Asturias"
+  },
+  "factores": [
+    {
+      "nombre": "Sector de actividad (CNAE)",
+      "compatible": false,
+      "detalle": "La convocatoria está dirigida a personas físicas para ayudas al alquiler de vivienda, no a empresas. El CNAE 6201 (Actividades de programación informática) identifica a Farho Domotica como una empresa, lo cual la excluye como beneficiaria de esta ayuda social."
+    },
+    {
+      "nombre": "Beneficiario",
+      "compatible": false,
+      "detalle": "La Cláusula Tercera de la convocatoria establece claramente que los beneficiarios deben ser 'personas físicas mayores de edad'. Farho Domotica es una entidad jurídica (empresa), lo que la hace incompatible con los requisitos de beneficiario de esta ayuda."
+    },
+    {
+      "nombre": "Alineación con S3/RIS3",
+      "compatible": false,
+      "detalle": "La convocatoria no está relacionada con la estrategia S3/RIS3 de Asturias, ya que su objetivo es social (ayudas al alquiler de vivienda) y no de I+D+i empresarial. Por lo tanto, el proyecto de I+D+i de la empresa no se alinea con el objeto de esta convocatoria."
+    },
+    {
+      "nombre": "Tipo de proyecto",
+      "compatible": false,
+      "detalle": "El objeto de las subvenciones (Cláusula Primera) es 'facilitar el disfrute de una vivienda o habitación [...] en régimen de alquiler o de cesión de uso'. El proyecto 'toallero inteligente' es un proyecto de desarrollo tecnológico o innovación (I+D+i), lo cual es completamente ajeno a la finalidad de esta ayuda al alquiler."
+    },
+    {
+      "nombre": "Restricciones específicas",
+      "compatible": false,
+      "detalle": "Las restricciones de la convocatoria se centran en la situación económica y patrimonial de las personas físicas (ingresos, propiedad de vivienda, etc.) y no en actividades empresariales o de I+D+i. La naturaleza empresarial del solicitante y del proyecto constituye una restricción fundamental no contemplada para la elegibilidad."
+    }
+  ],
+  "recomendaciones": [
+    "Buscar convocatorias específicas para proyectos de I+D+i o innovación tecnológica en el Principado de Asturias, gestionadas por organismos como el IDEPA (Instituto de Desarrollo Económico del Principado de Asturias) o la Consejería de Ciencia, Innovación y Universidad.",
+    "Revisar los programas de financiación nacionales (por ejemplo, CDTI, Ministerio de Ciencia e Innovación) o europeos (como Horizonte Europa o fondos FEDER gestionados a nivel regional para I+D+i) que sí apoyan proyectos empresariales de desarrollo tecnológico.",
+    "Consultar con un asesor especializado en financiación de I+D+i para identificar las líneas de ayuda adecuadas al perfil de la empresa y su proyecto 'toallero inteligente'.",
+    "Asegurarse de que el proyecto 'toallero inteligente' esté bien definido en términos de presupuesto, cronograma, equipo y resultados esperados para futuras solicitudes de ayudas de I+D+i."
+  ],
+  "id": "7a03340f-d293-440f-9267-7e0890e7e824",
+  "timestamp": "2025-10-16T12:15:18.697045"
+}

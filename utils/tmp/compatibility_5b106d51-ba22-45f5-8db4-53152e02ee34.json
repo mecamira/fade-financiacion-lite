@@ -1,0 +1,45 @@
+{
+  "compatible": false,
+  "resumen": "El proyecto 'toallero inteligente' de la empresa Farho Domotica no es compatible con la convocatoria de ayudas analizada. Esta convocatoria está dirigida exclusivamente a personas físicas para subvencionar el alquiler de vivienda, y no a empresas ni a proyectos de I+D+i.",
+  "motivo_incertidumbre": null,
+  "convocatoria": {
+    "nombre": "Convocatoria Pública de Ayudas al Alquiler de Vivienda",
+    "organismo": "Consejería de Ordenación de Territorio, Urbanismo, Vivienda y Derechos Ciudadanos del Principado de Asturias",
+    "tipo_ayuda": "Subvenciones al alquiler de vivienda (ayudas directas a personas arrendatarias)",
+    "ambito": "Principado de Asturias"
+  },
+  "factores": [
+    {
+      "nombre": "Sector de actividad (CNAE)",
+      "compatible": false,
+      "detalle": "El CNAE 6201 (Actividades de programación informática) corresponde a una empresa (persona jurídica). La convocatoria de ayudas está destinada exclusivamente a personas físicas como arrendatarias de vivienda, por lo que el sector de actividad de la empresa no es relevante para esta ayuda, ya que la empresa no es un beneficiario elegible."
+    },
+    {
+      "nombre": "Beneficiario",
+      "compatible": false,
+      "detalle": "La convocatoria establece claramente en su cláusula Tercera que 'Podrán beneficiarse de estas ayudas las personas físicas mayores de edad que posean la nacionalidad española, o la de alguno de los Estados miembros de la Unión Europea o del Espacio Económico Europeo, Suiza, ciudadanos no comunitarios con autorización de estancia o residencia en España'. Farho Domotica es una empresa (persona jurídica), lo que la excluye directamente como beneficiario elegible para esta ayuda."
+    },
+    {
+      "nombre": "Alineación con S3/RIS3",
+      "compatible": false,
+      "detalle": "La convocatoria no es una ayuda de I+D+i y no hace ninguna mención a la Estrategia de Especialización Inteligente (S3/RIS3) de Asturias. Su objetivo es social (ayudas al alquiler de vivienda), por lo que la alineación con la S3/RIS3 no es un requisito ni un factor aplicable a esta convocatoria."
+    },
+    {
+      "nombre": "Tipo de proyecto",
+      "compatible": false,
+      "detalle": "El proyecto 'toallero inteligente' es un desarrollo de producto o un proyecto de I+D+i. El objeto de la convocatoria, según su cláusula Primera, es 'facilitar el disfrute de una vivienda o habitación ubicadas en el Principado de Asturias, en régimen de alquiler o de cesión de uso a sectores de población con escasos medios económicos'. No existe ninguna alineación entre el tipo de proyecto presentado y el objeto de la ayuda."
+    },
+    {
+      "nombre": "Restricciones específicas",
+      "compatible": false,
+      "detalle": "Las restricciones de la convocatoria se centran en la situación personal y económica de los arrendatarios (límites de ingresos, no ser propietario de vivienda, no tener parentesco con el arrendador, etc.). Dado que la empresa no es un beneficiario elegible, ninguna de estas restricciones es aplicable a Farho Domotica. La convocatoria no es de I+D+i, por lo que las restricciones de la UE (FEDER, FTJ, Minimis, RGEC) en el contexto de I+D+i no son aplicables a este tipo de ayuda."
+    }
+  ],
+  "recomendaciones": [
+    "Farho Domotica debe buscar convocatorias de ayudas específicas para proyectos de I+D+i, desarrollo tecnológico o digitalización empresarial, que son las que se alinean con el tipo de proyecto 'toallero inteligente'.",
+    "Se recomienda revisar los programas de financiación ofrecidos por organismos como el IDEPA (Instituto de Desarrollo Económico del Principado de Asturias), el CDTI (Centro para el Desarrollo Tecnológico Industrial) a nivel nacional, o programas europeos como Horizonte Europa, que sí apoyan proyectos empresariales de I+D+i.",
+    "Considerar la posibilidad de buscar asesoramiento especializado en financiación de I+D+i para identificar las líneas de ayuda más adecuadas y preparar una propuesta que cumpla con los requisitos específicos de este tipo de convocatorias."
+  ],
+  "id": "5b106d51-ba22-45f5-8db4-53152e02ee34",
+  "timestamp": "2025-10-16T12:13:19.712317"
+}
