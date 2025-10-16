@@ -486,15 +486,16 @@ def analizar_compatibilidad_api():
     try:
         # Obtener datos del proyecto
         datos_empresa = {
-            'cnae': request.form.get('cnae'),
-            'descripcion_proyecto': request.form.get('descripcion_proyecto'),
+            'nombre': request.form.get('empresa_nombre'),
+            'cnae': request.form.get('empresa_cnae'),
+            'descripcion_proyecto': request.form.get('proyecto_descripcion'),
             'presupuesto': request.form.get('presupuesto'),
             'tamano_empresa': request.form.get('tamano_empresa')
         }
         
         # Obtener convocatoria (puede ser ID o PDF)
         convocatoria_id = request.form.get('convocatoria_id')
-        pdf_file = request.files.get('pdf_convocatoria')
+        pdf_file = request.files.get('convocatoria_pdf')  # Cambiado de pdf_convocatoria a convocatoria_pdf
         
         # Obtener texto de la convocatoria
         if convocatoria_id:
