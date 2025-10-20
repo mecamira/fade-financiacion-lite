@@ -316,8 +316,9 @@ class ConvocatoriaExtractor:
                                  convocatoria_text: str, 
                                  codigo_bdns: Optional[str] = None,
                                  fecha_publicacion: Optional[str] = None,
-                                 bases_url: Optional[str] = None,
-                                 convocatoria_url: Optional[str] = None) -> Dict[str, Any]:
+                                 url_bdns: Optional[str] = None,
+                                 convocatoria_url: Optional[str] = None,
+                                 bases_reguladoras_url: Optional[str] = None) -> Dict[str, Any]:
         """
         Extrae información estructurada de una convocatoria de financiación
         
@@ -325,8 +326,9 @@ class ConvocatoriaExtractor:
             convocatoria_text: Texto de la convocatoria
             codigo_bdns: Código BDNS de la convocatoria (opcional)
             fecha_publicacion: Fecha de publicación en formato YYYY-MM-DD (opcional)
-            bases_url: URL de las bases de la convocatoria (opcional)
-            convocatoria_url: URL de la convocatoria (opcional)
+            url_bdns: URL de la página BDNS (opcional)
+            convocatoria_url: URL del PDF de convocatoria (opcional)
+            bases_reguladoras_url: URL del PDF de bases reguladoras (opcional)
             
         Returns:
             Diccionario con la información estructurada de la convocatoria
@@ -335,7 +337,7 @@ class ConvocatoriaExtractor:
             # Preparar mensaje con información adicional si está disponible
             additional_info = ""
             
-            if codigo_bdns or fecha_publicacion or bases_url or convocatoria_url:
+            if codigo_bdns or fecha_publicacion or url_bdns or convocatoria_url or bases_reguladoras_url:
                 info_adicional = "INFORMACIÓN ADICIONAL A INCORPORAR EN EL JSON:\n"
                 
                 if codigo_bdns:
@@ -348,11 +350,14 @@ class ConvocatoriaExtractor:
                     additional_info += f"Si se menciona un plazo relativo a la publicación (ej: 15 días), "
                     additional_info += f"calcula la fecha absoluta usando esta fecha como referencia.\n"
                     
-                if bases_url:
-                    info_adicional += f"- URL de las bases: {bases_url}\n"
+                if url_bdns:
+                    info_adicional += f"- URL página BDNS: {url_bdns}\n"
                     
                 if convocatoria_url:
-                    info_adicional += f"- URL de la convocatoria: {convocatoria_url}\n"
+                    info_adicional += f"- URL PDF convocatoria: {convocatoria_url}\n"
+                    
+                if bases_reguladoras_url:
+                    info_adicional += f"- URL PDF bases reguladoras: {bases_reguladoras_url}\n"
                 
                 # Añadir a la convocatoria
                 convocatoria_text = info_adicional + additional_info + "\n" + convocatoria_text
@@ -409,15 +414,17 @@ class ConvocatoriaExtractor:
                 if codigo_bdns and (not result.get('codigo_bdns') or result['codigo_bdns'] == "null"):
                     result['codigo_bdns'] = codigo_bdns
                 
-                if bases_url and (not result.get('enlaces', {}).get('bases') or result['enlaces']['bases'] == "null"):
-                    if 'enlaces' not in result:
-                        result['enlaces'] = {}
-                    result['enlaces']['bases'] = bases_url
+                if 'enlaces' not in result:
+                    result['enlaces'] = {}
                 
-                if convocatoria_url and (not result.get('enlaces', {}).get('convocatoria') or result['enlaces']['convocatoria'] == "null"):
-                    if 'enlaces' not in result:
-                        result['enlaces'] = {}
+                if url_bdns and (not result['enlaces'].get('url_bdns') or result['enlaces']['url_bdns'] == "null"):
+                    result['enlaces']['url_bdns'] = url_bdns
+                
+                if convocatoria_url and (not result['enlaces'].get('convocatoria') or result['enlaces']['convocatoria'] == "null"):
                     result['enlaces']['convocatoria'] = convocatoria_url
+                    
+                if bases_reguladoras_url and (not result['enlaces'].get('bases_reguladoras') or result['enlaces']['bases_reguladoras'] == "null"):
+                    result['enlaces']['bases_reguladoras'] = bases_reguladoras_url
                 
                 # Verificar el estado de la convocatoria basado en las fechas
                 self._verificar_estado_convocatoria(result, fecha_publicacion)

@@ -220,8 +220,9 @@ def extraer_convocatoria():
         # Obtener datos adicionales del formulario
         codigo_bdns = None
         fecha_publicacion = None
-        bases_url = None
+        url_bdns = None
         convocatoria_url = None
+        bases_reguladoras_url = None
         
         # Intentar obtener datos como JSON o como form data
         if request.is_json:
@@ -229,15 +230,17 @@ def extraer_convocatoria():
             texto_convocatoria = data.get('texto')
             codigo_bdns = data.get('codigo_bdns')
             fecha_publicacion = data.get('fecha_publicacion')
-            bases_url = data.get('bases_url')
+            url_bdns = data.get('url_bdns')
             convocatoria_url = data.get('convocatoria_url')
+            bases_reguladoras_url = data.get('bases_reguladoras_url')
         else:
             # Datos de formulario
             texto_convocatoria = request.form.get('convocatoria_text')
             codigo_bdns = request.form.get('codigo_bdns')
             fecha_publicacion = request.form.get('fecha_publicacion')
-            bases_url = request.form.get('bases_url')
+            url_bdns = request.form.get('url_bdns')
             convocatoria_url = request.form.get('convocatoria_url')
+            bases_reguladoras_url = request.form.get('bases_reguladoras_url')
             
             # Si viene un PDF, extraer el texto
             if 'convocatoria_pdf' in request.files:
@@ -268,8 +271,9 @@ def extraer_convocatoria():
             texto_convocatoria,
             codigo_bdns=codigo_bdns,
             fecha_publicacion=fecha_publicacion,
-            bases_url=bases_url,
-            convocatoria_url=convocatoria_url
+            url_bdns=url_bdns,
+            convocatoria_url=convocatoria_url,
+            bases_reguladoras_url=bases_reguladoras_url
         )
         
         # Verificar si hay error
