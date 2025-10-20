@@ -211,30 +211,59 @@
             <h5 class="mb-0"><i class="fas fa-link me-2"></i>Enlaces</h5>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    {% if programa.enlaces.bases and programa.enlaces.bases != 'null' %}
-                        <a href="{{ programa.enlaces.bases }}" target="_blank" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-file-alt me-2"></i>Bases de la Convocatoria
+            <div class="row g-3">
+                <!-- URL BDNS -->
+                <div class="col-md-4">
+                    {% if programa.enlaces.url_bdns and programa.enlaces.url_bdns != 'null' %}
+                        <a href="{{ programa.enlaces.url_bdns }}" target="_blank" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-database me-2"></i>Página BDNS
                         </a>
                     {% else %}
                         <button class="btn btn-outline-secondary w-100" disabled>
-                            <i class="fas fa-file-alt me-2"></i>Bases no disponibles
+                            <i class="fas fa-database me-2"></i>BDNS no disponible
                         </button>
                     {% endif %}
                 </div>
-                <div class="col-md-6">
+                
+                <!-- Convocatoria (PDF) -->
+                <div class="col-md-4">
                     {% if programa.enlaces.convocatoria and programa.enlaces.convocatoria != 'null' %}
                         <a href="{{ programa.enlaces.convocatoria }}" target="_blank" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-external-link-alt me-2"></i>Página de la Convocatoria
+                            <i class="fas fa-file-pdf me-2"></i>Resolución de la Convocatoria
                         </a>
                     {% else %}
                         <button class="btn btn-outline-secondary w-100" disabled>
-                            <i class="fas fa-external-link-alt me-2"></i>Enlace no disponible
+                            <i class="fas fa-file-pdf me-2"></i>Resolución no disponible
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Bases Reguladoras (PDF) -->
+                <div class="col-md-4">
+                    {% if programa.enlaces.bases_reguladoras and programa.enlaces.bases_reguladoras != 'null' %}
+                        <a href="{{ programa.enlaces.bases_reguladoras }}" target="_blank" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-gavel me-2"></i>Bases Reguladoras
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="fas fa-gavel me-2"></i>Bases no disponibles
                         </button>
                     {% endif %}
                 </div>
             </div>
+            
+            <!-- COMPATIBILIDAD CON FORMATO ANTIGUO -->
+            <!-- Si existen enlaces con nombres antiguos (bases), mostrarlos también -->
+            {% if programa.enlaces.bases and programa.enlaces.bases != 'null' and not programa.enlaces.url_bdns %}
+            <div class="alert alert-info mt-3 mb-0">
+                <small><i class="fas fa-info-circle me-2"></i>Enlace adicional (formato antiguo):</small>
+                <div class="mt-2">
+                    <a href="{{ programa.enlaces.bases }}" target="_blank" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-external-link-alt me-1"></i>Enlace alternativo
+                    </a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
     {% endif %}

@@ -320,7 +320,8 @@ def obtener_info_bdns():
         return jsonify({
             'success': True,
             'codigo_bdns': info_bdns.get('codigo_bdns'),
-            'url_bases': info_bdns.get('url_bases'),
+            'url_bdns': info_bdns.get('url_bdns'),  # URL de la página BDNS
+            'bases_reguladoras_url': info_bdns.get('bases_reguladoras_url'),  # URL del PDF de bases
             'documentos': info_bdns.get('documentos', [])
         })
         

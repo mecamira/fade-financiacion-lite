@@ -59,13 +59,21 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="bases-url" class="form-label">URL de las Bases:</label>
-                            <input type="url" class="form-control" id="bases-url" name="bases_url" placeholder="https://...">
+                            <label for="url-bdns" class="form-label">URL BDNS:</label>
+                            <input type="url" class="form-control" id="url-bdns" name="url_bdns" placeholder="https://www.infosubvenciones.es/...">
+                            <small class="text-muted">URL de la página de la convocatoria en BDNS</small>
                         </div>
 
                         <div class="mb-3">
-                            <label for="convocatoria-url" class="form-label">URL de la Convocatoria:</label>
+                            <label for="convocatoria-url" class="form-label">Convocatoria:</label>
                             <input type="url" class="form-control" id="convocatoria-url" name="convocatoria_url" placeholder="https://...">
+                            <small class="text-muted">URL del PDF de la convocatoria</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bases-reguladoras-url" class="form-label">Bases Reguladoras:</label>
+                            <input type="url" class="form-control" id="bases-reguladoras-url" name="bases_reguladoras_url" placeholder="https://...">
+                            <small class="text-muted">URL del PDF de las bases reguladoras</small>
                         </div>
 
                         <div class="mb-3">
@@ -837,6 +845,7 @@ function generatePreview(data) {
                 const data = await response.json();
                 
                 console.log('Respuesta de BDNS:', data);  // DEBUG
+                console.log('Bases reguladoras URL:', data.bases_reguladoras_url);  // DEBUG ESPECÍFICO
                 
                 if (!data.success) {
                     throw new Error(data.error || 'Error al obtener información de BDNS');
@@ -847,9 +856,16 @@ function generatePreview(data) {
                 
                 console.log('Documentos BDNS:', documentosBDNS);  // DEBUG
                 
-                // Autocompletar campos básicos
+                // Autocompletar campos básicos (SIEMPRE, independiente del documento)
                 document.getElementById('codigo-bdns').value = data.codigo_bdns;
-                document.getElementById('bases-url').value = data.url_bases;
+                
+                // URL BDNS: es la URL que el usuario pegó, no la que devuelve el backend
+                document.getElementById('url-bdns').value = urlBdns;
+                
+                // Bases Reguladoras: si existe, autocompletar SIEMPRE
+                if (data.bases_reguladoras_url) {
+                    document.getElementById('bases-reguladoras-url').value = data.bases_reguladoras_url;
+                }
                 
                 // Si hay documentos
                 if (documentosBDNS.length === 0) {
@@ -945,10 +961,14 @@ function generatePreview(data) {
                 document.getElementById('fecha-publicacion').value = documento.fecha_publicacion;
             }
             
-            // URL de la convocatoria (documento)
-            if (documento.url) {
+            // URL de la convocatoria (documento PDF)
+            // SOLO si es del tipo convocatoria
+            if (documento.tipo === 'convocatoria' && documento.url) {
                 document.getElementById('convocatoria-url').value = documento.url;
             }
+            
+            // NOTA: NO tocamos url-bdns ni bases-reguladoras-url porque ya se rellenaron automáticamente
+            // y son independientes del documento seleccionado
         }
         
         // Mostrar botón para extraer información del PDF descargado

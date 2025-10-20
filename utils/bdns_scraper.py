@@ -209,10 +209,14 @@ class BDNSScraper:
             # Extraer documentos (pasar codigo_bdns)
             documentos = self._extraer_documentos(codigo_bdns)
             
+            # Extraer enlace de bases reguladoras
+            bases_reguladoras_url = self._extraer_bases_reguladoras()
+            
             resultado = {
                 'success': True,
                 'codigo_bdns': codigo_bdns,
-                'url_bases': url,
+                'url_bdns': url,  # URL de la página BDNS
+                'bases_reguladoras_url': bases_reguladoras_url,  # URL del PDF de bases
                 'documentos': documentos
             }
             
@@ -548,6 +552,59 @@ class BDNSScraper:
                 pass
         
         return resultado
+    
+    def _extraer_bases_reguladoras(self) -> Optional[str]:
+        """
+        Extrae el enlace de las bases reguladoras de la página
+        
+        Returns:
+            URL del PDF de las bases reguladoras o None si no se encuentra
+        """
+        try:
+            print("\n🔍 Buscando bases reguladoras...")
+            
+            # Buscar el div que contiene "Dirección electrónica de las bases reguladoras"
+            try:
+                # Buscar por el texto específico
+                bases_element = self.driver.find_element(
+                    By.XPATH, 
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Dirección electrónica de las bases reguladoras')]"
+                )
+                
+                # Buscar el enlace en el siguiente div hermano
+                parent_div = bases_element.find_element(By.XPATH, "..")
+                link_div = parent_div.find_element(By.XPATH, ".//a[@href]")
+                bases_url = link_div.get_attribute('href')
+                
+                if bases_url:
+                    print(f"   ✓ Bases reguladoras encontradas: {bases_url}")
+                    return bases_url
+                    
+            except Exception as e:
+                print(f"   ⚠ No se encontraron bases reguladoras en la sección específica: {e}")
+            
+            # Búsqueda alternativa: cualquier enlace con 'bopa' o 'bases' en el href
+            try:
+                enlaces_bases = self.driver.find_elements(
+                    By.XPATH, 
+                    "//a[contains(@href, 'bopa') or contains(translate(@href, 'BASES', 'bases'), 'bases')]"
+                )
+                
+                for enlace in enlaces_bases:
+                    href = enlace.get_attribute('href')
+                    if href and '.pdf' in href.lower():
+                        print(f"   ✓ Bases reguladoras encontradas (búsqueda alternativa): {href}")
+                        return href
+                        
+            except Exception as e:
+                print(f"   ⚠ Error en búsqueda alternativa: {e}")
+            
+            print("   ✗ No se encontraron bases reguladoras")
+            return None
+            
+        except Exception as e:
+            print(f"   Error al extraer bases reguladoras: {e}")
+            return None
     
     def _extraer_fechas_multiples(self, texto: str) -> Dict[str, Optional[str]]:
         """

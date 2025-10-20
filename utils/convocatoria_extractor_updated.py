@@ -82,8 +82,9 @@ class ConvocatoriaExtractor:
           "descripcion_detallada": "Descripción más detallada (2-3 frases)",
           "tags": ["Palabras", "clave", "relevantes"],
           "enlaces": {{
-            "bases": "URL bases (null si no disponible)",
-            "convocatoria": "URL convocatoria (null si no disponible)"
+            "url_bdns": "URL página BDNS (null si no disponible)",
+            "convocatoria": "URL PDF convocatoria (null si no disponible)",
+            "bases_reguladoras": "URL PDF bases reguladoras (null si no disponible)"
           }},
           "codigo_bdns": "Código BDNS (numérico si es posible, null si no disponible)"
         }}
@@ -140,8 +141,9 @@ class ConvocatoriaExtractor:
                          pdf_file,
                          codigo_bdns: Optional[str] = None,
                          fecha_publicacion: Optional[str] = None,
-                         bases_url: Optional[str] = None,
-                         convocatoria_url: Optional[str] = None) -> Dict[str, Any]:
+                         url_bdns: Optional[str] = None,
+                         convocatoria_url: Optional[str] = None,
+                         bases_reguladoras_url: Optional[str] = None) -> Dict[str, Any]:
         """
         Extrae información estructurada desde un archivo PDF de la convocatoria
         
@@ -149,8 +151,9 @@ class ConvocatoriaExtractor:
             pdf_file: Archivo PDF (objeto de tipo file de Flask) 
             codigo_bdns: Código BDNS de la convocatoria (opcional)
             fecha_publicacion: Fecha de publicación en formato YYYY-MM-DD (opcional)
-            bases_url: URL de las bases de la convocatoria (opcional)
-            convocatoria_url: URL de la convocatoria (opcional)
+            url_bdns: URL de la página BDNS (opcional)
+            convocatoria_url: URL del PDF de la convocatoria (opcional)
+            bases_reguladoras_url: URL del PDF de bases reguladoras (opcional)
             
         Returns:
             Diccionario con la información estructurada de la convocatoria
@@ -169,8 +172,9 @@ class ConvocatoriaExtractor:
                 convocatoria_text=pdf_text,
                 codigo_bdns=codigo_bdns,
                 fecha_publicacion=fecha_publicacion,
-                bases_url=bases_url,
-                convocatoria_url=convocatoria_url
+                url_bdns=url_bdns,
+                convocatoria_url=convocatoria_url,
+                bases_reguladoras_url=bases_reguladoras_url
             )
         except Exception as e:
             print(f"Error al procesar PDF: {e}")
