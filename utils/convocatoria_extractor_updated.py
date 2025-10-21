@@ -92,38 +92,52 @@ class ConvocatoriaExtractor:
         INSTRUCCIONES ESPECÍFICAS:
         1. Para "id": Genera un identificador a partir del nombre, en minúsculas, sin acentos, con guiones en lugar de espacios.
         
-        2. Para fechas: 
+        2. Para "nombre": 
+           - Debe ser un TÍTULO CONCISO de máximo 100 caracteres
+           - NO incluir fechas, plazos ni años (eso va en otros campos)
+           - NO incluir información sobre el tipo de ayuda (eso va en "tipo_ayuda")
+           - Eliminar frases como "Convocatoria de", "Programa de", empezar directo con el contenido
+           - Si el nombre oficial es muy largo, resumirlo manteniendo la esencia
+           - Ejemplos de buenos nombres:
+             * "Subvenciones contratación indefinida personas con discapacidad"
+             * "Ayudas Severo Ochoa para estancias breves de investigación"
+             * "Bonificaciones contratación jóvenes menores de 30 años"
+           - Ejemplos de nombres INCORRECTOS (demasiado largos):
+             * "Convocatoria de subvenciones para empresas por la contratación indefinida de personas desempleadas con discapacidad (Del 1 de junio de 2025 al 31 de mayo de 2027)"
+             * "Programa de ayudas del Ministerio para la realización de proyectos de I+D+i en el año 2025"
+        
+        3. Para fechas: 
            - Usa formato YYYY-MM-DD
            - Si se menciona un plazo en días (ej: "20 días hábiles desde publicación"), utiliza la fecha de publicación proporcionada para calcular una fecha aproximada. Por ejemplo, 20 días hábiles son aproximadamente 28 días naturales.
            - Si no se indica fecha de apertura, asume que es la misma que la fecha de publicación.
         
-        3. Para "estado": 
+        4. Para "estado": 
            - Debe ser "Abierta" si la fecha de cierre es posterior a la fecha actual
            - "Cerrada" si la fecha de cierre es anterior a la fecha actual
            - "Pendiente" si la fecha de apertura es posterior a la fecha actual
            - Si no hay fechas claras, deduce el estado por el contexto
         
-        4. Para listas (beneficiarios, sectores, requisitos, tags): 
+        5. Para listas (beneficiarios, sectores, requisitos, tags): 
            - Incluye elementos individuales, no textos largos con separadores
            - Cada elemento debe ser una frase corta y concisa
         
-        5. Para campos numéricos: 
+        6. Para campos numéricos: 
            - Extrae SOLO números sin símbolos monetarios
            - Ejemplo: para "500.000€" escribe sólo "500000"
            - Redondea a enteros si es necesario
         
-        6. Para la intensidad: 
+        7. Para la intensidad: 
            - Captura porcentajes y descripciones específicas de financiación
         
-        7. Para el resumen_breve: 
+        8. Para el resumen_breve: 
            - Una frase concisa (máximo 200 caracteres)
         
-        8. Para la descripcion_detallada: 
+        9. Para la descripcion_detallada: 
            - 2-3 frases con detalles relevantes (máximo 500 caracteres)
         
-        9. Si un campo no tiene información, usa null (no elimines el campo)
+        10. Si un campo no tiene información, usa null (no elimines el campo)
 
-        10. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
+        11. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
 
         NOTAS IMPORTANTES:
         - Lee DETENIDAMENTE el documento. A menudo hay información importante oculta en párrafos o secciones que podrían parecer irrelevantes.

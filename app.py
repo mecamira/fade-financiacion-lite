@@ -283,10 +283,21 @@ def extraer_convocatoria():
                 'error': resultado.get('error', 'Error desconocido')
             }), 500
         
+        # Verificar duplicados
+        try:
+            programas_existentes = financing_dashboard.load_all_financing_programs()
+            duplicados = convocatoria_extractor.verificar_duplicados(resultado, programas_existentes)
+        except Exception as e:
+            logger.warning(f"Error al verificar duplicados: {str(e)}")
+            duplicados = []
+        
         logger.info("Extracción de convocatoria exitosa con Gemini")
         return jsonify({
             'success': True,
-            'data': resultado
+            'data': resultado,
+            'validation': {
+                'duplicados': duplicados
+            }
         })
         
     except Exception as e:
