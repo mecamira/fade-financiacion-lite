@@ -162,7 +162,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div id="json-editor" class="border rounded p-3 bg-light" style="min-height: 300px; max-height: 600px; overflow-y: auto;"></div>
+                                <div id="json-editor" class="border rounded p-3 bg-light" style="min-height: 600px; max-height: 800px; overflow-y: auto;"></div>
                             </div>
                         </div>
 
@@ -223,6 +223,22 @@
 <!-- JSON editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.css" rel="stylesheet" type="text/css">
+
+<!-- Estilos personalizados para aumentar altura del editor JSON -->
+<style>
+    /* Aumentar altura del editor JSON */
+    #json-editor .jsoneditor,
+    #json-editor .jsoneditor-outer,
+    #json-editor .ace_editor {
+        min-height: 600px !important;
+        height: 600px !important;
+    }
+    
+    /* Asegurar que el contenedor también tenga altura */
+    #json-editor {
+        height: auto !important;
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
