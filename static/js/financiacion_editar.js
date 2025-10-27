@@ -111,13 +111,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
         document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
         document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
+        document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
+        document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
+        document.getElementById('edit-url-bases').value = p.enlaces?.bases || '';
     }
     
     // Limpiar formulario
     function limpiarFormulario() {
         ['edit-id', 'edit-nombre', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion',
-         'edit-beneficiarios', 'edit-sectores'].forEach(id => {
+         'edit-beneficiarios', 'edit-sectores', 'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('edit-estado').value = 'Abierta';
@@ -168,6 +171,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const sectores = document.getElementById('edit-sectores').value
             .split('\n').map(s => s.trim()).filter(s => s);
         
+        // Obtener URLs
+        const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
+        const urlConvocatoria = document.getElementById('edit-url-convocatoria').value.trim() || null;
+        const urlBases = document.getElementById('edit-url-bases').value.trim() || null;
+        
         return {
             nombre: document.getElementById('edit-nombre').value,
             codigo_bdns: document.getElementById('edit-bdns').value || null,
@@ -187,7 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
             sectores: sectores,
             requisitos: [],
             tags: [],
-            enlaces: {}
+            enlaces: {
+                url_bdns: urlBdns,
+                convocatoria: urlConvocatoria,
+                bases: urlBases
+            }
         };
     }
     
