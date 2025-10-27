@@ -111,13 +111,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
         document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
         document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
+        document.getElementById('edit-tipo-proyecto').value = p.tipo_proyecto || '';
+        document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
+        document.getElementById('edit-tags').value = (p.tags || []).join('\n');
+        document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
+        document.getElementById('edit-importe-maximo').value = p.financiacion?.importe_maximo || '';
+        document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
+        document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
+        document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
+        document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
+        document.getElementById('edit-url-bases').value = p.enlaces?.bases || '';
     }
     
     // Limpiar formulario
     function limpiarFormulario() {
         ['edit-id', 'edit-nombre', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion',
-         'edit-beneficiarios', 'edit-sectores'].forEach(id => {
+         'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-tags',
+         'edit-intensidad', 'edit-importe-maximo', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
+         'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('edit-estado').value = 'Abierta';
@@ -167,7 +179,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .split('\n').map(s => s.trim()).filter(s => s);
         const sectores = document.getElementById('edit-sectores').value
             .split('\n').map(s => s.trim()).filter(s => s);
-        
+        const requisitos = document.getElementById('edit-requisitos').value
+            .split('\n').map(s => s.trim()).filter(s => s);
+        const tags = document.getElementById('edit-tags').value
+            .split('\n').map(s => s.trim()).filter(s => s);
+
+        // Obtener URLs
+        const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
+        const urlConvocatoria = document.getElementById('edit-url-convocatoria').value.trim() || null;
+        const urlBases = document.getElementById('edit-url-bases').value.trim() || null;
+
         return {
             nombre: document.getElementById('edit-nombre').value,
             codigo_bdns: document.getElementById('edit-bdns').value || null,
@@ -179,15 +200,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 fecha_apertura: document.getElementById('edit-fecha-apertura').value || null,
                 fecha_cierre: document.getElementById('edit-fecha-cierre').value || null
             },
-            financiacion: {},
-            tipo_proyecto: null,
+            financiacion: {
+                intensidad: document.getElementById('edit-intensidad').value || null,
+                importe_maximo: document.getElementById('edit-importe-maximo').value || null,
+                presupuesto_minimo: document.getElementById('edit-presupuesto-minimo').value || null,
+                presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null
+            },
+            tipo_proyecto: document.getElementById('edit-tipo-proyecto').value || null,
             resumen_breve: document.getElementById('edit-resumen').value || null,
             descripcion_detallada: document.getElementById('edit-descripcion').value || null,
             beneficiarios: beneficiarios,
             sectores: sectores,
-            requisitos: [],
-            tags: [],
-            enlaces: {}
+            requisitos: requisitos,
+            tags: tags,
+            enlaces: {
+                url_bdns: urlBdns,
+                convocatoria: urlConvocatoria,
+                bases: urlBases
+            }
         };
     }
     
