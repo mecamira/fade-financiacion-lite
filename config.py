@@ -28,7 +28,7 @@ class Config:
     CHROME_HEADLESS = True
     
     # Uploads
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100 MB max file size
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
     ALLOWED_EXTENSIONS = {'pdf', 'txt'}
     

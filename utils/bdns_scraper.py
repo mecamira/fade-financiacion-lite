@@ -294,11 +294,26 @@ class BDNSScraper:
                                             
                                             # Buscar el enlace con la URL en el modal
                                             try:
-                                                # El modal tiene un <a> con la URL completa
-                                                url_link = self.driver.find_element(By.XPATH, "//mat-dialog-container//a[@href and contains(@href, '/document/')]")
-                                                doc_url = url_link.get_attribute('href')
-                                                
-                                                if doc_url and '/document/' in doc_url:
+                                                # Intentar múltiples selectores para encontrar la URL
+                                                doc_url = None
+                                                posibles_selectores = [
+                                                    "//mat-dialog-container//a[@href and contains(@href, '/document/')]",
+                                                    "//mat-dialog-container//a[@href and contains(@href, '.pdf')]",
+                                                    "//div[contains(@class, 'mat-dialog')]//a[@href]",
+                                                    "//a[@href and contains(@href, 'bdnstrans') and contains(@href, 'document')]"
+                                                ]
+
+                                                for selector in posibles_selectores:
+                                                    try:
+                                                        url_link = self.driver.find_element(By.XPATH, selector)
+                                                        href = url_link.get_attribute('href')
+                                                        if href and ('.pdf' in href.lower() or '/document/' in href):
+                                                            doc_url = href
+                                                            break
+                                                    except:
+                                                        continue
+
+                                                if doc_url:
                                                     print(f"      ✓ URL capturada del modal: {doc_url}")
                                                     
                                                     # Descargar el PDF automáticamente
@@ -340,12 +355,13 @@ class BDNSScraper:
                                                     nombre_archivo = "Documento de convocatoria"
                                                     if '.pdf' in fila_text.lower():
                                                         # Extraer nombre del PDF (buscar el patrón más específico)
-                                                        match_pdf = re.search(r'get_app\s+([\w\s_-]+\.pdf)', fila_text, re.IGNORECASE)
+                                                        # Patrón mejorado que captura nombres con espacios
+                                                        match_pdf = re.search(r'get_app\s+([^\n]+?\.pdf)', fila_text, re.IGNORECASE)
                                                         if match_pdf:
                                                             nombre_archivo = match_pdf.group(1).strip()
                                                         else:
-                                                            # Intento alternativo: buscar cualquier .pdf
-                                                            match_pdf = re.search(r'([\w_-]+\.pdf)', fila_text, re.IGNORECASE)
+                                                            # Intento alternativo: buscar cualquier texto seguido de .pdf
+                                                            match_pdf = re.search(r'([^\s/\\:]+\.pdf)', fila_text, re.IGNORECASE)
                                                             if match_pdf:
                                                                 nombre_archivo = match_pdf.group(1).strip()
                                                     
