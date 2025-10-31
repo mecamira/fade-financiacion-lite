@@ -325,13 +325,24 @@ class BDNSScraper:
                                                         pdf_response = requests.get(doc_url, timeout=30)
                                                         
                                                         if pdf_response.status_code == 200:
-                                                            # Guardar en temporal
+                                                            # Guardar en directorio uploads (compartido entre contenedores)
                                                             import tempfile
-                                                            temp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+                                                            import os
+
+                                                            # Usar directorio uploads en lugar de /tmp/
+                                                            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
+                                                            os.makedirs(uploads_dir, exist_ok=True)
+
+                                                            # Crear archivo temporal en uploads
+                                                            temp_pdf = tempfile.NamedTemporaryFile(
+                                                                delete=False,
+                                                                suffix='.pdf',
+                                                                dir=uploads_dir
+                                                            )
                                                             temp_pdf.write(pdf_response.content)
                                                             temp_pdf_path = temp_pdf.name
                                                             temp_pdf.close()
-                                                            
+
                                                             print(f"      ✓ PDF descargado: {temp_pdf_path}")
                                                         else:
                                                             print(f"      ⚠ Error al descargar PDF: {pdf_response.status_code}")
