@@ -158,16 +158,29 @@
                         <textarea class="form-control" id="edit-sectores" rows="3"></textarea>
                     </div>
                     <div class="col-12">
-                        <label>Tipo de Proyecto</label>
-                        <input type="text" class="form-control" id="edit-tipo-proyecto" placeholder="Ej: Investigación, desarrollo, innovación...">
+                        <label>Tipo de Proyecto (uno por línea)</label>
+                        <textarea class="form-control" id="edit-tipo-proyecto" rows="3" placeholder="I+D+i, Digitalización, Inversión productiva..."></textarea>
                     </div>
                     <div class="col-6">
                         <label>Requisitos (uno por línea)</label>
                         <textarea class="form-control" id="edit-requisitos" rows="3" placeholder="Añadir cada requisito en una línea nueva"></textarea>
                     </div>
                     <div class="col-6">
-                        <label>Tags (uno por línea)</label>
-                        <textarea class="form-control" id="edit-tags" rows="3" placeholder="Palabras clave relevantes, una por línea"></textarea>
+                        <label>Gastos Subvencionables (uno por línea)</label>
+                        <textarea class="form-control" id="edit-gastos-subvencionables" rows="3" placeholder="Personal, Equipamiento, Materiales..."></textarea>
+                    </div>
+                    <div class="col-6">
+                        <label>Origen de Fondos</label>
+                        <select class="form-select" id="edit-origen-fondos">
+                            <option value="">No especificado</option>
+                            <option value="FEDER">FEDER</option>
+                            <option value="FEMPA">FEMPA</option>
+                            <option value="FTJ">FTJ</option>
+                            <option value="Next Generation">Next Generation</option>
+                            <option value="Propios">Propios</option>
+                            <option value="Mixtos">Mixtos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
                     </div>
                     <div class="col-12">
                         <hr class="my-3">

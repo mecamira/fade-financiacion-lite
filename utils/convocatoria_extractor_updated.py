@@ -58,14 +58,15 @@ class ConvocatoriaExtractor:
 
         ESTRUCTURA JSON REQUERIDA:
         {{
-          "id": "identificador-unico-basado-en-nombre", 
+          "id": "identificador-unico-basado-en-nombre",
           "nombre": "Nombre completo de la convocatoria",
-          "organismo": "Organismo gestor",
-          "tipo_ayuda": "Tipo de ayuda (Subvención, Préstamo, etc.)",
-          "ambito": "Ámbito geográfico (Nacional, Comunidad Autónoma, etc.)",
-          "beneficiarios": ["Lista", "de", "beneficiarios"],
-          "sectores": ["Lista", "de", "sectores", "aplicables"],
-          "tipo_proyecto": "Tipo de proyecto financiable",
+          "organismo": "Organismo gestor [VALOR CERRADO]",
+          "tipo_ayuda": "Tipo de ayuda [VALOR CERRADO]",
+          "ambito": "Ámbito geográfico [VALOR CERRADO]",
+          "beneficiarios": ["Lista", "de", "beneficiarios", "[VALORES CERRADOS]"],
+          "sectores": ["Lista", "de", "sectores", "[VALORES CERRADOS]"],
+          "tipo_proyecto": ["Lista", "de", "tipos", "de", "proyecto", "[VALORES CERRADOS]"],
+          "origen_fondos": "Origen de los fondos [VALOR CERRADO]",
           "convocatoria": {{
             "estado": "Estado (Abierta, Cerrada, Pendiente)",
             "fecha_apertura": "YYYY-MM-DD (null si no se especifica)",
@@ -78,9 +79,9 @@ class ConvocatoriaExtractor:
             "presupuesto_maximo": "Presupuesto máximo (numérico si es posible, sin símbolos)"
           }},
           "requisitos": ["Lista", "de", "requisitos", "principales"],
+          "gastos_subvencionables": ["Lista", "de", "gastos", "subvencionables"],
           "resumen_breve": "Resumen breve y conciso de la convocatoria",
           "descripcion_detallada": "Descripción más detallada (2-3 frases)",
-          "tags": ["Palabras", "clave", "relevantes"],
           "enlaces": {{
             "url_bdns": "URL página BDNS (null si no disponible)",
             "convocatoria": "URL PDF convocatoria (null si no disponible)",
@@ -89,10 +90,95 @@ class ConvocatoriaExtractor:
           "codigo_bdns": "Código BDNS (numérico si es posible, null si no disponible)"
         }}
 
+        INSTRUCCIONES PARA CAMPOS CON VALORES CERRADOS:
+
+        1. Para "organismo" - Seleccionar UNO de estos valores:
+           - CDTI
+           - SEKUENS
+           - Red.es
+           - EOI
+           - AEI
+           - FICYT
+           - Administración del Estado
+           - Organismos Europeos
+           - Entidades Financieras
+           - CCAA
+           - Otros
+
+        2. Para "tipo_ayuda" - Seleccionar UNO de estos valores:
+           - Subvención
+           - Préstamo/Crédito
+           - Capital Riesgo
+           - Aval/Garantía
+           - Ayuda en especie
+           - Ventaja fiscal
+           - Otros
+
+        3. Para "ambito" - Seleccionar UNO de estos valores:
+           - Europeo
+           - Nacional
+           - Autonómico
+           - Local
+           - Internacional
+
+        4. Para "tipo_proyecto" - Seleccionar UNO O MÁS de estos valores (array):
+           - I+D+i
+           - Digitalización
+           - Inversión productiva
+           - Contratación
+           - Formación
+           - Internacionalización
+           - Sostenibilidad
+           - Propiedad intelectual
+           - Marketing/Comercialización
+           - Creación de empresas
+           - General
+
+        5. Para "beneficiarios" - Seleccionar UNO O MÁS de estos valores (array):
+           - PYME
+           - Gran Empresa
+           - Startups
+           - Autónomos
+           - Emprendedores
+           - Sector Público
+           - Particulares
+           - ONG
+           - Investigadores
+           - Todas las empresas
+
+        6. Para "sectores" - Seleccionar UNO O MÁS de estos valores (array):
+           - General/Multisectorial
+           - I+D+i
+           - Tecnología/Digital
+           - Industria/Manufactura
+           - Salud/Sanidad
+           - Agricultura/Ganadería/Silvicultura/Pesca
+           - Energía/Sostenibilidad
+           - Construcción
+           - Turismo/Hostelería
+           - Cultura/Creativo
+           - Transporte/Logística
+           - Servicios profesionales
+           - Comercio
+           - Educación
+           - Defensa
+           - Administración Pública
+
+        7. Para "origen_fondos" - Seleccionar UNO de estos valores:
+           - FEDER
+           - FEMPA
+           - FTJ
+           - Next Generation
+           - Propios
+           - Mixtos
+           - Otros
+           - null (si no se especifica)
+
         INSTRUCCIONES ESPECÍFICAS:
+
         1. Para "id": Genera un identificador a partir del nombre, en minúsculas, sin acentos, con guiones en lugar de espacios.
-        
-        2. Para "nombre": 
+
+        2. Para "nombre":
            - Debe ser un TÍTULO CONCISO de máximo 100 caracteres
            - NO incluir fechas, plazos ni años (eso va en otros campos)
            - NO incluir información sobre el tipo de ayuda (eso va en "tipo_ayuda")
@@ -102,48 +188,62 @@ class ConvocatoriaExtractor:
              * "Subvenciones contratación indefinida personas con discapacidad"
              * "Ayudas Severo Ochoa para estancias breves de investigación"
              * "Bonificaciones contratación jóvenes menores de 30 años"
-           - Ejemplos de nombres INCORRECTOS (demasiado largos):
-             * "Convocatoria de subvenciones para empresas por la contratación indefinida de personas desempleadas con discapacidad (Del 1 de junio de 2025 al 31 de mayo de 2027)"
-             * "Programa de ayudas del Ministerio para la realización de proyectos de I+D+i en el año 2025"
-        
-        3. Para fechas: 
+
+        3. Para campos normalizados (organismo, tipo_ayuda, ambito, origen_fondos):
+           - SOLO puedes usar los valores especificados arriba
+           - Si el texto menciona algo similar, escoge el valor más cercano de la lista
+           - Si no encaja en ninguna categoría, usa "Otros" (o "null" para origen_fondos si no se menciona)
+
+        4. Para campos normalizados de array (tipo_proyecto, beneficiarios, sectores):
+           - Puedes seleccionar MÚLTIPLES valores de la lista
+           - SOLO usa los valores exactos especificados arriba
+           - Si se menciona "todas las empresas" o similar para beneficiarios, usa "Todas las empresas"
+           - Si el sector es general o no específico, usa "General/Multisectorial"
+
+        5. Para fechas:
            - Usa formato YYYY-MM-DD
-           - Si se menciona un plazo en días (ej: "20 días hábiles desde publicación"), utiliza la fecha de publicación proporcionada para calcular una fecha aproximada. Por ejemplo, 20 días hábiles son aproximadamente 28 días naturales.
-           - Si no se indica fecha de apertura, asume que es la misma que la fecha de publicación.
-        
-        4. Para "estado": 
+           - Si se menciona un plazo en días (ej: "20 días hábiles desde publicación"), utiliza la fecha de publicación proporcionada para calcular una fecha aproximada
+           - Si no se indica fecha de apertura, asume que es la misma que la fecha de publicación
+
+        6. Para "estado":
            - Debe ser "Abierta" si la fecha de cierre es posterior a la fecha actual
            - "Cerrada" si la fecha de cierre es anterior a la fecha actual
            - "Pendiente" si la fecha de apertura es posterior a la fecha actual
-           - Si no hay fechas claras, deduce el estado por el contexto
-        
-        5. Para listas (beneficiarios, sectores, requisitos, tags): 
-           - Incluye elementos individuales, no textos largos con separadores
+
+        7. Para "requisitos":
+           - Lista de requisitos principales que deben cumplir los beneficiarios
            - Cada elemento debe ser una frase corta y concisa
-        
-        6. Para campos numéricos: 
+           - Incluye requisitos clave como tipo de empresa, ubicación, requisitos técnicos, etc.
+
+        8. Para "gastos_subvencionables":
+           - Lista de tipos de gastos que pueden ser financiados/subvencionados
+           - Cada elemento debe ser una categoría de gasto específica
+           - Ejemplos: "Personal investigador", "Equipamiento", "Materiales", "Servicios externos", etc.
+           - Si no se especifica, usa null o array vacío []
+
+        9. Para campos numéricos:
            - Extrae SOLO números sin símbolos monetarios
            - Ejemplo: para "500.000€" escribe sólo "500000"
            - Redondea a enteros si es necesario
-        
-        7. Para la intensidad: 
-           - Captura porcentajes y descripciones específicas de financiación
-        
-        8. Para el resumen_breve: 
-           - Una frase concisa (máximo 200 caracteres)
-        
-        9. Para la descripcion_detallada: 
-           - 2-3 frases con detalles relevantes (máximo 500 caracteres)
-        
-        10. Si un campo no tiene información, usa null (no elimines el campo)
 
-        11. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
+        10. Para la intensidad:
+            - Captura porcentajes y descripciones específicas de financiación
+
+        11. Para el resumen_breve:
+            - Una frase concisa (máximo 200 caracteres)
+
+        12. Para la descripcion_detallada:
+            - 2-3 frases con detalles relevantes (máximo 500 caracteres)
+
+        13. Si un campo no tiene información, usa null (no elimines el campo)
+
+        14. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
 
         NOTAS IMPORTANTES:
         - Lee DETENIDAMENTE el documento. A menudo hay información importante oculta en párrafos o secciones que podrían parecer irrelevantes.
         - Sé PRECISO en la extracción de fechas, importes y porcentajes. Son cruciales para evaluar la adecuación de la convocatoria.
         - Sé EXHAUSTIVO en tu análisis para capturar todos los detalles relevantes del texto, especialmente requisitos, beneficiarios, tipo de proyectos y sectores.
-        - VERIFICA que la información sea coherente en todo el documento.
+        - VERIFICA que los valores normalizados sean EXACTAMENTE uno de los valores especificados en las listas arriba.
         - ASEGÚRATE de que el JSON generado sea completamente válido y siga la estructura exacta.
 
         La fecha actual es {datetime.datetime.now().strftime("%Y-%m-%d")}. Si hay información sobre la fecha de publicación, usarás esta como referencia para calcular fechas. Si no hay fecha de cierre específica o si es posterior a la fecha actual, el estado debe ser "Abierta". Si la fecha de cierre es anterior a la fecha actual, el estado debe ser "Cerrada".
@@ -541,41 +641,45 @@ class ConvocatoriaExtractor:
         # Campos obligatorios de primer nivel
         required_fields = [
             'id', 'nombre', 'organismo', 'tipo_ayuda', 'ambito', 'beneficiarios',
-            'sectores', 'tipo_proyecto', 'convocatoria', 'financiacion', 'requisitos',
-            'resumen_breve', 'descripcion_detallada', 'tags', 'enlaces'
+            'sectores', 'tipo_proyecto', 'origen_fondos', 'convocatoria', 'financiacion',
+            'requisitos', 'gastos_subvencionables', 'resumen_breve', 'descripcion_detallada', 'enlaces'
         ]
-        
+
         for field in required_fields:
             if field not in data:
-                data[field] = None if field not in ['beneficiarios', 'sectores', 'requisitos', 'tags'] else []
-        
+                # Los campos array deben inicializarse como array vacío
+                if field in ['beneficiarios', 'sectores', 'tipo_proyecto', 'requisitos', 'gastos_subvencionables']:
+                    data[field] = []
+                else:
+                    data[field] = None
+
         # Campos anidados
         if 'convocatoria' not in data or not isinstance(data['convocatoria'], dict):
             data['convocatoria'] = {}
-        
+
         conv_fields = ['estado', 'fecha_apertura', 'fecha_cierre']
         for field in conv_fields:
             if field not in data['convocatoria']:
                 data['convocatoria'][field] = None
-        
+
         if 'financiacion' not in data or not isinstance(data['financiacion'], dict):
             data['financiacion'] = {}
-        
+
         fin_fields = ['intensidad', 'importe_maximo', 'presupuesto_minimo', 'presupuesto_maximo']
         for field in fin_fields:
             if field not in data['financiacion']:
                 data['financiacion'][field] = None
-        
+
         if 'enlaces' not in data or not isinstance(data['enlaces'], dict):
             data['enlaces'] = {}
-        
+
         enl_fields = ['bases', 'convocatoria']
         for field in enl_fields:
             if field not in data['enlaces']:
                 data['enlaces'][field] = None
-        
+
         # Asegurar que los campos array son realmente arrays
-        array_fields = ['beneficiarios', 'sectores', 'requisitos', 'tags']
+        array_fields = ['beneficiarios', 'sectores', 'tipo_proyecto', 'requisitos', 'gastos_subvencionables']
         for field in array_fields:
             if field not in data or not isinstance(data[field], list):
                 data[field] = []
