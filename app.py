@@ -136,10 +136,12 @@ def get_programas():
         ambito = request.args.get('ambito')
         beneficiario = request.args.get('beneficiario')
         sector = request.args.get('sector')
+        tipo_proyecto = request.args.get('tipo_proyecto')
+        origen_fondos = request.args.get('origen_fondos')
         estado = request.args.get('estado')
         search_term = request.args.get('search')
         bdns = request.args.get('bdns')
-        
+
         # Cargar programas con filtros
         programas = financing_dashboard.load_financing_programs(
             organismo=organismo,
@@ -147,6 +149,8 @@ def get_programas():
             ambito=ambito,
             beneficiario=beneficiario,
             sector=sector,
+            tipo_proyecto=tipo_proyecto,
+            origen_fondos=origen_fondos,
             estado=estado,
             search_term=search_term,
             bdns=bdns

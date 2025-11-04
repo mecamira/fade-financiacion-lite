@@ -92,9 +92,11 @@
                     <p>{{ programa.financiacion.intensidad if programa.financiacion.intensidad and programa.financiacion.intensidad != 'null' else 'No especificada' }}</p>
                 </div>
                 <div class="col-md-6">
-                    <strong>Importe Máximo:</strong>
+                    <strong>Presupuesto Total de la Convocatoria:</strong>
                     <p>
-                        {% if programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
+                        {% if programa.financiacion.presupuesto_total and programa.financiacion.presupuesto_total != 'null' %}
+                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_total|float) }} €
+                        {% elif programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
                             {{ "{:,.0f}".format(programa.financiacion.importe_maximo|float) }} €
                         {% else %}
                             No especificado
@@ -104,7 +106,7 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <strong>Presupuesto Mínimo:</strong>
+                    <strong>Presupuesto Mínimo del Proyecto:</strong>
                     <p>
                         {% if programa.financiacion.presupuesto_minimo and programa.financiacion.presupuesto_minimo != 'null' %}
                             {{ "{:,.0f}".format(programa.financiacion.presupuesto_minimo|float) }} €
@@ -114,7 +116,7 @@
                     </p>
                 </div>
                 <div class="col-md-6">
-                    <strong>Presupuesto Máximo:</strong>
+                    <strong>Presupuesto Máximo del Proyecto:</strong>
                     <p>
                         {% if programa.financiacion.presupuesto_maximo and programa.financiacion.presupuesto_maximo != 'null' %}
                             {{ "{:,.0f}".format(programa.financiacion.presupuesto_maximo|float) }} €
@@ -167,7 +169,27 @@
             <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Tipo de Proyecto</h5>
         </div>
         <div class="card-body">
-            <p>{{ programa.tipo_proyecto }}</p>
+            <div class="d-flex flex-wrap gap-2">
+                {% if programa.tipo_proyecto is string %}
+                    <span class="badge bg-info text-white">{{ programa.tipo_proyecto }}</span>
+                {% else %}
+                    {% for tipo in programa.tipo_proyecto %}
+                        <span class="badge bg-info text-white">{{ tipo }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Origen de Fondos -->
+    {% if programa.origen_fondos %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Origen de Fondos</h5>
+        </div>
+        <div class="card-body">
+            <span class="badge bg-success" style="font-size: 1rem;">{{ programa.origen_fondos }}</span>
         </div>
     </div>
     {% endif %}
@@ -188,18 +210,18 @@
     </div>
     {% endif %}
 
-    <!-- Tags -->
-    {% if programa.tags %}
+    <!-- Gastos Subvencionables -->
+    {% if programa.gastos_subvencionables %}
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-tags me-2"></i>Palabras Clave</h5>
+            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Gastos Subvencionables</h5>
         </div>
         <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-                {% for tag in programa.tags %}
-                    <span class="badge bg-secondary">{{ tag }}</span>
+            <ul>
+                {% for gasto in programa.gastos_subvencionables %}
+                    <li>{{ gasto }}</li>
                 {% endfor %}
-            </div>
+            </ul>
         </div>
     </div>
     {% endif %}

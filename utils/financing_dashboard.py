@@ -255,27 +255,52 @@ def load_all_financing_programs():
         print(traceback.format_exc())
         return []
 
-def load_financing_programs(organismo=None, tipo_ayuda=None, ambito=None, beneficiario=None, 
-                           sector=None, estado=None, presupuesto_min=None, presupuesto_max=None, 
-                           search_term=None, bdns=None):
+def load_financing_programs(organismo=None, tipo_ayuda=None, ambito=None, beneficiario=None,
+                           sector=None, tipo_proyecto=None, origen_fondos=None, estado=None,
+                           presupuesto_min=None, presupuesto_max=None, search_term=None, bdns=None):
     """Carga y filtra programas de financiación según los criterios especificados"""
     try:
         programas = load_all_financing_programs()
-        
+
         if organismo:
-            programas = [p for p in programas if p.get('organismo_grupo') == organismo]
-        
+            # Usar campo normalizado directamente, con fallback a campo antiguo
+            programas = [p for p in programas if
+                        p.get('organismo') == organismo or p.get('organismo_grupo') == organismo]
+
         if tipo_ayuda:
-            programas = [p for p in programas if p.get('tipo_ayuda_grupo') == tipo_ayuda]
-        
+            # Usar campo normalizado directamente, con fallback a campo antiguo
+            programas = [p for p in programas if
+                        p.get('tipo_ayuda') == tipo_ayuda or p.get('tipo_ayuda_grupo') == tipo_ayuda]
+
         if ambito:
             programas = [p for p in programas if p.get('ambito') and ambito.lower() in p['ambito'].lower()]
-        
+
         if beneficiario:
-            programas = [p for p in programas if beneficiario in p.get('beneficiarios_grupos', [])]
-        
+            # Usar campo normalizado directamente, con fallback a campo antiguo
+            programas = [p for p in programas if
+                        (isinstance(p.get('beneficiarios'), list) and beneficiario in p['beneficiarios']) or
+                        beneficiario in p.get('beneficiarios_grupos', [])]
+
         if sector:
-            programas = [p for p in programas if sector in p.get('sectores_grupos', [])]
+            # Usar campo normalizado directamente, con fallback a campo antiguo
+            programas = [p for p in programas if
+                        (isinstance(p.get('sectores'), list) and sector in p['sectores']) or
+                        sector in p.get('sectores_grupos', [])]
+
+        if tipo_proyecto:
+            # Nuevo campo normalizado
+            def tiene_tipo_proyecto(p, tipo):
+                tp = p.get('tipo_proyecto')
+                if isinstance(tp, list):
+                    return tipo in tp
+                elif isinstance(tp, str):
+                    return tipo.lower() in tp.lower()
+                return False
+            programas = [p for p in programas if tiene_tipo_proyecto(p, tipo_proyecto)]
+
+        if origen_fondos:
+            # Nuevo campo normalizado
+            programas = [p for p in programas if p.get('origen_fondos') == origen_fondos]
         
         if estado:
             programas = [p for p in programas if 'convocatoria' in p and p['convocatoria'].get('estado') and estado.lower() in p['convocatoria']['estado'].lower()]
@@ -384,47 +409,79 @@ def get_financing_filter_options():
     """Obtiene las opciones SIMPLIFICADAS disponibles para los filtros del dashboard"""
     try:
         programas = load_all_financing_programs()
-        
+
         organismos = set()
         tipos_ayuda = set()
         ambitos = set()
         beneficiarios = set()
         sectores = set()
+        tipos_proyecto = set()
+        origenes_fondos = set()
         estados = set()
-        
+
         for p in programas:
-            if 'organismo_grupo' in p:
+            # Usar campos normalizados directamente (con fallback a campos antiguos)
+            if 'organismo' in p and p['organismo']:
+                organismos.add(p['organismo'])
+            elif 'organismo_grupo' in p:
                 organismos.add(p['organismo_grupo'])
-            
-            if 'tipo_ayuda_grupo' in p:
+
+            if 'tipo_ayuda' in p and p['tipo_ayuda']:
+                tipos_ayuda.add(p['tipo_ayuda'])
+            elif 'tipo_ayuda_grupo' in p:
                 tipos_ayuda.add(p['tipo_ayuda_grupo'])
-            
-            if 'ambito' in p:
+
+            if 'ambito' in p and p['ambito']:
                 ambitos.add(p['ambito'])
-            
-            if 'beneficiarios_grupos' in p:
+
+            # Beneficiarios (ahora ya vienen normalizados desde Gemini)
+            if 'beneficiarios' in p and isinstance(p['beneficiarios'], list):
+                for b in p['beneficiarios']:
+                    if b:
+                        beneficiarios.add(b)
+            elif 'beneficiarios_grupos' in p:
                 for b in p['beneficiarios_grupos']:
                     beneficiarios.add(b)
-            
-            if 'sectores_grupos' in p:
+
+            # Sectores (ahora ya vienen normalizados desde Gemini)
+            if 'sectores' in p and isinstance(p['sectores'], list):
+                for s in p['sectores']:
+                    if s:
+                        sectores.add(s)
+            elif 'sectores_grupos' in p:
                 for s in p['sectores_grupos']:
                     sectores.add(s)
-            
+
+            # Tipo de proyecto (nuevo campo normalizado)
+            if 'tipo_proyecto' in p:
+                if isinstance(p['tipo_proyecto'], list):
+                    for t in p['tipo_proyecto']:
+                        if t:
+                            tipos_proyecto.add(t)
+                elif p['tipo_proyecto']:  # Si es string (convocatorias antiguas)
+                    tipos_proyecto.add(p['tipo_proyecto'])
+
+            # Origen de fondos (nuevo campo)
+            if 'origen_fondos' in p and p['origen_fondos']:
+                origenes_fondos.add(p['origen_fondos'])
+
             if 'convocatoria' in p and 'estado' in p['convocatoria']:
                 estados.add(p['convocatoria']['estado'])
-        
+
         def ordenar_con_otros_al_final(lista):
             lista_ordenada = sorted([x for x in lista if x != 'Otros'])
             if 'Otros' in lista:
                 lista_ordenada.append('Otros')
             return lista_ordenada
-        
+
         return {
             'organismos': ordenar_con_otros_al_final(list(organismos)),
             'tipos_ayuda': ordenar_con_otros_al_final(list(tipos_ayuda)),
             'ambitos': sorted(list(ambitos)),
             'beneficiarios': ordenar_con_otros_al_final(list(beneficiarios)),
             'sectores': ordenar_con_otros_al_final(list(sectores)),
+            'tipos_proyecto': ordenar_con_otros_al_final(list(tipos_proyecto)),
+            'origenes_fondos': ordenar_con_otros_al_final(list(origenes_fondos)),
             'estados': sorted(list(estados))
         }
     except Exception as e:
@@ -437,6 +494,8 @@ def get_financing_filter_options():
             'ambitos': [],
             'beneficiarios': [],
             'sectores': [],
+            'tipos_proyecto': [],
+            'origenes_fondos': [],
             'estados': []
         }
 

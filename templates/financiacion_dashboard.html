@@ -133,7 +133,29 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
+
+                        <!-- Tipo de Proyecto -->
+                        <div class="mb-3">
+                            <label for="tipo_proyecto" class="form-label">Tipo de Proyecto:</label>
+                            <select class="form-select" id="tipo_proyecto">
+                                <option value="">Todos</option>
+                                {% for tipo in filter_options.tipos_proyecto %}
+                                <option value="{{ tipo }}">{{ tipo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Origen de Fondos -->
+                        <div class="mb-3">
+                            <label for="origen_fondos" class="form-label">Origen de Fondos:</label>
+                            <select class="form-select" id="origen_fondos">
+                                <option value="">Todos</option>
+                                {% for origen in filter_options.origenes_fondos %}
+                                <option value="{{ origen }}">{{ origen }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
                         <!-- Presupuesto -->
                         <div class="mb-3">
                             <label class="form-label">Presupuesto proyecto:</label>
@@ -551,10 +573,12 @@
             const ambito = document.getElementById('ambito').value;
             const beneficiario = document.getElementById('beneficiario').value;
             const sector = document.getElementById('sector').value;
+            const tipo_proyecto = document.getElementById('tipo_proyecto').value;
+            const origen_fondos = document.getElementById('origen_fondos').value;
             const presupuesto_min = document.getElementById('presupuesto_min').value;
             const presupuesto_max = document.getElementById('presupuesto_max').value;
             const bdns = document.getElementById('bdns').value;
-            
+
             // Construir URL de la API con parámetros
             let url = '/api/programas-financiacion?';
             if (search) url += `search=${encodeURIComponent(search)}&`;
@@ -564,6 +588,8 @@
             if (ambito) url += `ambito=${encodeURIComponent(ambito)}&`;
             if (beneficiario) url += `beneficiario=${encodeURIComponent(beneficiario)}&`;
             if (sector) url += `sector=${encodeURIComponent(sector)}&`;
+            if (tipo_proyecto) url += `tipo_proyecto=${encodeURIComponent(tipo_proyecto)}&`;
+            if (origen_fondos) url += `origen_fondos=${encodeURIComponent(origen_fondos)}&`;
             if (presupuesto_min) url += `presupuesto_min=${encodeURIComponent(presupuesto_min)}&`;
             if (presupuesto_max) url += `presupuesto_max=${encodeURIComponent(presupuesto_max)}&`;
             // Añadir parámetro BDNS
