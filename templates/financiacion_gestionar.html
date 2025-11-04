@@ -565,9 +565,9 @@ function generatePreview(data) {
                             <h6>Financiación</h6>
                             <ul class="list-unstyled">
                             <li><strong>Intensidad:</strong> ${data.financiacion?.intensidad || 'No especificada'}</li>
-                            <li><strong>Importe máximo:</strong> ${data.financiacion?.importe_maximo ? formatMoney(data.financiacion.importe_maximo) : 'No especificado'}</li>
-                            <li><strong>Presupuesto mínimo:</strong> ${data.financiacion?.presupuesto_minimo ? formatMoney(data.financiacion.presupuesto_minimo) : 'No especificado'}</li>
-                            <li><strong>Presupuesto máximo:</strong> ${data.financiacion?.presupuesto_maximo ? formatMoney(data.financiacion.presupuesto_maximo) : 'No especificado'}</li>
+                            <li><strong>Presupuesto total:</strong> ${data.financiacion?.presupuesto_total ? formatMoney(data.financiacion.presupuesto_total) : (data.financiacion?.importe_maximo ? formatMoney(data.financiacion.importe_maximo) : 'No especificado')}</li>
+                            <li><strong>Presupuesto mínimo del proyecto:</strong> ${data.financiacion?.presupuesto_minimo ? formatMoney(data.financiacion.presupuesto_minimo) : 'No especificado'}</li>
+                            <li><strong>Presupuesto máximo del proyecto:</strong> ${data.financiacion?.presupuesto_maximo ? formatMoney(data.financiacion.presupuesto_maximo) : 'No especificado'}</li>
                             </ul>
                             </div>
                         </div>

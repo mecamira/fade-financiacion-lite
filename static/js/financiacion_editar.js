@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
         document.getElementById('edit-origen-fondos').value = p.origen_fondos || '';
         document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
-        document.getElementById('edit-importe-maximo').value = p.financiacion?.importe_maximo || '';
+        document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
         document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
         document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
         document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ['edit-id', 'edit-nombre', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion',
          'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-gastos-subvencionables',
-         'edit-origen-fondos', 'edit-intensidad', 'edit-importe-maximo', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
+         'edit-origen-fondos', 'edit-intensidad', 'edit-presupuesto-total', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
          'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases'].forEach(id => {
             document.getElementById(id).value = '';
         });
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             financiacion: {
                 intensidad: document.getElementById('edit-intensidad').value || null,
-                importe_maximo: document.getElementById('edit-importe-maximo').value || null,
+                presupuesto_total: document.getElementById('edit-presupuesto-total').value || null,
                 presupuesto_minimo: document.getElementById('edit-presupuesto-minimo').value || null,
                 presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null
             },
