@@ -176,7 +176,12 @@ class ConvocatoriaExtractor:
 
         INSTRUCCIONES ESPECÍFICAS:
 
-        1. Para "id": Genera un identificador a partir del nombre, en minúsculas, sin acentos, con guiones en lugar de espacios.
+        1. Para "id": Genera un identificador único siguiendo este formato:
+           - Toma el nombre de la convocatoria y normalízalo (minúsculas, sin acentos, guiones en lugar de espacios)
+           - Añade al final la fecha en formato AAAAMMDD (usa fecha_apertura si está disponible, sino usa la fecha de publicación proporcionada)
+           - Formato final: "nombre-normalizado-AAAAMMDD"
+           - Ejemplo: "ayudas-digitalizacion-pyme-20250315"
+           - IMPORTANTE: El ID debe terminar SIEMPRE con un guion seguido de 8 dígitos de fecha
 
         2. Para "nombre":
            - Debe ser un TÍTULO CONCISO de máximo 100 caracteres
