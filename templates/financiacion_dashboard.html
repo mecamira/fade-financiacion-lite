@@ -189,7 +189,7 @@
                                 <li><a class="dropdown-item sort-option" data-sort="nombre">Nombre</a></li>
                                 <li><a class="dropdown-item sort-option" data-sort="organismo">Organismo</a></li>
                                 <li><a class="dropdown-item sort-option" data-sort="fecha_cierre">Fecha de cierre</a></li>
-                                <li><a class="dropdown-item sort-option" data-sort="importe_maximo">Importe máximo</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="importe_maximo">Presupuesto total</a></li>
                             </ul>
                         </div>
                     </div>
@@ -625,11 +625,11 @@
                     valueA = a.convocatoria && a.convocatoria.fecha_cierre ? a.convocatoria.fecha_cierre : '9999-12-31';
                     valueB = b.convocatoria && b.convocatoria.fecha_cierre ? b.convocatoria.fecha_cierre : '9999-12-31';
                 } else if (sortField === 'importe_maximo') {
-                    // Para importes
-                    valueA = a.financiacion && a.financiacion.importe_maximo ? 
-                                (isNaN(a.financiacion.importe_maximo) ? 0 : parseFloat(a.financiacion.importe_maximo)) : 0;
-                    valueB = b.financiacion && b.financiacion.importe_maximo ? 
-                                (isNaN(b.financiacion.importe_maximo) ? 0 : parseFloat(b.financiacion.importe_maximo)) : 0;
+                    // Para presupuesto total (con fallback a importe_maximo)
+                    const presupuestoA = a.financiacion?.presupuesto_total || a.financiacion?.importe_maximo;
+                    const presupuestoB = b.financiacion?.presupuesto_total || b.financiacion?.importe_maximo;
+                    valueA = presupuestoA ? (isNaN(presupuestoA) ? 0 : parseFloat(presupuestoA)) : 0;
+                    valueB = presupuestoB ? (isNaN(presupuestoB) ? 0 : parseFloat(presupuestoB)) : 0;
                 } else {
                     valueA = a[sortField] || '';
                     valueB = b[sortField] || '';
@@ -701,10 +701,11 @@
                 card.querySelector('.programa-tipo-ayuda').textContent = programa.tipo_ayuda || 'No especificado';
                 card.querySelector('.programa-ambito').textContent = programa.ambito || 'No especificado';
                 
-                // Importe máximo
+                // Presupuesto total (con fallback a importe_maximo para compatibilidad)
                 const importeEl = card.querySelector('.programa-importe');
-                if (programa.financiacion && programa.financiacion.importe_maximo && programa.financiacion.importe_maximo !== 'nan') {
-                    importeEl.textContent = programa.financiacion.importe_maximo;
+                const presupuesto = programa.financiacion?.presupuesto_total || programa.financiacion?.importe_maximo;
+                if (presupuesto && presupuesto !== 'nan') {
+                    importeEl.textContent = presupuesto;
                 } else {
                     importeEl.textContent = 'No especificado';
                 }
@@ -1121,7 +1122,7 @@
                     p.convocatoria?.estado || '',
                     p.convocatoria?.fecha_cierre || '',
                     (p.beneficiarios || []).join(', '),
-                    p.financiacion?.importe_maximo || '',
+                    p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '',
                     p.financiacion?.intensidad || ''
                 ];
                 data.push(row);
@@ -1299,7 +1300,7 @@
                 { label: 'Tipo de Ayuda', key: 'tipo_ayuda' },
                 { label: 'Estado', key: 'convocatoria.estado', nested: true },
                 { label: 'Fecha Cierre', key: 'convocatoria.fecha_cierre', nested: true, isDate: true },
-                { label: 'Importe Máximo', key: 'financiacion.importe_maximo', nested: true },
+                { label: 'Presupuesto Total', key: 'financiacion.presupuesto_total', nested: true, fallback: 'financiacion.importe_maximo' },
                 { label: 'Intensidad', key: 'financiacion.intensidad', nested: true },
                 { label: 'Beneficiarios', key: 'beneficiarios', isArray: true },
                 { label: 'Sectores', key: 'sectores', isArray: true },
@@ -1325,6 +1326,11 @@
                     if (field.nested) {
                         const parts = field.key.split('.');
                         value = programa[parts[0]] ? programa[parts[0]][parts[1]] : null;
+                        // Si hay fallback y el valor es null, intentar con el fallback
+                        if (!value && field.fallback) {
+                            const fallbackParts = field.fallback.split('.');
+                            value = programa[fallbackParts[0]] ? programa[fallbackParts[0]][fallbackParts[1]] : null;
+                        }
                     } else {
                         value = programa[field.key];
                     }

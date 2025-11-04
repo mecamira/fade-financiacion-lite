@@ -73,10 +73,10 @@ class ConvocatoriaExtractor:
             "fecha_cierre": "YYYY-MM-DD (null si no se especifica)"
           }},
           "financiacion": {{
-            "intensidad": "% o descripción de la intensidad",
-            "importe_maximo": "Cantidad máxima (numérico si es posible, sin símbolos)",
-            "presupuesto_minimo": "Presupuesto mínimo (numérico si es posible, sin símbolos)",
-            "presupuesto_maximo": "Presupuesto máximo (numérico si es posible, sin símbolos)"
+            "intensidad": "% o descripción de la intensidad de financiación",
+            "presupuesto_total": "Presupuesto total de la convocatoria (cuánto dinero hay disponible en total)",
+            "presupuesto_minimo": "Presupuesto mínimo del proyecto para poder solicitarla",
+            "presupuesto_maximo": "Presupuesto máximo del proyecto permitido"
           }},
           "requisitos": ["Lista", "de", "requisitos", "principales"],
           "gastos_subvencionables": ["Lista", "de", "gastos", "subvencionables"],
@@ -226,13 +226,16 @@ class ConvocatoriaExtractor:
            - Ejemplos: "Personal investigador", "Equipamiento", "Materiales", "Servicios externos", etc.
            - Si no se especifica, usa null o array vacío []
 
-        9. Para campos numéricos:
+        9. Para campos numéricos de financiación:
+           - **presupuesto_total**: El presupuesto TOTAL de la convocatoria (cuánto dinero hay disponible en total para repartir entre todos los solicitantes)
+           - **presupuesto_minimo**: El presupuesto MÍNIMO que debe tener el proyecto del solicitante para poder aplicar
+           - **presupuesto_maximo**: El presupuesto MÁXIMO que puede tener el proyecto del solicitante
            - Extrae SOLO números sin símbolos monetarios
            - Ejemplo: para "500.000€" escribe sólo "500000"
            - Redondea a enteros si es necesario
 
         10. Para la intensidad:
-            - Captura porcentajes y descripciones específicas de financiación
+            - Captura porcentajes y descripciones específicas de financiación (cuánto % del proyecto se financia)
 
         11. Para el resumen_breve:
             - Una frase concisa (máximo 200 caracteres)
@@ -670,7 +673,7 @@ class ConvocatoriaExtractor:
         if 'financiacion' not in data or not isinstance(data['financiacion'], dict):
             data['financiacion'] = {}
 
-        fin_fields = ['intensidad', 'importe_maximo', 'presupuesto_minimo', 'presupuesto_maximo']
+        fin_fields = ['intensidad', 'presupuesto_total', 'presupuesto_minimo', 'presupuesto_maximo']
         for field in fin_fields:
             if field not in data['financiacion']:
                 data['financiacion'][field] = None
