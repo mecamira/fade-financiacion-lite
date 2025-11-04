@@ -111,9 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
         document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
         document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
-        document.getElementById('edit-tipo-proyecto').value = p.tipo_proyecto || '';
+        document.getElementById('edit-tipo-proyecto').value = (p.tipo_proyecto || []).join('\n');
         document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
-        document.getElementById('edit-tags').value = (p.tags || []).join('\n');
+        document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
+        document.getElementById('edit-origen-fondos').value = p.origen_fondos || '';
         document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
         document.getElementById('edit-importe-maximo').value = p.financiacion?.importe_maximo || '';
         document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
@@ -127,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function limpiarFormulario() {
         ['edit-id', 'edit-nombre', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion',
-         'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-tags',
-         'edit-intensidad', 'edit-importe-maximo', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
+         'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-gastos-subvencionables',
+         'edit-origen-fondos', 'edit-intensidad', 'edit-importe-maximo', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
          'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases'].forEach(id => {
             document.getElementById(id).value = '';
         });
@@ -179,9 +180,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .split('\n').map(s => s.trim()).filter(s => s);
         const sectores = document.getElementById('edit-sectores').value
             .split('\n').map(s => s.trim()).filter(s => s);
+        const tipo_proyecto = document.getElementById('edit-tipo-proyecto').value
+            .split('\n').map(s => s.trim()).filter(s => s);
         const requisitos = document.getElementById('edit-requisitos').value
             .split('\n').map(s => s.trim()).filter(s => s);
-        const tags = document.getElementById('edit-tags').value
+        const gastos_subvencionables = document.getElementById('edit-gastos-subvencionables').value
             .split('\n').map(s => s.trim()).filter(s => s);
 
         // Obtener URLs
@@ -195,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             organismo: document.getElementById('edit-organismo').value,
             tipo_ayuda: document.getElementById('edit-tipo').value,
             ambito: document.getElementById('edit-ambito').value || null,
+            origen_fondos: document.getElementById('edit-origen-fondos').value || null,
             convocatoria: {
                 estado: document.getElementById('edit-estado').value,
                 fecha_apertura: document.getElementById('edit-fecha-apertura').value || null,
@@ -206,13 +210,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 presupuesto_minimo: document.getElementById('edit-presupuesto-minimo').value || null,
                 presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null
             },
-            tipo_proyecto: document.getElementById('edit-tipo-proyecto').value || null,
+            tipo_proyecto: tipo_proyecto,
             resumen_breve: document.getElementById('edit-resumen').value || null,
             descripcion_detallada: document.getElementById('edit-descripcion').value || null,
             beneficiarios: beneficiarios,
             sectores: sectores,
             requisitos: requisitos,
-            tags: tags,
+            gastos_subvencionables: gastos_subvencionables,
             enlaces: {
                 url_bdns: urlBdns,
                 convocatoria: urlConvocatoria,
