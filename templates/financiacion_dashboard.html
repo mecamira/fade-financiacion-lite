@@ -567,108 +567,111 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar Select2 en los filtros (excepto búsqueda, BDNS y presupuestos)
-        $('#estado').select2({
-            placeholder: 'Selecciona un estado',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+        // Usar jQuery explícitamente para evitar conflictos
+        jQuery(document).ready(function($) {
+            $('#estado').select2({
+                placeholder: 'Selecciona un estado',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#organismo').select2({
-            placeholder: 'Selecciona un organismo',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#organismo').select2({
+                placeholder: 'Selecciona un organismo',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#tipo_ayuda').select2({
-            placeholder: 'Selecciona tipo de ayuda',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#tipo_ayuda').select2({
+                placeholder: 'Selecciona tipo de ayuda',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#ambito').select2({
-            placeholder: 'Selecciona un ámbito',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#ambito').select2({
+                placeholder: 'Selecciona un ámbito',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#beneficiario').select2({
-            placeholder: 'Selecciona un beneficiario',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#beneficiario').select2({
+                placeholder: 'Selecciona un beneficiario',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#sector').select2({
-            placeholder: 'Selecciona un sector',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#sector').select2({
+                placeholder: 'Selecciona un sector',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#tipo_proyecto').select2({
-            placeholder: 'Selecciona tipo de proyecto',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#tipo_proyecto').select2({
+                placeholder: 'Selecciona tipo de proyecto',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
-        });
+            });
 
-        $('#origen_fondos').select2({
-            placeholder: 'Selecciona origen de fondos',
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
+            $('#origen_fondos').select2({
+                placeholder: 'Selecciona origen de fondos',
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    }
                 }
-            }
+            });
         });
 
         // Variables para ordenación
@@ -701,14 +704,14 @@
         document.getElementById('reset-filters').addEventListener('click', function() {
             document.getElementById('filter-form').reset();
             // Resetear también los Select2
-            $('#estado').val(null).trigger('change');
-            $('#organismo').val(null).trigger('change');
-            $('#tipo_ayuda').val(null).trigger('change');
-            $('#ambito').val(null).trigger('change');
-            $('#beneficiario').val(null).trigger('change');
-            $('#sector').val(null).trigger('change');
-            $('#tipo_proyecto').val(null).trigger('change');
-            $('#origen_fondos').val(null).trigger('change');
+            jQuery('#estado').val(null).trigger('change');
+            jQuery('#organismo').val(null).trigger('change');
+            jQuery('#tipo_ayuda').val(null).trigger('change');
+            jQuery('#ambito').val(null).trigger('change');
+            jQuery('#beneficiario').val(null).trigger('change');
+            jQuery('#sector').val(null).trigger('change');
+            jQuery('#tipo_proyecto').val(null).trigger('change');
+            jQuery('#origen_fondos').val(null).trigger('change');
             loadPrograms();
         });
         
@@ -716,14 +719,14 @@
         document.getElementById('clear-all-filters').addEventListener('click', function() {
             document.getElementById('filter-form').reset();
             // Resetear también los Select2
-            $('#estado').val(null).trigger('change');
-            $('#organismo').val(null).trigger('change');
-            $('#tipo_ayuda').val(null).trigger('change');
-            $('#ambito').val(null).trigger('change');
-            $('#beneficiario').val(null).trigger('change');
-            $('#sector').val(null).trigger('change');
-            $('#tipo_proyecto').val(null).trigger('change');
-            $('#origen_fondos').val(null).trigger('change');
+            jQuery('#estado').val(null).trigger('change');
+            jQuery('#organismo').val(null).trigger('change');
+            jQuery('#tipo_ayuda').val(null).trigger('change');
+            jQuery('#ambito').val(null).trigger('change');
+            jQuery('#beneficiario').val(null).trigger('change');
+            jQuery('#sector').val(null).trigger('change');
+            jQuery('#tipo_proyecto').val(null).trigger('change');
+            jQuery('#origen_fondos').val(null).trigger('change');
             loadPrograms();
         });
         
