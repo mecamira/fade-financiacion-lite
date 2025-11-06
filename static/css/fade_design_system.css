@@ -1,0 +1,615 @@
+/**
+ * FADE Design System
+ * Sistema de diseño corporativo para aplicaciones FADE
+ *
+ * Basado en el manual de identidad corporativa de FADE
+ * Color primario: Azul FADE #0078BF (RGB: 0, 120, 191)
+ * Tipografía: Inter (Google Fonts)
+ */
+
+/* ==========================================
+   1. VARIABLES CSS (TOKENS DE DISEÑO)
+   ========================================== */
+
+:root {
+    /* Colores Primarios (Azul FADE) */
+    --color-primary-50: #E6F2FF;
+    --color-primary-100: #B3D7FF;
+    --color-primary-500: #0078BF;  /* Color corporativo FADE */
+    --color-primary-700: #005A91;
+    --color-primary-900: #003C60;
+
+    /* Colores Neutrales (Grises) */
+    --color-neutral-0: #FFFFFF;
+    --color-neutral-50: #F7FAFC;
+    --color-neutral-200: #E2E8F0;
+    --color-neutral-700: #4A5568;
+    --color-neutral-900: #1A202C;
+
+    /* Colores Semánticos */
+    --color-success-500: #38A169;
+    --color-warning-500: #D69E2E;
+    --color-error-500: #E53E3E;
+
+    /* Colores para Visualización de Datos */
+    --color-data-1: #0078BF;  /* Azul FADE */
+    --color-data-2: #00A0A0;  /* Teal */
+    --color-data-3: #5552A3;  /* Púrpura */
+    --color-data-4: #E07C00;  /* Naranja */
+
+    /* Tipografía - Familia de fuentes */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Tipografía - Tamaños */
+    --font-size-display: 32px;      /* H1 */
+    --font-size-title: 24px;        /* H2 */
+    --font-size-subtitle: 18px;     /* H3 */
+    --font-size-body: 16px;         /* Default */
+    --font-size-table-header: 14px;
+    --font-size-table-cell: 14px;
+    --font-size-label: 14px;
+    --font-size-caption: 12px;
+    --font-size-button: 14px;
+
+    /* Tipografía - Pesos */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Tipografía - Altura de línea */
+    --line-height-display: 40px;
+    --line-height-title: 32px;
+    --line-height-subtitle: 24px;
+    --line-height-body: 24px;
+    --line-height-table: 20px;
+    --line-height-caption: 16px;
+    --line-height-button: 16px;
+
+    /* Tipografía - Espaciado de letras */
+    --letter-spacing-tight: -0.5px;
+    --letter-spacing-normal: 0px;
+    --letter-spacing-wide: 0.2px;
+    --letter-spacing-wider: 0.1px;
+
+    /* Sistema de Espaciado (base 8px) */
+    --spacing-1: 8px;
+    --spacing-2: 16px;
+    --spacing-3: 24px;
+    --spacing-4: 32px;
+    --spacing-5: 40px;
+    --spacing-6: 48px;
+
+    /* Bordes y Radios */
+    --border-radius-sm: 6px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+    /* Alturas de componentes */
+    --header-height: 64px;
+    --sidebar-width: 240px;
+}
+
+/* ==========================================
+   2. ESTILOS GLOBALES BASE
+   ========================================== */
+
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-body);
+    color: var(--color-neutral-900);
+    background-color: var(--color-neutral-50);
+}
+
+/* ==========================================
+   3. ESCALA TIPOGRÁFICA
+   ========================================== */
+
+h1, .h1, .display {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-neutral-900);
+}
+
+h2, .h2, .title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--color-neutral-900);
+}
+
+h3, .h3, .subtitle {
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-subtitle);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--color-neutral-900);
+}
+
+.body-strong {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-body);
+}
+
+.caption {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-caption);
+    letter-spacing: var(--letter-spacing-wider);
+    color: var(--color-neutral-700);
+}
+
+/* ==========================================
+   4. COMPONENTES - BOTONES
+   ========================================== */
+
+/* Botón Primario */
+.btn-primary,
+.btn.btn-primary {
+    background-color: var(--color-primary-500);
+    border: 1px solid var(--color-primary-500);
+    color: var(--color-neutral-0);
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-button);
+    letter-spacing: var(--letter-spacing-wide);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn.btn-primary:hover {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    color: var(--color-neutral-0);
+}
+
+.btn-primary:disabled,
+.btn.btn-primary:disabled {
+    background-color: var(--color-neutral-200);
+    border-color: var(--color-neutral-200);
+    color: var(--color-neutral-700);
+}
+
+/* Botón Secundario */
+.btn-secondary,
+.btn.btn-secondary,
+.btn-outline-primary,
+.btn.btn-outline-primary {
+    background-color: var(--color-neutral-0);
+    border: 1px solid var(--color-primary-500);
+    color: var(--color-primary-500);
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-button);
+    letter-spacing: var(--letter-spacing-wide);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover,
+.btn.btn-secondary:hover,
+.btn-outline-primary:hover,
+.btn.btn-outline-primary:hover {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-700);
+    color: var(--color-primary-700);
+}
+
+.btn-secondary:disabled,
+.btn.btn-secondary:disabled,
+.btn-outline-primary:disabled,
+.btn.btn-outline-primary:disabled {
+    background-color: var(--color-neutral-0);
+    border-color: var(--color-neutral-200);
+    color: var(--color-neutral-200);
+}
+
+/* Botón Terciario (Ghost) */
+.btn-tertiary,
+.btn-link {
+    background-color: transparent;
+    border: none;
+    color: var(--color-primary-500);
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-button);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-tertiary:hover,
+.btn-link:hover {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-700);
+    text-decoration: none;
+}
+
+/* Botones de Éxito, Advertencia, Error */
+.btn-success,
+.btn.btn-success {
+    background-color: var(--color-success-500);
+    border-color: var(--color-success-500);
+}
+
+.btn-warning,
+.btn.btn-warning {
+    background-color: var(--color-warning-500);
+    border-color: var(--color-warning-500);
+}
+
+.btn-danger,
+.btn.btn-danger {
+    background-color: var(--color-error-500);
+    border-color: var(--color-error-500);
+}
+
+/* ==========================================
+   5. COMPONENTES - TARJETAS
+   ========================================== */
+
+.card {
+    background-color: var(--color-neutral-0);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-2);
+}
+
+.card-header {
+    background-color: var(--color-neutral-0);
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: var(--spacing-2);
+    font-weight: var(--font-weight-semibold);
+}
+
+.card-body {
+    padding: var(--spacing-2);
+}
+
+.card-footer {
+    background-color: var(--color-neutral-0);
+    border-top: 1px solid var(--color-neutral-200);
+    padding: var(--spacing-2);
+}
+
+/* Tarjetas KPI */
+.kpi-card {
+    background-color: var(--color-neutral-0);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-2);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.kpi-card-title {
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-700);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--spacing-1);
+}
+
+.kpi-card-value {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-500);
+    line-height: var(--line-height-display);
+    margin-bottom: var(--spacing-1);
+}
+
+.kpi-card-context {
+    font-size: var(--font-size-caption);
+    color: var(--color-neutral-700);
+    line-height: var(--line-height-caption);
+}
+
+/* ==========================================
+   6. COMPONENTES - TABLAS DE DATOS
+   ========================================== */
+
+.table {
+    font-size: var(--font-size-table-cell);
+    color: var(--color-neutral-900);
+}
+
+.table thead th {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-900);
+    font-size: var(--font-size-table-header);
+    font-weight: var(--font-weight-semibold);
+    padding: 12px var(--spacing-2);
+    border-bottom: 2px solid var(--color-primary-500);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.table tbody td {
+    padding: 12px var(--spacing-2);
+    border-bottom: 1px solid var(--color-neutral-200);
+    font-size: var(--font-size-table-cell);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-table);
+}
+
+/* Estilo Zebra para tablas */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--color-neutral-0);
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: var(--color-neutral-50);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--color-primary-50);
+}
+
+/* Alineación de celdas */
+.table .text-right,
+.table .text-end {
+    text-align: right;
+}
+
+.table .text-center {
+    text-align: center;
+}
+
+/* ==========================================
+   7. COMPONENTES - FORMULARIOS
+   ========================================== */
+
+.form-label {
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-900);
+    margin-bottom: var(--spacing-1);
+    display: block;
+}
+
+.form-control,
+.form-select {
+    font-size: var(--font-size-body);
+    font-family: var(--font-family-base);
+    padding: var(--spacing-1) 12px;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-neutral-0);
+    color: var(--color-neutral-900);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-50);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--color-neutral-700);
+    opacity: 0.7;
+}
+
+/* Campos requeridos */
+.form-label.required::after {
+    content: "*";
+    color: var(--color-error-500);
+    margin-left: 4px;
+}
+
+/* Estados de validación */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--color-error-500);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--color-success-500);
+}
+
+.invalid-feedback {
+    color: var(--color-error-500);
+    font-size: var(--font-size-caption);
+}
+
+.valid-feedback {
+    color: var(--color-success-500);
+    font-size: var(--font-size-caption);
+}
+
+/* ==========================================
+   8. COMPONENTES - ALERTAS
+   ========================================== */
+
+.alert {
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-body);
+}
+
+.alert-success {
+    background-color: rgba(56, 161, 105, 0.1);
+    border-color: var(--color-success-500);
+    color: var(--color-success-500);
+}
+
+.alert-warning {
+    background-color: rgba(214, 158, 46, 0.1);
+    border-color: var(--color-warning-500);
+    color: var(--color-warning-500);
+}
+
+.alert-danger,
+.alert-error {
+    background-color: rgba(229, 62, 62, 0.1);
+    border-color: var(--color-error-500);
+    color: var(--color-error-500);
+}
+
+.alert-info {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-500);
+    color: var(--color-primary-900);
+}
+
+/* ==========================================
+   9. COMPONENTES - BADGES
+   ========================================== */
+
+.badge {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    padding: 4px var(--spacing-1);
+    border-radius: 4px;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.badge.bg-primary {
+    background-color: var(--color-primary-500) !important;
+    color: var(--color-neutral-0);
+}
+
+.badge.bg-success {
+    background-color: var(--color-success-500) !important;
+    color: var(--color-neutral-0);
+}
+
+.badge.bg-warning {
+    background-color: var(--color-warning-500) !important;
+    color: var(--color-neutral-900);
+}
+
+.badge.bg-secondary {
+    background-color: var(--color-neutral-700) !important;
+    color: var(--color-neutral-0);
+}
+
+/* ==========================================
+   10. LAYOUT - HEADER
+   ========================================== */
+
+header {
+    background-color: var(--color-neutral-0);
+    box-shadow: var(--shadow-md);
+}
+
+.bg-primary {
+    background-color: var(--color-primary-500) !important;
+    color: var(--color-neutral-0) !important;
+}
+
+/* ==========================================
+   11. NAVEGACIÓN
+   ========================================== */
+
+.navbar {
+    background-color: var(--color-neutral-0);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-nav .nav-link {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-900);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-700);
+}
+
+.navbar-nav .nav-link.active {
+    background-color: var(--color-primary-500);
+    color: var(--color-neutral-0) !important;
+}
+
+/* ==========================================
+   12. UTILIDADES
+   ========================================== */
+
+/* Colores de texto */
+.text-primary {
+    color: var(--color-primary-500) !important;
+}
+
+.text-success {
+    color: var(--color-success-500) !important;
+}
+
+.text-warning {
+    color: var(--color-warning-500) !important;
+}
+
+.text-danger {
+    color: var(--color-error-500) !important;
+}
+
+.text-muted {
+    color: var(--color-neutral-700) !important;
+}
+
+/* Colores de fondo */
+.bg-light {
+    background-color: var(--color-neutral-50) !important;
+}
+
+.bg-white {
+    background-color: var(--color-neutral-0) !important;
+}
+
+/* Espaciado */
+.mb-1 { margin-bottom: var(--spacing-1) !important; }
+.mb-2 { margin-bottom: var(--spacing-2) !important; }
+.mb-3 { margin-bottom: var(--spacing-3) !important; }
+.mb-4 { margin-bottom: var(--spacing-4) !important; }
+
+.mt-1 { margin-top: var(--spacing-1) !important; }
+.mt-2 { margin-top: var(--spacing-2) !important; }
+.mt-3 { margin-top: var(--spacing-3) !important; }
+.mt-4 { margin-top: var(--spacing-4) !important; }
+
+.p-1 { padding: var(--spacing-1) !important; }
+.p-2 { padding: var(--spacing-2) !important; }
+.p-3 { padding: var(--spacing-3) !important; }
+.p-4 { padding: var(--spacing-4) !important; }
+
+/* ==========================================
+   13. COLORES DE VISUALIZACIÓN DE DATOS
+   ========================================== */
+
+.chart-color-1 { color: var(--color-data-1); }
+.chart-color-2 { color: var(--color-data-2); }
+.chart-color-3 { color: var(--color-data-3); }
+.chart-color-4 { color: var(--color-data-4); }
+
+.chart-bg-1 { background-color: var(--color-data-1); }
+.chart-bg-2 { background-color: var(--color-data-2); }
+.chart-bg-3 { background-color: var(--color-data-3); }
+.chart-bg-4 { background-color: var(--color-data-4); }
