@@ -14,35 +14,31 @@
     <!-- Tarjetas de resumen -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Programas Totales</h5>
-                    <h2 id="stats-total">{{ stats.total }}</h2>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-card-title">PROGRAMAS TOTALES</div>
+                <div class="kpi-card-value" id="stats-total">{{ stats.total }}</div>
+                <div class="kpi-card-context">En el sistema</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Convocatorias Abiertas</h5>
-                    <h2 id="stats-abiertas">{{ stats.estados.Abierta }}</h2>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-card-title">CONVOCATORIAS ABIERTAS</div>
+                <div class="kpi-card-value" id="stats-abiertas" style="color: var(--color-success-500);">{{ stats.estados.Abierta }}</div>
+                <div class="kpi-card-context">Disponibles para solicitar</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Convocatorias Pendientes</h5>
-                    <h2 id="stats-pendientes">{{ stats.estados.Pendiente }}</h2>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-card-title">CONVOCATORIAS PENDIENTES</div>
+                <div class="kpi-card-value" id="stats-pendientes" style="color: var(--color-warning-500);">{{ stats.estados.Pendiente }}</div>
+                <div class="kpi-card-context">Próximas aperturas</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-secondary text-white">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Convocatorias Cerradas</h5>
-                    <h2 id="stats-cerradas">{{ stats.estados.Cerrada }}</h2>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-card-title">CONVOCATORIAS CERRADAS</div>
+                <div class="kpi-card-value" id="stats-cerradas" style="color: var(--color-neutral-700);">{{ stats.estados.Cerrada }}</div>
+                <div class="kpi-card-context">Finalizadas</div>
             </div>
         </div>
     </div>
@@ -420,51 +416,69 @@
     /* Estilos para el dashboard de financiación */
     .programa-card {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: var(--border-radius-md);
     }
-    
+
     .programa-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        box-shadow: var(--shadow-lg) !important;
     }
-    
+
     .card-header .badge {
-        font-size: 0.75rem;
+        font-size: var(--font-size-caption);
     }
-    
+
     /* Personalizar scrollbar para listas largas de filtros */
     select.form-select {
         max-height: 200px;
         overflow-y: auto;
     }
-    
+
     /* Barra de comparación */
     #compare-bar {
         z-index: 1040;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        background-color: var(--color-neutral-900);
     }
-    
+
     /* Tooltips personalizados */
     .tooltip-inner {
         max-width: 300px;
         text-align: left;
     }
-    
+
     /* Estilos para la vista previa */
     .programa-preview-card {
-        border-left: 4px solid #3498db;
+        border-left: 4px solid var(--color-primary-500);
     }
-    
+
     /* Mejorar visualización de fechas */
     .fecha-alerta {
-        font-size: 0.85rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        font-size: var(--font-size-caption);
+        padding: var(--spacing-1) var(--spacing-1);
+        border-radius: var(--border-radius-sm);
     }
-    
+
     /* Efecto para destacar tarjetas seleccionadas para comparar */
     .programa-card.selected-for-compare {
-        border: 2px solid #3498db !important;
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.5) !important;
+        border: 2px solid var(--color-primary-500) !important;
+        box-shadow: 0 0 10px rgba(0, 120, 191, 0.5) !important;
+    }
+
+    /* Aplicar estilo zebra a tablas en modal de comparación */
+    #compare-table tbody tr:nth-of-type(odd) {
+        background-color: var(--color-neutral-0);
+    }
+
+    #compare-table tbody tr:nth-of-type(even) {
+        background-color: var(--color-neutral-50);
+    }
+
+    #compare-table thead th {
+        background-color: var(--color-primary-50);
+        color: var(--color-primary-900);
+        font-weight: var(--font-weight-semibold);
+        border-bottom: 2px solid var(--color-primary-500);
     }
 </style>
 
@@ -957,8 +971,8 @@
                     datasets: [{
                         label: 'Número de programas',
                         data: organismosOrdenados.map(e => e[1]),
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(0, 120, 191, 0.5)',  /* color-data-1: Azul FADE */
+                        borderColor: 'rgba(0, 120, 191, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -999,30 +1013,30 @@
                     datasets: [{
                         data: sectoresOrdenados.map(e => e[1]),
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.5)',
-                            'rgba(54, 162, 235, 0.5)',
-                            'rgba(255, 206, 86, 0.5)',
-                            'rgba(75, 192, 192, 0.5)',
-                            'rgba(153, 102, 255, 0.5)',
-                            'rgba(255, 159, 64, 0.5)',
-                            'rgba(199, 199, 199, 0.5)',
-                            'rgba(83, 102, 255, 0.5)',
-                            'rgba(40, 159, 64, 0.5)',
-                            'rgba(210, 199, 199, 0.5)',
+                            'rgba(0, 120, 191, 0.7)',    /* color-data-1: Azul FADE */
+                            'rgba(0, 160, 160, 0.7)',    /* color-data-2: Teal */
+                            'rgba(85, 82, 163, 0.7)',    /* color-data-3: Púrpura */
+                            'rgba(224, 124, 0, 0.7)',    /* color-data-4: Naranja */
+                            'rgba(56, 161, 105, 0.7)',   /* color-success-500 */
+                            'rgba(214, 158, 46, 0.7)',   /* color-warning-500 */
+                            'rgba(0, 90, 145, 0.7)',     /* color-primary-700 */
+                            'rgba(0, 130, 130, 0.7)',    /* Variante Teal */
+                            'rgba(105, 102, 183, 0.7)',  /* Variante Púrpura */
+                            'rgba(244, 144, 20, 0.7)',   /* Variante Naranja */
                         ],
                         borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)',
-                            'rgba(199, 199, 199, 1)',
-                            'rgba(83, 102, 255, 1)',
-                            'rgba(40, 159, 64, 1)',
-                            'rgba(210, 199, 199, 1)',
+                            'rgba(0, 120, 191, 1)',
+                            'rgba(0, 160, 160, 1)',
+                            'rgba(85, 82, 163, 1)',
+                            'rgba(224, 124, 0, 1)',
+                            'rgba(56, 161, 105, 1)',
+                            'rgba(214, 158, 46, 1)',
+                            'rgba(0, 90, 145, 1)',
+                            'rgba(0, 130, 130, 1)',
+                            'rgba(105, 102, 183, 1)',
+                            'rgba(244, 144, 20, 1)',
                         ],
-                        borderWidth: 1
+                        borderWidth: 2
                     }]
                 },
                 options: {
@@ -1086,8 +1100,8 @@
                     datasets: [{
                         label: 'Número de convocatorias que cierran',
                         data: convocatoriasPorMes,
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(0, 160, 160, 0.5)',  /* color-data-2: Teal */
+                        borderColor: 'rgba(0, 160, 160, 1)',
                         borderWidth: 1
                     }]
                 },
