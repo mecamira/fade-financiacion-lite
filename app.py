@@ -28,6 +28,37 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# ============================================================================
+# FILTROS PERSONALIZADOS DE JINJA2
+# ============================================================================
+
+@app.template_filter('format_importe')
+def format_importe_filter(valor):
+    """
+    Filtro Jinja2 para formatear importes al estilo español.
+    Formato: 15.000,00 € (punto para miles, coma para decimales, 2 decimales)
+    """
+    if not valor or valor == 'null' or valor == 'nan':
+        return 'No especificado'
+
+    try:
+        # Convertir a float
+        numero = float(valor)
+
+        # Formatear con separador de miles español (punto) y decimales (coma)
+        # Formatear primero con punto decimal estándar
+        formatted = f"{numero:,.2f}"
+
+        # Intercambiar coma y punto para formato español
+        # En formato US: 1,234.56 -> En formato ES: 1.234,56
+        formatted = formatted.replace(',', 'TEMP')  # Guardar comas temporalmente
+        formatted = formatted.replace('.', ',')      # Punto decimal → coma
+        formatted = formatted.replace('TEMP', '.')   # Comas de miles → puntos
+
+        return f"{formatted} €"
+    except (ValueError, TypeError):
+        return 'No especificado'
+
 # Crear directorio de logs si no existe
 log_dir = app.config.get('LOG_DIR', 'logs')
 os.makedirs(log_dir, exist_ok=True)

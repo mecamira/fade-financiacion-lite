@@ -95,9 +95,9 @@
                     <strong>Presupuesto Total de la Convocatoria:</strong>
                     <p>
                         {% if programa.financiacion.presupuesto_total and programa.financiacion.presupuesto_total != 'null' %}
-                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_total|float) }} €
+                            {{ programa.financiacion.presupuesto_total|format_importe }}
                         {% elif programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
-                            {{ "{:,.0f}".format(programa.financiacion.importe_maximo|float) }} €
+                            {{ programa.financiacion.importe_maximo|format_importe }}
                         {% else %}
                             No especificado
                         {% endif %}
@@ -107,23 +107,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <strong>Presupuesto Mínimo del Proyecto:</strong>
-                    <p>
-                        {% if programa.financiacion.presupuesto_minimo and programa.financiacion.presupuesto_minimo != 'null' %}
-                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_minimo|float) }} €
-                        {% else %}
-                            No especificado
-                        {% endif %}
-                    </p>
+                    <p>{{ programa.financiacion.presupuesto_minimo|format_importe }}</p>
                 </div>
                 <div class="col-md-6">
                     <strong>Presupuesto Máximo del Proyecto:</strong>
-                    <p>
-                        {% if programa.financiacion.presupuesto_maximo and programa.financiacion.presupuesto_maximo != 'null' %}
-                            {{ "{:,.0f}".format(programa.financiacion.presupuesto_maximo|float) }} €
-                        {% else %}
-                            No especificado
-                        {% endif %}
-                    </p>
+                    <p>{{ programa.financiacion.presupuesto_maximo|format_importe }}</p>
                 </div>
             </div>
         </div>
