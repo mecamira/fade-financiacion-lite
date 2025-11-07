@@ -453,10 +453,10 @@
                     </div>
                 </div>
                 
-                <!-- Mostrar también importe máximo si existe -->
+                <!-- Mostrar presupuesto total de la convocatoria -->
                 <div class="row mb-3">
                     <div class="col-12">
-                        <small class="text-muted d-block">Importe máximo:</small>
+                        <small class="text-muted d-block">Presupuesto total:</small>
                         <div class="programa-importe"></div>
                     </div>
                 </div>
@@ -676,10 +676,30 @@
             });
         });
 
+        // Función para formatear importes al estilo español
+        function formatImporte(valor) {
+            // Si es undefined, null, vacío o 'nan', retornar mensaje por defecto
+            if (!valor || valor === 'nan' || valor === 'NaN' || isNaN(parseFloat(valor))) {
+                return 'No especificado';
+            }
+
+            // Convertir a número
+            let numero = parseFloat(valor);
+
+            // Formatear con 2 decimales, punto para miles y coma para decimales
+            const formatoEspanol = new Intl.NumberFormat('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(numero);
+
+            // Añadir símbolo de euro
+            return formatoEspanol + ' €';
+        }
+
         // Variables para ordenación
         let sortField = 'nombre';
         let sortDirection = 'asc';
-        
+
         // Variable para almacenar programas cargados (global para usar en exportación)
         let programasCargados = [];
         
@@ -951,11 +971,7 @@
                 // Presupuesto total (con fallback a importe_maximo para compatibilidad)
                 const importeEl = card.querySelector('.programa-importe');
                 const presupuesto = programa.financiacion?.presupuesto_total || programa.financiacion?.importe_maximo;
-                if (presupuesto && presupuesto !== 'nan') {
-                    importeEl.textContent = presupuesto;
-                } else {
-                    importeEl.textContent = 'No especificado';
-                }
+                importeEl.textContent = formatImporte(presupuesto);
                 
                 // Beneficiarios
                 const beneficiariosEl = card.querySelector('.programa-beneficiarios');
@@ -1358,10 +1374,11 @@
             
             // Crear matriz de datos para Excel
             const data = [
-                ['Nombre', 'Organismo', 'Tipo de Ayuda', 'Estado', 'Fecha Cierre', 'Beneficiarios', 'Importe Máximo', 'Intensidad']
+                ['Nombre', 'Organismo', 'Tipo de Ayuda', 'Estado', 'Fecha Cierre', 'Beneficiarios', 'Presupuesto Total', 'Intensidad']
             ];
-            
+
             programas.forEach(p => {
+                const presupuesto = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo;
                 const row = [
                     p.nombre || '',
                     p.organismo || '',
@@ -1369,7 +1386,7 @@
                     p.convocatoria?.estado || '',
                     p.convocatoria?.fecha_cierre || '',
                     (p.beneficiarios || []).join(', '),
-                    p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '',
+                    formatImporte(presupuesto),
                     p.financiacion?.intensidad || ''
                 ];
                 data.push(row);
@@ -1547,7 +1564,7 @@
                 { label: 'Tipo de Ayuda', key: 'tipo_ayuda' },
                 { label: 'Estado', key: 'convocatoria.estado', nested: true },
                 { label: 'Fecha Cierre', key: 'convocatoria.fecha_cierre', nested: true, isDate: true },
-                { label: 'Presupuesto Total', key: 'financiacion.presupuesto_total', nested: true, fallback: 'financiacion.importe_maximo' },
+                { label: 'Presupuesto Total', key: 'financiacion.presupuesto_total', nested: true, fallback: 'financiacion.importe_maximo', isImporte: true },
                 { label: 'Intensidad', key: 'financiacion.intensidad', nested: true },
                 { label: 'Beneficiarios', key: 'beneficiarios', isArray: true },
                 { label: 'Sectores', key: 'sectores', isArray: true },
@@ -1584,8 +1601,8 @@
                     
                     // Formatear valor
                     if (field.isArray && Array.isArray(value)) {
-                        cell.innerHTML = '<ul class="mb-0 ps-3">' + 
-                            value.map(v => `<li>${v}</li>`).join('') + 
+                        cell.innerHTML = '<ul class="mb-0 ps-3">' +
+                            value.map(v => `<li>${v}</li>`).join('') +
                             '</ul>';
                     } else if (field.isDate && value) {
                         try {
@@ -1595,6 +1612,9 @@
                         } catch(e) {
                             cell.textContent = value;
                         }
+                    } else if (field.isImporte) {
+                        // Formatear como importe (presupuesto, mínimo, máximo)
+                        cell.textContent = formatImporte(value);
                     } else if (value) {
                         cell.textContent = value;
                     } else {
