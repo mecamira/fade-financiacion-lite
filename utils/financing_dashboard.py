@@ -9,13 +9,91 @@ from datetime import datetime
 # Mapeos para simplificar los filtros
 ORGANISMO_GRUPOS = {
     'CDTI': ['CDTI', 'CDTI E.P.E', 'CDTI Innovación', 'CDTI (con fondos FEMPA)', 'CDTI (en colaboración con AEI)'],
-    'IDEPA/Asturias': ['SEKUENS', 'SEPEPA', 'Consejería', 'Principado de Asturias', 'IDEPA', 
-                       'Ayuntamiento de Gijón', 'Ayuntamiento de Avilés', 'Sociedad de Desarrollo'],
-    'Europea': ['EUIPO'],
-    'Financieras': ['Asturgar', 'SRP', 'MicroBank', 'TORSA CAPITAL'],
+    'Administración del Estado': [
+        # Ministerios
+        'Ministerio de Agricultura, Pesca y Alimentación',
+        'Ministerio de Asuntos Exteriores, Unión Europea y Cooperación',
+        'Ministerio de Ciencia, Innovación y Universidades',
+        'Ministerio de Cultura',
+        'Ministerio de Defensa',
+        'Ministerio de Derechos Sociales, Consumo y Agenda 2030',
+        'Ministerio de Economía, Comercio y Empresa',
+        'Ministerio de Educación, Formación Profesional y Deportes',
+        'Ministerio de Hacienda',
+        'Ministerio de Igualdad',
+        'Ministerio de Inclusión, Seguridad Social y Migraciones',
+        'Ministerio de Industria y Turismo',
+        'Ministerio de Juventud e Infancia',
+        'Ministerio de la Presidencia, Justicia y Relaciones con las Cortes',
+        'Ministerio de Política Territorial y Memoria Democrática',
+        'Ministerio de Sanidad',
+        'Ministerio de Trabajo y Economía Social',
+        'Ministerio de Transportes y Movilidad Sostenible',
+        'Ministerio de Vivienda y Agenda Urbana',
+        'Ministerio del Interior',
+        'Ministerio para la Transformación Digital y de la Función Pública',
+        'Ministerio para la Transición Ecológica y el Reto Demográfico',
+        # Otras Entidades Estatales
+        'ICO',
+        'Instituto de Crédito Oficial',
+        'ENISA',
+        'Empresa Nacional de Innovación',
+        'Fundación EOI',
+        'Escuela de Organización Industrial',
+        'SEPIDES',
+        'Sociedad Mercantil Estatal de Participaciones Industriales',
+        'AEI',
+        'Agencia Estatal de Investigación',
+        'COFIDES',
+        'Compañía Española de Financiación del Desarrollo',
+        'CERSA',
+        'Compañía Española de Reafianzamiento',
+        'ICEX',
+        'ICEX ESPAÑA',
+        'Exportación e Inversiones',
+        'OFICINA ESPAÑOLA DE PATENTES Y MARCAS',
+        'SEPE',
+        'Servicio Público de Empleo Estatal'
+    ],
+    'CCAA': [
+        # Consejerías del Principado de Asturias
+        'Conseyería de Presidencia, Retu Demográficu, Igualdá y Turismu',
+        'Conseyería de Facienda, Xusticia y Asuntos Europeos',
+        'Conseyería d\'Ordenación de Territoriu, Urbanismo, Vivienda y Derechos Ciudadanos',
+        'Conseyería de Ciencia, Industria y Empléu',
+        'Conseyería de Salú',
+        'Conseyería d\'Educación',
+        'Conseyería de Movilidá, Mediu Ambiente y Xestión d\'Emerxencias',
+        'Conseyería de Mediu Rural y Política Agraria',
+        'Conseyería de Derechos Sociales y Bienestar',
+        'Conseyería de Cultura, Política Llingüística y Deporte',
+        # Otras entidades autonómicas
+        'SEPEPA',
+        'Servicio Público de Empleo del Principado de Asturias',
+        'IAPRL',
+        'Instituto Asturiano de Prevención de Riesgos Laborales',
+        'SEKUENS',
+        'Consejería',
+        'Principado de Asturias',
+        'IDEPA'
+    ],
+    'Entidades Locales / Ayuntamientos': [
+        'Ayuntamiento de Gijón',
+        'Ayuntamiento de Avilés',
+        'Ayuntamiento de Llanes',
+        'Ayuntamiento de Llanera',
+        'Ayuntamiento de Siero',
+        'Ayuntamiento de Valdés',
+        'Ayuntamiento de Parres',
+        'Ayuntamiento de Carreño',
+        'Ayuntamiento de Oviedo',
+        'Ayuntamiento de Piloña',
+        'Sociedad de Desarrollo'
+    ],
+    'Organismos Europeos': ['EUIPO', 'Europea'],
+    'Entidades Financieras': ['Asturgar', 'SRP', 'MicroBank', 'TORSA CAPITAL'],
     'Red.es': ['Red.es'],
-    'Ministerios': ['Ministerio de Hacienda', 'Ministerio'],
-    'EOI': ['EOI', 'Escuela de Organización Industrial'],
+    'EOI': ['EOI'],
     'Otros': []
 }
 
@@ -61,21 +139,57 @@ SECTOR_GRUPOS = {
 
 BENEFICIARIO_GRUPOS = {
     'Todas las empresas': ['Empresas', 'Empresas (individualmente)', 'Sociedades', 'Cooperativas'],
-    'PYME': ['PYMES', 'PYMES Españolas', 'Pequeñas empresas', 'Medianas Empresas', 
+    'PYME': ['PYMES', 'PYMES Españolas', 'Pequeñas empresas', 'Medianas Empresas',
              'MIDCAPS', 'Microempresas', 'Micropymes'],
     'Gran Empresa': ['Gran Empresa', 'Grandes Empresas'],
-    'Startups/EBT': ['Startups', 'Empresas de Base Tecnológica', 'EBT', 
+    'Startups/EBT': ['Startups', 'Empresas de Base Tecnológica', 'EBT',
                      'Pequeñas empresas innovadoras', 'Empresas emergentes'],
     'Autónomos': ['Autónomos', 'Personas físicas emprendedoras'],
-    'Emprendedores': ['Emprendedores', 'Emprendedores innovadores', 
+    'Emprendedores': ['Emprendedores', 'Emprendedores innovadores',
                       'Mujeres emprendedoras y empresarias'],
-    'Agrupaciones': ['Agrupaciones de empresas', 'Agrupaciones de 2-6 empresas', 
+    'Agrupaciones': ['Agrupaciones de empresas', 'Agrupaciones de 2-6 empresas',
                      'Agrupaciones de 3-8 empresas'],
-    'Sector Público': ['Ayuntamientos', 'Entidades Locales', 'Sector Público', 
+    'Asociaciones Empresariales': ['Asociaciones Empresariales', 'Asociación Empresarial'],
+    'Sociedades Laborales y Cooperativas': ['Sociedades Laborales', 'Cooperativas',
+                                             'Sociedad Laboral', 'Cooperativa'],
+    'Sector Público': ['Ayuntamientos', 'Entidades Locales', 'Sector Público',
                        'Corporaciones', 'Sociedades públicas'],
     'Otros': ['Particulares', 'Comunidades Propietarios', 'Entidades sin ánimo de lucro',
               'Asociaciones', 'Artesanos']
 }
+
+# Valores permitidos para ÁMBITO (sin Internacional)
+AMBITO_VALORES = [
+    'Europeo',
+    'Nacional',
+    'Autonómico',
+    'Local'
+]
+
+# Valores permitidos para TIPO DE PROYECTO (ahora es múltiple)
+TIPO_PROYECTO_VALORES = [
+    'I+D+i',
+    'Digitalización',
+    'Inversión productiva',
+    'Contratación',
+    'Formación y Empleo',  # Cambiado de "Formación"
+    'Internacionalización',
+    'Sostenibilidad',
+    'Propiedad intelectual',
+    'Marketing/Comercialización',
+    'Creación de empresas',
+    'Riesgos Laborales',  # Nuevo
+    'General'
+]
+
+# Valores permitidos para FONDOS EUROPEOS (ahora es múltiple, sin Mixtos ni Propios)
+FONDOS_EUROPEOS_VALORES = [
+    'FEDER',
+    'FEMPA',
+    'FTJ',
+    'Next Generation',
+    'Otros'
+]
 
 def normalizar_organismo(organismo):
     """Normaliza un organismo a su grupo simplificado"""
@@ -189,32 +303,47 @@ def load_all_financing_programs():
             if 'convocatoria' in programa:
                 # Si no hay fechas, establecer estado basado en el campo 'estado'
                 if not programa['convocatoria'].get('fecha_apertura') and not programa['convocatoria'].get('fecha_cierre'):
-                    pass
+                    # Cambiar "Pendiente" por "Próxima apertura" si existe
+                    if programa['convocatoria'].get('estado') == 'Pendiente':
+                        programa['convocatoria']['estado'] = 'Próxima apertura'
                 else:
                     fecha_apertura = programa['convocatoria'].get('fecha_apertura')
                     fecha_cierre = programa['convocatoria'].get('fecha_cierre')
-                    
+
                     fecha_apertura_dt = None
                     fecha_cierre_dt = None
-                    
+
                     if fecha_apertura:
                         try:
                             fecha_apertura_dt = datetime.strptime(fecha_apertura, '%Y-%m-%d %H:%M:%S')
                         except (ValueError, TypeError):
-                            fecha_apertura_dt = None
-                    
+                            try:
+                                fecha_apertura_dt = datetime.strptime(fecha_apertura, '%Y-%m-%d')
+                            except (ValueError, TypeError):
+                                fecha_apertura_dt = None
+
                     if fecha_cierre:
                         try:
                             fecha_cierre_dt = datetime.strptime(fecha_cierre, '%Y-%m-%d %H:%M:%S')
                         except (ValueError, TypeError):
-                            fecha_cierre_dt = None
-                    
+                            try:
+                                fecha_cierre_dt = datetime.strptime(fecha_cierre, '%Y-%m-%d')
+                            except (ValueError, TypeError):
+                                fecha_cierre_dt = None
+
                     now = datetime.now()
-                    
+
                     if fecha_cierre_dt and fecha_cierre_dt < now:
                         programa['convocatoria']['estado'] = 'Cerrada'
                     elif fecha_apertura_dt and fecha_apertura_dt > now:
-                        programa['convocatoria']['estado'] = 'Pendiente'
+                        programa['convocatoria']['estado'] = 'Próxima apertura'
+                    elif fecha_cierre_dt and fecha_cierre_dt >= now:
+                        # Calcular días hasta el cierre
+                        dias_hasta_cierre = (fecha_cierre_dt - now).days
+                        if dias_hasta_cierre <= 15:
+                            programa['convocatoria']['estado'] = 'Cierre próximo'
+                        else:
+                            programa['convocatoria']['estado'] = 'Abierta'
                     else:
                         programa['convocatoria']['estado'] = 'Abierta'
             
@@ -256,7 +385,7 @@ def load_all_financing_programs():
         return []
 
 def load_financing_programs(organismo=None, tipo_ayuda=None, ambito=None, beneficiario=None,
-                           sector=None, tipo_proyecto=None, origen_fondos=None, estado=None,
+                           sector=None, tipo_proyecto=None, fondos_europeos=None, origen_fondos=None, estado=None,
                            presupuesto_min=None, presupuesto_max=None, search_term=None, bdns=None):
     """Carga y filtra programas de financiación según los criterios especificados"""
     try:
@@ -298,9 +427,12 @@ def load_financing_programs(organismo=None, tipo_ayuda=None, ambito=None, benefi
                 return False
             programas = [p for p in programas if tiene_tipo_proyecto(p, tipo_proyecto)]
 
-        if origen_fondos:
-            # Nuevo campo normalizado
-            programas = [p for p in programas if p.get('origen_fondos') == origen_fondos]
+        # Filtrar por fondos europeos (nuevo campo) o origen_fondos (compatibilidad)
+        fondos_filter = fondos_europeos or origen_fondos
+        if fondos_filter:
+            programas = [p for p in programas if
+                        (isinstance(p.get('fondos_europeos'), list) and fondos_filter in p['fondos_europeos']) or
+                        p.get('origen_fondos') == fondos_filter]
         
         if estado:
             programas = [p for p in programas if 'convocatoria' in p and p['convocatoria'].get('estado') and estado.lower() in p['convocatoria']['estado'].lower()]
@@ -359,16 +491,18 @@ def get_financing_stats():
         
         total_programas = len(programas)
         
-        estados = {'Abierta': 0, 'Cerrada': 0, 'Pendiente': 0}
+        estados = {'Abierta': 0, 'Cerrada': 0, 'Próxima apertura': 0, 'Cierre próximo': 0}
         for p in programas:
             if 'convocatoria' in p and 'estado' in p['convocatoria']:
                 estado = p['convocatoria']['estado']
-                if 'Abierta' in estado:
+                if estado == 'Cierre próximo':
+                    estados['Cierre próximo'] += 1
+                elif estado == 'Próxima apertura':
+                    estados['Próxima apertura'] += 1
+                elif 'Abierta' in estado:
                     estados['Abierta'] += 1
                 elif 'Cerrada' in estado:
                     estados['Cerrada'] += 1
-                elif 'Pendiente' in estado:
-                    estados['Pendiente'] += 1
         
         tipos_ayuda = {}
         for p in programas:
@@ -426,8 +560,14 @@ def get_financing_filter_options():
             elif 'organismo_grupo' in p:
                 organismos.add(p['organismo_grupo'])
 
+            # Tipo de ayuda (ahora puede ser array o string)
             if 'tipo_ayuda' in p and p['tipo_ayuda']:
-                tipos_ayuda.add(p['tipo_ayuda'])
+                if isinstance(p['tipo_ayuda'], list):
+                    for ta in p['tipo_ayuda']:
+                        if ta:
+                            tipos_ayuda.add(ta)
+                else:
+                    tipos_ayuda.add(p['tipo_ayuda'])
             elif 'tipo_ayuda_grupo' in p:
                 tipos_ayuda.add(p['tipo_ayuda_grupo'])
 
@@ -461,8 +601,12 @@ def get_financing_filter_options():
                 elif p['tipo_proyecto']:  # Si es string (convocatorias antiguas)
                     tipos_proyecto.add(p['tipo_proyecto'])
 
-            # Origen de fondos (nuevo campo)
-            if 'origen_fondos' in p and p['origen_fondos']:
+            # Fondos europeos (nuevo campo array) o origen_fondos (compatibilidad)
+            if 'fondos_europeos' in p and isinstance(p['fondos_europeos'], list):
+                for f in p['fondos_europeos']:
+                    if f:
+                        origenes_fondos.add(f)
+            elif 'origen_fondos' in p and p['origen_fondos']:
                 origenes_fondos.add(p['origen_fondos'])
 
             if 'convocatoria' in p and 'estado' in p['convocatoria']:
