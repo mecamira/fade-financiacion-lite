@@ -59,16 +59,17 @@ class ConvocatoriaExtractor:
         ESTRUCTURA JSON REQUERIDA:
         {{
           "id": "identificador-unico-basado-en-nombre",
-          "nombre": "Nombre completo de la convocatoria",
+          "nombre_coloquial": "Nombre coloquial y conciso de la convocatoria",
+          "nombre_oficial": "Nombre oficial completo de la convocatoria",
           "organismo": "Organismo gestor [VALOR CERRADO]",
-          "tipo_ayuda": "Tipo de ayuda [VALOR CERRADO]",
+          "tipo_ayuda": ["Lista", "de", "tipos", "de", "ayuda", "[VALORES CERRADOS - MÚLTIPLE]"],
           "ambito": "Ámbito geográfico [VALOR CERRADO]",
           "beneficiarios": ["Lista", "de", "beneficiarios", "[VALORES CERRADOS]"],
           "sectores": ["Lista", "de", "sectores", "[VALORES CERRADOS]"],
           "tipo_proyecto": ["Lista", "de", "tipos", "de", "proyecto", "[VALORES CERRADOS]"],
-          "origen_fondos": "Origen de los fondos [VALOR CERRADO]",
+          "fondos_europeos": ["Lista", "de", "fondos", "europeos", "[VALORES CERRADOS - MÚLTIPLE - PUEDE ESTAR VACÍO]"],
           "convocatoria": {{
-            "estado": "Estado (Abierta, Cerrada, Pendiente)",
+            "estado": "Estado (Abierta, Cerrada, Próxima apertura)",
             "fecha_apertura": "YYYY-MM-DD (null si no se especifica)",
             "fecha_cierre": "YYYY-MM-DD (null si no se especifica)"
           }},
@@ -76,7 +77,9 @@ class ConvocatoriaExtractor:
             "intensidad": "% o descripción de la intensidad de financiación",
             "presupuesto_total": "Presupuesto total de la convocatoria (cuánto dinero hay disponible en total)",
             "presupuesto_minimo": "Presupuesto mínimo del proyecto para poder solicitarla",
-            "presupuesto_maximo": "Presupuesto máximo del proyecto permitido"
+            "presupuesto_maximo": "Presupuesto máximo del proyecto permitido",
+            "importe_minimo_subvencionable": "Importe mínimo que se puede solicitar como subvención",
+            "importe_maximo_subvencionable": "Importe máximo que se puede solicitar como subvención"
           }},
           "requisitos": ["Lista", "de", "requisitos", "principales"],
           "gastos_subvencionables": ["Lista", "de", "gastos", "subvencionables"],
@@ -87,25 +90,78 @@ class ConvocatoriaExtractor:
             "convocatoria": "URL PDF convocatoria (null si no disponible)",
             "bases_reguladoras": "URL PDF bases reguladoras (null si no disponible)"
           }},
-          "codigo_bdns": "Código BDNS (numérico si es posible, null si no disponible)"
+          "codigo_bdns": "Código BDNS (numérico si es posible, null si no disponible)",
+          "comentarios": ""
         }}
 
         INSTRUCCIONES PARA CAMPOS CON VALORES CERRADOS:
 
         1. Para "organismo" - Seleccionar UNO de estos valores:
            - CDTI
+           - Ministerio de Agricultura, Pesca y Alimentación
+           - Ministerio de Asuntos Exteriores, Unión Europea y Cooperación
+           - Ministerio de Ciencia, Innovación y Universidades
+           - Ministerio de Cultura
+           - Ministerio de Defensa
+           - Ministerio de Derechos Sociales, Consumo y Agenda 2030
+           - Ministerio de Economía, Comercio y Empresa
+           - Ministerio de Educación, Formación Profesional y Deportes
+           - Ministerio de Hacienda
+           - Ministerio de Igualdad
+           - Ministerio de Inclusión, Seguridad Social y Migraciones
+           - Ministerio de Industria y Turismo
+           - Ministerio de Juventud e Infancia
+           - Ministerio de la Presidencia, Justicia y Relaciones con las Cortes
+           - Ministerio de Política Territorial y Memoria Democrática
+           - Ministerio de Sanidad
+           - Ministerio de Trabajo y Economía Social
+           - Ministerio de Transportes y Movilidad Sostenible
+           - Ministerio de Vivienda y Agenda Urbana
+           - Ministerio del Interior
+           - Ministerio para la Transformación Digital y de la Función Pública
+           - Ministerio para la Transición Ecológica y el Reto Demográfico
+           - ICO (Instituto de Crédito Oficial)
+           - ENISA (Empresa Nacional de Innovación, S.A.)
+           - Fundación EOI (Escuela de Organización Industrial)
+           - SEPIDES (Sociedad Mercantil Estatal de Participaciones Industriales)
+           - AEI (Agencia Estatal de Investigación)
+           - COFIDES (Compañía Española de Financiación del Desarrollo)
+           - CERSA (Compañía Española de Reafianzamiento)
+           - ICEX ESPAÑA (Exportación e Inversiones)
+           - OFICINA ESPAÑOLA DE PATENTES Y MARCAS
+           - SEPE (Servicio Público de Empleo Estatal)
+           - Conseyería de Presidencia, Retu Demográficu, Igualdá y Turismu
+           - Conseyería de Facienda, Xusticia y Asuntos Europeos
+           - Conseyería d'Ordenación de Territoriu, Urbanismo, Vivienda y Derechos Ciudadanos
+           - Conseyería de Ciencia, Industria y Empléu
+           - Conseyería de Salú
+           - Conseyería d'Educación
+           - Conseyería de Movilidá, Mediu Ambiente y Xestión d'Emerxencies
+           - Conseyería de Mediu Rural y Política Agraria
+           - Conseyería de Derechos Sociales y Bienestar
+           - Conseyería de Cultura, Política Llingüística y Deporte
+           - SEPEPA (Servicio Público de Empleo del Principado de Asturias)
+           - IAPRL (Instituto Asturiano de Prevención de Riesgos Laborales)
+           - Ayuntamiento de Gijón
+           - Ayuntamiento de Avilés
+           - Ayuntamiento de Llanes
+           - Ayuntamiento de Llanera
+           - Ayuntamiento de Siero
+           - Ayuntamiento de Valdés
+           - Ayuntamiento de Parres
+           - Ayuntamiento de Carreño
+           - Ayuntamiento de Oviedo
+           - Ayuntamiento de Piloña
            - SEKUENS
            - Red.es
            - EOI
-           - AEI
-           - FICYT
            - Administración del Estado
            - Organismos Europeos
            - Entidades Financieras
            - CCAA
            - Otros
 
-        2. Para "tipo_ayuda" - Seleccionar UNO de estos valores:
+        2. Para "tipo_ayuda" - Seleccionar UNO O MÁS de estos valores (array):
            - Subvención
            - Préstamo/Crédito
            - Capital Riesgo
@@ -119,19 +175,19 @@ class ConvocatoriaExtractor:
            - Nacional
            - Autonómico
            - Local
-           - Internacional
 
         4. Para "tipo_proyecto" - Seleccionar UNO O MÁS de estos valores (array):
            - I+D+i
            - Digitalización
            - Inversión productiva
            - Contratación
-           - Formación
+           - Formación y Empleo
            - Internacionalización
            - Sostenibilidad
            - Propiedad intelectual
            - Marketing/Comercialización
            - Creación de empresas
+           - Riesgos Laborales
            - General
 
         5. Para "beneficiarios" - Seleccionar UNO O MÁS de estos valores (array):
@@ -140,6 +196,8 @@ class ConvocatoriaExtractor:
            - Startups
            - Autónomos
            - Emprendedores
+           - Asociaciones Empresariales
+           - Sociedades Laborales y Cooperativas
            - Sector Público
            - Particulares
            - ONG
@@ -164,15 +222,13 @@ class ConvocatoriaExtractor:
            - Defensa
            - Administración Pública
 
-        7. Para "origen_fondos" - Seleccionar UNO de estos valores:
+        7. Para "fondos_europeos" - Seleccionar UNO O MÁS de estos valores (array) - PUEDE ESTAR VACÍO:
            - FEDER
            - FEMPA
            - FTJ
            - Next Generation
-           - Propios
-           - Mixtos
            - Otros
-           - null (si no se especifica)
+           IMPORTANTE: Este campo puede estar vacío [] si el origen de los fondos no cuadra con ninguna de las opciones.
 
         INSTRUCCIONES ESPECÍFICAS:
 
@@ -183,27 +239,29 @@ class ConvocatoriaExtractor:
            - Ejemplo: "ayudas-digitalizacion-pyme-20250315"
            - IMPORTANTE: El ID debe terminar SIEMPRE con un guion seguido de 8 dígitos de fecha
 
-        2. Para "nombre":
-           - Debe ser un TÍTULO CONCISO de máximo 100 caracteres
-           - NO incluir fechas, plazos ni años (eso va en otros campos)
-           - NO incluir información sobre el tipo de ayuda (eso va en "tipo_ayuda")
-           - Eliminar frases como "Convocatoria de", "Programa de", empezar directo con el contenido
-           - Si el nombre oficial es muy largo, resumirlo manteniendo la esencia
-           - Ejemplos de buenos nombres:
-             * "Subvenciones contratación indefinida personas con discapacidad"
-             * "Ayudas Severo Ochoa para estancias breves de investigación"
-             * "Bonificaciones contratación jóvenes menores de 30 años"
+        2. Para "nombre_coloquial" y "nombre_oficial":
+           - **nombre_coloquial**: Título CONCISO de máximo 100 caracteres
+             * NO incluir fechas, plazos ni años
+             * NO incluir información sobre el tipo de ayuda
+             * Eliminar frases como "Convocatoria de", "Programa de"
+             * Ejemplos: "Subvenciones contratación indefinida personas con discapacidad"
+           - **nombre_oficial**: Nombre LITERAL y COMPLETO de la convocatoria tal como aparece en el documento
+             * Mantener el nombre oficial exacto, aunque sea largo
+             * Incluir referencias completas, años, y numeración oficial
+             * Ejemplo: "Convocatoria de subvenciones del Ministerio de Trabajo para la contratación indefinida de personas con discapacidad, ejercicio 2025"
 
-        3. Para campos normalizados (organismo, tipo_ayuda, ambito, origen_fondos):
+        3. Para campos normalizados (organismo, ambito):
            - SOLO puedes usar los valores especificados arriba
            - Si el texto menciona algo similar, escoge el valor más cercano de la lista
-           - Si no encaja en ninguna categoría, usa "Otros" (o "null" para origen_fondos si no se menciona)
+           - Si no encaja en ninguna categoría, usa "Otros"
 
-        4. Para campos normalizados de array (tipo_proyecto, beneficiarios, sectores):
+        4. Para campos normalizados de array (tipo_ayuda, tipo_proyecto, beneficiarios, sectores, fondos_europeos):
            - Puedes seleccionar MÚLTIPLES valores de la lista
            - SOLO usa los valores exactos especificados arriba
-           - Si se menciona "todas las empresas" o similar para beneficiarios, usa "Todas las empresas"
-           - Si el sector es general o no específico, usa "General/Multisectorial"
+           - Para tipo_ayuda: ahora es un ARRAY, puede tener múltiples tipos
+           - Para beneficiarios: si se menciona "todas las empresas", usa "Todas las empresas"
+           - Para sectores: si es general o no específico, usa "General/Multisectorial"
+           - Para fondos_europeos: puede estar VACÍO [] si no hay fondos europeos identificados
 
         5. Para fechas:
            - Usa formato YYYY-MM-DD
@@ -213,7 +271,7 @@ class ConvocatoriaExtractor:
         6. Para "estado":
            - Debe ser "Abierta" si la fecha de cierre es posterior a la fecha actual
            - "Cerrada" si la fecha de cierre es anterior a la fecha actual
-           - "Pendiente" si la fecha de apertura es posterior a la fecha actual
+           - "Próxima apertura" si la fecha de apertura es posterior a la fecha actual
 
         7. Para "requisitos":
            - Lista de requisitos principales que deben cumplir los beneficiarios
@@ -230,9 +288,12 @@ class ConvocatoriaExtractor:
            - **presupuesto_total**: El presupuesto TOTAL de la convocatoria (cuánto dinero hay disponible en total para repartir entre todos los solicitantes)
            - **presupuesto_minimo**: El presupuesto MÍNIMO que debe tener el proyecto del solicitante para poder aplicar
            - **presupuesto_maximo**: El presupuesto MÁXIMO que puede tener el proyecto del solicitante
+           - **importe_minimo_subvencionable**: El importe MÍNIMO que se puede solicitar como ayuda/subvención (cuánto dinero mínimo se puede pedir)
+           - **importe_maximo_subvencionable**: El importe MÁXIMO que se puede solicitar como ayuda/subvención (cuánto dinero máximo se puede pedir)
            - Extrae SOLO números sin símbolos monetarios
            - Ejemplo: para "500.000€" escribe sólo "500000"
            - Redondea a enteros si es necesario
+           - Si no se especifica alguno de estos campos, usa null
 
         10. Para la intensidad:
             - Captura porcentajes y descripciones específicas de financiación (cuánto % del proyecto se financia)
@@ -243,9 +304,14 @@ class ConvocatoriaExtractor:
         12. Para la descripcion_detallada:
             - 2-3 frases con detalles relevantes (máximo 500 caracteres)
 
-        13. Si un campo no tiene información, usa null (no elimines el campo)
+        13. Para el campo "comentarios":
+            - Este campo debe estar siempre VACÍO ("") inicialmente
+            - Es un campo reservado para que el usuario añada notas posteriores
+            - NUNCA añadas contenido a este campo durante la extracción
 
-        14. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
+        14. Si un campo no tiene información, usa null (no elimines el campo)
+
+        15. IMPORTANTE: Evita incluir palabras sueltas o texto que no sea parte del JSON. El output SOLAMENTE debe ser el objeto JSON válido.
 
         NOTAS IMPORTANTES:
         - Lee DETENIDAMENTE el documento. A menudo hay información importante oculta en párrafos o secciones que podrían parecer irrelevantes.
@@ -648,18 +714,34 @@ class ConvocatoriaExtractor:
         """
         # Campos obligatorios de primer nivel
         required_fields = [
-            'id', 'nombre', 'organismo', 'tipo_ayuda', 'ambito', 'beneficiarios',
-            'sectores', 'tipo_proyecto', 'origen_fondos', 'convocatoria', 'financiacion',
-            'requisitos', 'gastos_subvencionables', 'resumen_breve', 'descripcion_detallada', 'enlaces'
+            'id', 'nombre_coloquial', 'nombre_oficial', 'organismo', 'tipo_ayuda', 'ambito', 'beneficiarios',
+            'sectores', 'tipo_proyecto', 'fondos_europeos', 'convocatoria', 'financiacion',
+            'requisitos', 'gastos_subvencionables', 'resumen_breve', 'descripcion_detallada', 'enlaces', 'comentarios'
         ]
 
         for field in required_fields:
             if field not in data:
                 # Los campos array deben inicializarse como array vacío
-                if field in ['beneficiarios', 'sectores', 'tipo_proyecto', 'requisitos', 'gastos_subvencionables']:
+                if field in ['beneficiarios', 'sectores', 'tipo_proyecto', 'tipo_ayuda', 'fondos_europeos', 'requisitos', 'gastos_subvencionables']:
                     data[field] = []
+                elif field == 'comentarios':
+                    data[field] = ""
                 else:
                     data[field] = None
+
+        # Compatibilidad hacia atrás: si existe 'nombre' pero no 'nombre_coloquial', copiar
+        if 'nombre' in data and 'nombre_coloquial' not in data:
+            data['nombre_coloquial'] = data['nombre']
+        if 'nombre' in data and 'nombre_oficial' not in data:
+            data['nombre_oficial'] = data['nombre']
+
+        # Compatibilidad hacia atrás: si existe 'origen_fondos' pero no 'fondos_europeos'
+        if 'origen_fondos' in data and 'fondos_europeos' not in data:
+            origen = data['origen_fondos']
+            if origen and origen not in ['Propios', 'Mixtos', 'null', None]:
+                data['fondos_europeos'] = [origen] if isinstance(origen, str) else origen
+            else:
+                data['fondos_europeos'] = []
 
         # Campos anidados
         if 'convocatoria' not in data or not isinstance(data['convocatoria'], dict):
@@ -673,7 +755,7 @@ class ConvocatoriaExtractor:
         if 'financiacion' not in data or not isinstance(data['financiacion'], dict):
             data['financiacion'] = {}
 
-        fin_fields = ['intensidad', 'presupuesto_total', 'presupuesto_minimo', 'presupuesto_maximo']
+        fin_fields = ['intensidad', 'presupuesto_total', 'presupuesto_minimo', 'presupuesto_maximo', 'importe_minimo_subvencionable', 'importe_maximo_subvencionable']
         for field in fin_fields:
             if field not in data['financiacion']:
                 data['financiacion'][field] = None
@@ -687,10 +769,14 @@ class ConvocatoriaExtractor:
                 data['enlaces'][field] = None
 
         # Asegurar que los campos array son realmente arrays
-        array_fields = ['beneficiarios', 'sectores', 'tipo_proyecto', 'requisitos', 'gastos_subvencionables']
+        array_fields = ['beneficiarios', 'sectores', 'tipo_proyecto', 'tipo_ayuda', 'fondos_europeos', 'requisitos', 'gastos_subvencionables']
         for field in array_fields:
             if field not in data or not isinstance(data[field], list):
-                data[field] = []
+                # Si tipo_ayuda es string, convertir a array
+                if field == 'tipo_ayuda' and field in data and isinstance(data[field], str):
+                    data[field] = [data[field]]
+                else:
+                    data[field] = []
     
     def verificar_duplicados(self, convocatoria: Dict[str, Any], programas_existentes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """

@@ -168,7 +168,8 @@ def get_programas():
         beneficiario = request.args.get('beneficiario')
         sector = request.args.get('sector')
         tipo_proyecto = request.args.get('tipo_proyecto')
-        origen_fondos = request.args.get('origen_fondos')
+        fondos_europeos = request.args.get('fondos_europeos')
+        origen_fondos = request.args.get('origen_fondos')  # Compatibilidad hacia atrás
         estado = request.args.get('estado')
         search_term = request.args.get('search')
         bdns = request.args.get('bdns')
@@ -181,6 +182,7 @@ def get_programas():
             beneficiario=beneficiario,
             sector=sector,
             tipo_proyecto=tipo_proyecto,
+            fondos_europeos=fondos_europeos,
             origen_fondos=origen_fondos,
             estado=estado,
             search_term=search_term,
@@ -424,11 +426,13 @@ def guardar_programa():
     try:
         data = request.get_json()
         
-        # Validar datos requeridos
-        campos_requeridos = ['nombre', 'organismo', 'tipo_ayuda']
-        for campo in campos_requeridos:
-            if not data.get(campo):
-                return jsonify({'success': False, 'error': f'Falta el campo: {campo}'}), 400
+        # Validar datos requeridos (con compatibilidad para nombre_coloquial)
+        if not data.get('nombre_coloquial') and not data.get('nombre'):
+            return jsonify({'success': False, 'error': 'Falta el campo: nombre_coloquial o nombre'}), 400
+        if not data.get('organismo'):
+            return jsonify({'success': False, 'error': 'Falta el campo: organismo'}), 400
+        if not data.get('tipo_ayuda'):
+            return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Guardar en base de datos
         programa_id = financing_dashboard.agregar_programa(data)
@@ -472,11 +476,13 @@ def actualizar_programa(programa_id):
     try:
         data = request.get_json()
         
-        # Validar datos requeridos
-        campos_requeridos = ['nombre', 'organismo', 'tipo_ayuda']
-        for campo in campos_requeridos:
-            if not data.get(campo):
-                return jsonify({'success': False, 'error': f'Falta el campo: {campo}'}), 400
+        # Validar datos requeridos (con compatibilidad para nombre_coloquial)
+        if not data.get('nombre_coloquial') and not data.get('nombre'):
+            return jsonify({'success': False, 'error': 'Falta el campo: nombre_coloquial o nombre'}), 400
+        if not data.get('organismo'):
+            return jsonify({'success': False, 'error': 'Falta el campo: organismo'}), 400
+        if not data.get('tipo_ayuda'):
+            return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Actualizar en base de datos
         success = financing_dashboard.actualizar_programa(programa_id, data)
