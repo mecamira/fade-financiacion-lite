@@ -218,10 +218,10 @@
                             </select>
                         </div>
 
-                        <!-- Origen de Fondos -->
+                        <!-- Fondos Europeos -->
                         <div class="mb-3">
-                            <label for="origen_fondos" class="form-label">Origen de Fondos:</label>
-                            <select class="form-select" id="origen_fondos">
+                            <label for="fondos_europeos" class="form-label">Fondos Europeos:</label>
+                            <select class="form-select" id="fondos_europeos">
                                 <option value="">Todos</option>
                                 {% for origen in filter_options.origenes_fondos %}
                                 <option value="{{ origen }}">{{ origen }}</option>
@@ -662,8 +662,8 @@
                 }
             });
 
-            $('#origen_fondos').select2({
-                placeholder: 'Selecciona origen de fondos',
+            $('#fondos_europeos').select2({
+                placeholder: 'Selecciona fondos europeos',
                 allowClear: true,
                 language: {
                     noResults: function() {
@@ -733,7 +733,7 @@
             jQuery('#beneficiario').val(null).trigger('change');
             jQuery('#sector').val(null).trigger('change');
             jQuery('#tipo_proyecto').val(null).trigger('change');
-            jQuery('#origen_fondos').val(null).trigger('change');
+            jQuery('#fondos_europeos').val(null).trigger('change');
             loadPrograms();
         });
         
@@ -748,7 +748,7 @@
             jQuery('#beneficiario').val(null).trigger('change');
             jQuery('#sector').val(null).trigger('change');
             jQuery('#tipo_proyecto').val(null).trigger('change');
-            jQuery('#origen_fondos').val(null).trigger('change');
+            jQuery('#fondos_europeos').val(null).trigger('change');
             loadPrograms();
         });
         
@@ -815,7 +815,7 @@
             const beneficiario = document.getElementById('beneficiario').value;
             const sector = document.getElementById('sector').value;
             const tipo_proyecto = document.getElementById('tipo_proyecto').value;
-            const origen_fondos = document.getElementById('origen_fondos').value;
+            const fondos_europeos = document.getElementById('fondos_europeos').value;
             const presupuesto_min = document.getElementById('presupuesto_min').value;
             const presupuesto_max = document.getElementById('presupuesto_max').value;
             const bdns = document.getElementById('bdns').value;
@@ -830,7 +830,7 @@
             if (beneficiario) url += `beneficiario=${encodeURIComponent(beneficiario)}&`;
             if (sector) url += `sector=${encodeURIComponent(sector)}&`;
             if (tipo_proyecto) url += `tipo_proyecto=${encodeURIComponent(tipo_proyecto)}&`;
-            if (origen_fondos) url += `origen_fondos=${encodeURIComponent(origen_fondos)}&`;
+            if (fondos_europeos) url += `fondos_europeos=${encodeURIComponent(fondos_europeos)}&`;
             if (presupuesto_min) url += `presupuesto_min=${encodeURIComponent(presupuesto_min)}&`;
             if (presupuesto_max) url += `presupuesto_max=${encodeURIComponent(presupuesto_max)}&`;
             // Añadir parámetro BDNS
@@ -995,11 +995,13 @@
                 const badge = card.querySelector('.badge');
                 if (programa.convocatoria && programa.convocatoria.estado) {
                     badge.textContent = programa.convocatoria.estado;
-                    
-                    if (programa.convocatoria.estado.includes('Abierta')) {
+
+                    if (programa.convocatoria.estado.includes('Cierre próximo')) {
+                        badge.classList.add('bg-warning');
+                    } else if (programa.convocatoria.estado.includes('Abierta')) {
                         badge.classList.add('bg-success');
-                    } else if (programa.convocatoria.estado.includes('Pendiente')) {
-                        badge.classList.add('bg-warning', 'text-dark');
+                    } else if (programa.convocatoria.estado.includes('Próxima apertura') || programa.convocatoria.estado.includes('Pendiente')) {
+                        badge.classList.add('bg-info', 'text-white');
                     } else {
                         badge.classList.add('bg-secondary');
                     }
@@ -1042,11 +1044,11 @@
                         }
                     }
                     // Caso: Fecha de apertura futura
-                    else if (fechaApertura && programa.convocatoria.estado.includes('Pendiente')) {
+                    else if (fechaApertura && (programa.convocatoria.estado.includes('Próxima apertura') || programa.convocatoria.estado.includes('Pendiente'))) {
                         try {
                             const date = new Date(fechaApertura);
                             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                            fechaHTML = `<div class="alert alert-warning py-1 px-2"><i class="fas fa-clock me-1"></i> Apertura prevista: <strong>${date.toLocaleDateString('es-ES', options)}</strong></div>`;
+                            fechaHTML = `<div class="alert alert-info py-1 px-2"><i class="fas fa-clock me-1"></i> Apertura prevista: <strong>${date.toLocaleDateString('es-ES', options)}</strong></div>`;
                         } catch (e) {
                             fechaHTML = `<small class="text-muted">Fecha de apertura: ${fechaApertura}</small>`;
                         }
@@ -1139,28 +1141,31 @@
             // Contar estados
             let estados = {
                 'Abierta': 0,
-                'Pendiente': 0,
+                'Cierre próximo': 0,
+                'Próxima apertura': 0,
                 'Cerrada': 0
             };
-            
+
             // Contar por estado
             programas.forEach(programa => {
                 if (programa.convocatoria && programa.convocatoria.estado) {
                     const estado = programa.convocatoria.estado;
-                    if (estado.includes('Abierta')) {
+                    if (estado.includes('Cierre próximo')) {
+                        estados['Cierre próximo']++;
+                    } else if (estado.includes('Abierta')) {
                         estados['Abierta']++;
-                    } else if (estado.includes('Pendiente')) {
-                        estados['Pendiente']++;
+                    } else if (estado.includes('Próxima apertura') || estado.includes('Pendiente')) {
+                        estados['Próxima apertura']++;
                     } else {
                         estados['Cerrada']++;
                     }
                 }
             });
-            
+
             // Actualizar DOM
             document.getElementById('stats-total').textContent = programas.length;
-            document.getElementById('stats-abiertas').textContent = estados['Abierta'];
-            document.getElementById('stats-pendientes').textContent = estados['Pendiente'];
+            document.getElementById('stats-abiertas').textContent = estados['Abierta'] + estados['Cierre próximo'];
+            document.getElementById('stats-pendientes').textContent = estados['Próxima apertura'];
             document.getElementById('stats-cerradas').textContent = estados['Cerrada'];
         }
         
