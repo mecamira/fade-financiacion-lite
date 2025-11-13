@@ -208,18 +208,27 @@ class BDNSScraper:
             
             # Extraer documentos (pasar codigo_bdns)
             documentos = self._extraer_documentos(codigo_bdns)
-            
+
             # Extraer enlace de bases reguladoras
             bases_reguladoras_url = self._extraer_bases_reguladoras()
-            
+
+            # Extraer nombre oficial de la convocatoria
+            nombre_oficial = self._extraer_nombre_oficial()
+
+            # Extraer información de extractos (URL y fecha de publicación)
+            extracto_info = self._extraer_extracto_info()
+
             resultado = {
                 'success': True,
                 'codigo_bdns': codigo_bdns,
                 'url_bdns': url,  # URL de la página BDNS
                 'bases_reguladoras_url': bases_reguladoras_url,  # URL del PDF de bases
-                'documentos': documentos
+                'documentos': documentos,
+                'nombre_oficial': nombre_oficial,  # Título oficial de la convocatoria
+                'extracto': extracto_info.get('extracto'),  # URL del extracto
+                'fecha_publicacion': extracto_info.get('fecha_publicacion')  # Fecha de publicación del extracto
             }
-            
+
             return resultado
             
         except Exception as e:
@@ -580,55 +589,164 @@ class BDNSScraper:
         
         return resultado
     
+    def _extraer_nombre_oficial(self) -> Optional[str]:
+        """
+        Extrae el título oficial de la convocatoria
+
+        Returns:
+            Título oficial de la convocatoria o None si no se encuentra
+        """
+        try:
+            print("\n🔍 Buscando título oficial de la convocatoria...")
+
+            # Buscar el div que contiene "Título de la convocatoria en español"
+            try:
+                titulo_element = self.driver.find_element(
+                    By.XPATH,
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Título de la convocatoria en español')]"
+                )
+
+                # Buscar el párrafo siguiente que contiene el título
+                parent_div = titulo_element.find_element(By.XPATH, "..")
+                titulo_p = parent_div.find_element(By.XPATH, ".//p")
+                titulo_oficial = titulo_p.text.strip()
+
+                if titulo_oficial:
+                    print(f"   ✓ Título oficial encontrado: {titulo_oficial}")
+                    return titulo_oficial
+
+            except Exception as e:
+                print(f"   ⚠ No se encontró el título oficial: {e}")
+
+            print("   ✗ No se encontró el título oficial")
+            return None
+
+        except Exception as e:
+            print(f"   Error al extraer título oficial: {e}")
+            return None
+
+    def _extraer_extracto_info(self) -> Dict[str, Optional[str]]:
+        """
+        Extrae información de la tabla "Extractos de la convocatoria"
+
+        Returns:
+            Diccionario con extracto (URL) y fecha_publicacion
+        """
+        try:
+            print("\n🔍 Buscando extractos de la convocatoria...")
+
+            resultado = {
+                'extracto': None,
+                'fecha_publicacion': None
+            }
+
+            # Buscar la tabla de extractos
+            try:
+                # Buscar todas las tablas
+                tablas = self.driver.find_elements(By.TAG_NAME, "table")
+
+                for tabla in tablas:
+                    tabla_text = tabla.text
+
+                    # Verificar si es la tabla de extractos
+                    if "Extractos de la convocatoria" in tabla_text or ("Fecha de publicación" in tabla_text and "Diario oficial" in tabla_text):
+                        print("   ✓ Tabla de extractos encontrada!")
+
+                        # Buscar las filas de datos (tbody tr)
+                        filas = tabla.find_elements(By.XPATH, ".//tbody/tr")
+
+                        if filas:
+                            # Tomar la primera fila de datos
+                            primera_fila = filas[0]
+
+                            # Extraer fecha de publicación (segunda columna)
+                            try:
+                                fecha_col = primera_fila.find_element(By.XPATH, ".//td[2]")
+                                fecha_text = fecha_col.text.strip()
+
+                                # Convertir DD/MM/YYYY a YYYY-MM-DD
+                                if fecha_text:
+                                    match = re.match(r'(\d{1,2})/(\d{1,2})/(\d{4})', fecha_text)
+                                    if match:
+                                        dia, mes, año = match.groups()
+                                        fecha_obj = datetime(int(año), int(mes), int(dia))
+                                        resultado['fecha_publicacion'] = fecha_obj.strftime('%Y-%m-%d')
+                                        print(f"   ✓ Fecha de publicación: {resultado['fecha_publicacion']}")
+                            except Exception as e:
+                                print(f"   ⚠ Error extrayendo fecha: {e}")
+
+                            # Extraer URL del extracto (última columna con enlace)
+                            try:
+                                # Buscar enlace en la última columna
+                                url_link = primera_fila.find_element(By.XPATH, ".//td[last()]//a[@href]")
+                                extracto_url = url_link.get_attribute('href')
+
+                                if extracto_url:
+                                    resultado['extracto'] = extracto_url
+                                    print(f"   ✓ URL extracto: {extracto_url}")
+                            except Exception as e:
+                                print(f"   ⚠ Error extrayendo URL: {e}")
+
+                            break
+
+            except Exception as e:
+                print(f"   ⚠ Error buscando tabla de extractos: {e}")
+
+            return resultado
+
+        except Exception as e:
+            print(f"   Error al extraer información de extractos: {e}")
+            return {'extracto': None, 'fecha_publicacion': None}
+
     def _extraer_bases_reguladoras(self) -> Optional[str]:
         """
         Extrae el enlace de las bases reguladoras de la página
-        
+
         Returns:
             URL del PDF de las bases reguladoras o None si no se encuentra
         """
         try:
             print("\n🔍 Buscando bases reguladoras...")
-            
+
             # Buscar el div que contiene "Dirección electrónica de las bases reguladoras"
             try:
                 # Buscar por el texto específico
                 bases_element = self.driver.find_element(
-                    By.XPATH, 
+                    By.XPATH,
                     "//div[contains(@class, 'titulo-campo') and contains(text(), 'Dirección electrónica de las bases reguladoras')]"
                 )
-                
+
                 # Buscar el enlace en el siguiente div hermano
                 parent_div = bases_element.find_element(By.XPATH, "..")
                 link_div = parent_div.find_element(By.XPATH, ".//a[@href]")
                 bases_url = link_div.get_attribute('href')
-                
+
                 if bases_url:
                     print(f"   ✓ Bases reguladoras encontradas: {bases_url}")
                     return bases_url
-                    
+
             except Exception as e:
                 print(f"   ⚠ No se encontraron bases reguladoras en la sección específica: {e}")
-            
+
             # Búsqueda alternativa: cualquier enlace con 'bopa' o 'bases' en el href
             try:
                 enlaces_bases = self.driver.find_elements(
-                    By.XPATH, 
+                    By.XPATH,
                     "//a[contains(@href, 'bopa') or contains(translate(@href, 'BASES', 'bases'), 'bases')]"
                 )
-                
+
                 for enlace in enlaces_bases:
                     href = enlace.get_attribute('href')
                     if href and '.pdf' in href.lower():
                         print(f"   ✓ Bases reguladoras encontradas (búsqueda alternativa): {href}")
                         return href
-                        
+
             except Exception as e:
                 print(f"   ⚠ Error en búsqueda alternativa: {e}")
-            
+
             print("   ✗ No se encontraron bases reguladoras")
             return None
-            
+
         except Exception as e:
             print(f"   Error al extraer bases reguladoras: {e}")
             return None

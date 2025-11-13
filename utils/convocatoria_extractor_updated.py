@@ -325,36 +325,40 @@ class ConvocatoriaExtractor:
         Ahora, procesa el texto proporcionado sobre la convocatoria y genera SOLO el objeto JSON estructurado:
         """
     
-    def extract_from_pdf(self, 
+    def extract_from_pdf(self,
                          pdf_file,
                          codigo_bdns: Optional[str] = None,
                          fecha_publicacion: Optional[str] = None,
                          url_bdns: Optional[str] = None,
                          convocatoria_url: Optional[str] = None,
-                         bases_reguladoras_url: Optional[str] = None) -> Dict[str, Any]:
+                         bases_reguladoras_url: Optional[str] = None,
+                         nombre_oficial: Optional[str] = None,
+                         extracto_url: Optional[str] = None) -> Dict[str, Any]:
         """
         Extrae información estructurada desde un archivo PDF de la convocatoria
-        
+
         Args:
-            pdf_file: Archivo PDF (objeto de tipo file de Flask) 
+            pdf_file: Archivo PDF (objeto de tipo file de Flask)
             codigo_bdns: Código BDNS de la convocatoria (opcional)
             fecha_publicacion: Fecha de publicación en formato YYYY-MM-DD (opcional)
             url_bdns: URL de la página BDNS (opcional)
             convocatoria_url: URL del PDF de la convocatoria (opcional)
             bases_reguladoras_url: URL del PDF de bases reguladoras (opcional)
-            
+            nombre_oficial: Título oficial de la convocatoria (opcional)
+            extracto_url: URL del extracto oficial (opcional)
+
         Returns:
             Diccionario con la información estructurada de la convocatoria
         """
         try:
             # Leer el contenido del PDF
             pdf_text = self._extract_text_from_pdf(pdf_file)
-            
+
             if not pdf_text:
                 return {
                     "error": "No se pudo extraer texto del PDF"
                 }
-            
+
             # Una vez extraído el texto, usar el método existente para extraer información
             return self.extract_convocatoria_info(
                 convocatoria_text=pdf_text,
@@ -362,7 +366,9 @@ class ConvocatoriaExtractor:
                 fecha_publicacion=fecha_publicacion,
                 url_bdns=url_bdns,
                 convocatoria_url=convocatoria_url,
-                bases_reguladoras_url=bases_reguladoras_url
+                bases_reguladoras_url=bases_reguladoras_url,
+                nombre_oficial=nombre_oficial,
+                extracto_url=extracto_url
             )
         except Exception as e:
             print(f"Error al procesar PDF: {e}")
@@ -500,16 +506,18 @@ class ConvocatoriaExtractor:
             print(f"Error al limpiar JSON malformado: {e}")
             return json_text  # Devolvemos el texto original si hay algún error
     
-    def extract_convocatoria_info(self, 
-                                 convocatoria_text: str, 
+    def extract_convocatoria_info(self,
+                                 convocatoria_text: str,
                                  codigo_bdns: Optional[str] = None,
                                  fecha_publicacion: Optional[str] = None,
                                  url_bdns: Optional[str] = None,
                                  convocatoria_url: Optional[str] = None,
-                                 bases_reguladoras_url: Optional[str] = None) -> Dict[str, Any]:
+                                 bases_reguladoras_url: Optional[str] = None,
+                                 nombre_oficial: Optional[str] = None,
+                                 extracto_url: Optional[str] = None) -> Dict[str, Any]:
         """
         Extrae información estructurada de una convocatoria de financiación
-        
+
         Args:
             convocatoria_text: Texto de la convocatoria
             codigo_bdns: Código BDNS de la convocatoria (opcional)
@@ -517,36 +525,44 @@ class ConvocatoriaExtractor:
             url_bdns: URL de la página BDNS (opcional)
             convocatoria_url: URL del PDF de convocatoria (opcional)
             bases_reguladoras_url: URL del PDF de bases reguladoras (opcional)
-            
+            nombre_oficial: Título oficial de la convocatoria (opcional)
+            extracto_url: URL del extracto oficial (opcional)
+
         Returns:
             Diccionario con la información estructurada de la convocatoria
         """
         try:
             # Preparar mensaje con información adicional si está disponible
             additional_info = ""
-            
-            if codigo_bdns or fecha_publicacion or url_bdns or convocatoria_url or bases_reguladoras_url:
+
+            if codigo_bdns or fecha_publicacion or url_bdns or convocatoria_url or bases_reguladoras_url or nombre_oficial or extracto_url:
                 info_adicional = "INFORMACIÓN ADICIONAL A INCORPORAR EN EL JSON:\n"
-                
+
                 if codigo_bdns:
                     info_adicional += f"- Código BDNS: {codigo_bdns}\n"
-                    
+
+                if nombre_oficial:
+                    info_adicional += f"- Título oficial (usar como nombre_oficial): {nombre_oficial}\n"
+
                 if fecha_publicacion:
                     info_adicional += f"- Fecha de publicación: {fecha_publicacion}\n"
                     # Añadir fecha de publicación como contexto para el cálculo de fechas
                     additional_info += f"\nLa fecha de publicación es {fecha_publicacion}. "
                     additional_info += f"Si se menciona un plazo relativo a la publicación (ej: 15 días), "
                     additional_info += f"calcula la fecha absoluta usando esta fecha como referencia.\n"
-                    
+
                 if url_bdns:
                     info_adicional += f"- URL página BDNS: {url_bdns}\n"
-                    
+
                 if convocatoria_url:
                     info_adicional += f"- URL PDF convocatoria: {convocatoria_url}\n"
-                    
+
                 if bases_reguladoras_url:
                     info_adicional += f"- URL PDF bases reguladoras: {bases_reguladoras_url}\n"
-                
+
+                if extracto_url:
+                    info_adicional += f"- URL extracto oficial: {extracto_url}\n"
+
                 # Añadir a la convocatoria
                 convocatoria_text = info_adicional + additional_info + "\n" + convocatoria_text
             
@@ -601,18 +617,24 @@ class ConvocatoriaExtractor:
                 # Completar con información adicional si no se añadió correctamente
                 if codigo_bdns and (not result.get('codigo_bdns') or result['codigo_bdns'] == "null"):
                     result['codigo_bdns'] = codigo_bdns
-                
+
+                if nombre_oficial and (not result.get('nombre_oficial') or result['nombre_oficial'] == "null"):
+                    result['nombre_oficial'] = nombre_oficial
+
                 if 'enlaces' not in result:
                     result['enlaces'] = {}
-                
+
                 if url_bdns and (not result['enlaces'].get('url_bdns') or result['enlaces']['url_bdns'] == "null"):
                     result['enlaces']['url_bdns'] = url_bdns
-                
+
                 if convocatoria_url and (not result['enlaces'].get('convocatoria') or result['enlaces']['convocatoria'] == "null"):
                     result['enlaces']['convocatoria'] = convocatoria_url
-                    
+
                 if bases_reguladoras_url and (not result['enlaces'].get('bases_reguladoras') or result['enlaces']['bases_reguladoras'] == "null"):
                     result['enlaces']['bases_reguladoras'] = bases_reguladoras_url
+
+                if extracto_url and (not result['enlaces'].get('extracto') or result['enlaces']['extracto'] == "null"):
+                    result['enlaces']['extracto'] = extracto_url
                 
                 # Verificar el estado de la convocatoria basado en las fechas
                 self._verificar_estado_convocatoria(result, fecha_publicacion)
@@ -763,7 +785,7 @@ class ConvocatoriaExtractor:
         if 'enlaces' not in data or not isinstance(data['enlaces'], dict):
             data['enlaces'] = {}
 
-        enl_fields = ['bases', 'convocatoria']
+        enl_fields = ['bases', 'convocatoria', 'extracto', 'url_bdns', 'bases_reguladoras']
         for field in enl_fields:
             if field not in data['enlaces']:
                 data['enlaces'][field] = None
