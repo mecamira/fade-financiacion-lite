@@ -260,7 +260,9 @@ def extraer_convocatoria():
         url_bdns = None
         convocatoria_url = None
         bases_reguladoras_url = None
-        
+        nombre_oficial = None
+        extracto_url = None
+
         # Intentar obtener datos como JSON o como form data
         if request.is_json:
             data = request.get_json()
@@ -270,6 +272,8 @@ def extraer_convocatoria():
             url_bdns = data.get('url_bdns')
             convocatoria_url = data.get('convocatoria_url')
             bases_reguladoras_url = data.get('bases_reguladoras_url')
+            nombre_oficial = data.get('nombre_oficial')
+            extracto_url = data.get('extracto')
         else:
             # Datos de formulario
             texto_convocatoria = request.form.get('convocatoria_text')
@@ -278,6 +282,8 @@ def extraer_convocatoria():
             url_bdns = request.form.get('url_bdns')
             convocatoria_url = request.form.get('convocatoria_url')
             bases_reguladoras_url = request.form.get('bases_reguladoras_url')
+            nombre_oficial = request.form.get('nombre_oficial')
+            extracto_url = request.form.get('extracto')
             
             # Si viene un PDF, extraer el texto
             if 'convocatoria_pdf' in request.files:
@@ -310,7 +316,9 @@ def extraer_convocatoria():
             fecha_publicacion=fecha_publicacion,
             url_bdns=url_bdns,
             convocatoria_url=convocatoria_url,
-            bases_reguladoras_url=bases_reguladoras_url
+            bases_reguladoras_url=bases_reguladoras_url,
+            nombre_oficial=nombre_oficial,
+            extracto_url=extracto_url
         )
         
         # Verificar si hay error
@@ -374,6 +382,9 @@ def obtener_info_bdns():
             'codigo_bdns': info_bdns.get('codigo_bdns'),
             'url_bdns': info_bdns.get('url_bdns'),  # URL de la página BDNS
             'bases_reguladoras_url': info_bdns.get('bases_reguladoras_url'),  # URL del PDF de bases
+            'nombre_oficial': info_bdns.get('nombre_oficial'),  # Título oficial de la convocatoria
+            'extracto': info_bdns.get('extracto'),  # URL del extracto oficial
+            'fecha_publicacion': info_bdns.get('fecha_publicacion'),  # Fecha de publicación del extracto
             'documentos': info_bdns.get('documentos', [])
         })
         
