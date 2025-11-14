@@ -442,7 +442,9 @@ def guardar_programa():
             return jsonify({'success': False, 'error': 'Falta el campo: nombre_coloquial o nombre'}), 400
         if not data.get('organismo'):
             return jsonify({'success': False, 'error': 'Falta el campo: organismo'}), 400
-        if not data.get('tipo_ayuda'):
+        # tipo_ayuda puede ser array o string
+        tipo_ayuda = data.get('tipo_ayuda')
+        if not tipo_ayuda or (isinstance(tipo_ayuda, list) and len(tipo_ayuda) == 0):
             return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Guardar en base de datos
@@ -492,7 +494,9 @@ def actualizar_programa(programa_id):
             return jsonify({'success': False, 'error': 'Falta el campo: nombre_coloquial o nombre'}), 400
         if not data.get('organismo'):
             return jsonify({'success': False, 'error': 'Falta el campo: organismo'}), 400
-        if not data.get('tipo_ayuda'):
+        # tipo_ayuda puede ser array o string
+        tipo_ayuda = data.get('tipo_ayuda')
+        if not tipo_ayuda or (isinstance(tipo_ayuda, list) and len(tipo_ayuda) == 0):
             return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Actualizar en base de datos

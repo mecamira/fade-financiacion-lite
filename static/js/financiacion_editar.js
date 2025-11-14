@@ -48,27 +48,33 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        tbody.innerHTML = programas.map(p => `
-            <tr>
-                <td><strong>${p.nombre || '-'}</strong></td>
-                <td>${p.organismo || '-'}</td>
-                <td>${p.convocatoria?.estado ? `<span class="badge bg-${getBadge(p.convocatoria.estado)}">${p.convocatoria.estado}</span>` : '-'}</td>
-                <td>${p.codigo_bdns || '-'}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="editar('${p.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminar('${p.id}', '${(p.nombre || '').replace(/'/g, "\\'")}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = programas.map(p => {
+            const nombre = p.nombre_coloquial || p.nombre || '-';
+            return `
+                <tr>
+                    <td><strong>${nombre}</strong></td>
+                    <td>${p.organismo || '-'}</td>
+                    <td>${p.convocatoria?.estado ? `<span class="badge bg-${getBadge(p.convocatoria.estado)}">${p.convocatoria.estado}</span>` : '-'}</td>
+                    <td>${p.codigo_bdns || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editar('${p.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminar('${p.id}', '${nombre.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
     
     function getBadge(estado) {
         if (estado?.includes('Abierta')) return 'success';
+        if (estado?.includes('Cierre próximo')) return 'warning';
+        if (estado?.includes('Próxima apertura')) return 'info';
         if (estado?.includes('Pendiente')) return 'warning';
+        if (estado?.includes('Cerrada')) return 'secondary';
         return 'secondary';
     }
     
@@ -99,10 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar datos en formulario
     function cargarDatos(p) {
         document.getElementById('edit-id').value = p.id || '';
-        document.getElementById('edit-nombre').value = p.nombre || '';
+        // Compatibilidad: usar nombre_coloquial o nombre
+        document.getElementById('edit-nombre').value = p.nombre_coloquial || p.nombre || '';
         document.getElementById('edit-bdns').value = p.codigo_bdns || '';
         document.getElementById('edit-organismo').value = p.organismo || '';
-        document.getElementById('edit-tipo').value = p.tipo_ayuda || '';
+        // Compatibilidad: tipo_ayuda puede ser array o string
+        let tipoAyuda = p.tipo_ayuda;
+        if (Array.isArray(tipoAyuda)) {
+            tipoAyuda = tipoAyuda.join(', ');
+        }
+        document.getElementById('edit-tipo').value = tipoAyuda || '';
         document.getElementById('edit-ambito').value = p.ambito || '';
         document.getElementById('edit-estado').value = p.convocatoria?.estado || 'Abierta';
         document.getElementById('edit-fecha-apertura').value = p.convocatoria?.fecha_apertura || '';
@@ -114,14 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-tipo-proyecto').value = (p.tipo_proyecto || []).join('\n');
         document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
         document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
-        document.getElementById('edit-origen-fondos').value = p.origen_fondos || '';
+        // Compatibilidad: origen_fondos vs fondos_europeos (array)
+        let fondos = p.fondos_europeos || p.origen_fondos || '';
+        if (Array.isArray(fondos)) {
+            fondos = fondos.join(', ');
+        }
+        document.getElementById('edit-origen-fondos').value = fondos || '';
         document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
         document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
         document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
         document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
         document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
         document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
-        document.getElementById('edit-url-bases').value = p.enlaces?.bases || '';
+        document.getElementById('edit-url-bases').value = p.enlaces?.bases_reguladoras || p.enlaces?.bases || '';
     }
     
     // Limpiar formulario
@@ -140,9 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
     async function guardar() {
         const id = document.getElementById('edit-id').value;
         const datos = obtenerDatos();
-        
-        if (!datos.nombre || !datos.organismo || !datos.tipo_ayuda) {
-            alert('Completa los campos obligatorios');
+
+        if (!datos.nombre_coloquial || !datos.organismo || !datos.tipo_ayuda || datos.tipo_ayuda.length === 0) {
+            alert('Completa los campos obligatorios (nombre, organismo y tipo de ayuda)');
             return;
         }
         
@@ -187,18 +204,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const gastos_subvencionables = document.getElementById('edit-gastos-subvencionables').value
             .split('\n').map(s => s.trim()).filter(s => s);
 
+        // Tipo de ayuda como array (separado por comas)
+        const tipoAyudaStr = document.getElementById('edit-tipo').value || '';
+        const tipo_ayuda = tipoAyudaStr.split(',').map(s => s.trim()).filter(s => s);
+
+        // Fondos europeos como array (separado por comas)
+        const fondosStr = document.getElementById('edit-origen-fondos').value || '';
+        const fondos_europeos = fondosStr.split(',').map(s => s.trim()).filter(s => s);
+
         // Obtener URLs
         const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
         const urlConvocatoria = document.getElementById('edit-url-convocatoria').value.trim() || null;
         const urlBases = document.getElementById('edit-url-bases').value.trim() || null;
 
+        const nombre = document.getElementById('edit-nombre').value;
+
         return {
-            nombre: document.getElementById('edit-nombre').value,
+            // Usar nombre_coloquial como campo principal (compatibilidad hacia atrás)
+            nombre_coloquial: nombre,
+            nombre: nombre,  // Mantener nombre también para compatibilidad
+            nombre_oficial: nombre,  // Por defecto, igual al nombre_coloquial
             codigo_bdns: document.getElementById('edit-bdns').value || null,
             organismo: document.getElementById('edit-organismo').value,
-            tipo_ayuda: document.getElementById('edit-tipo').value,
+            tipo_ayuda: tipo_ayuda,  // Ahora es array
             ambito: document.getElementById('edit-ambito').value || null,
-            origen_fondos: document.getElementById('edit-origen-fondos').value || null,
+            fondos_europeos: fondos_europeos,  // Campo nuevo (array)
+            comentarios: '',  // Campo nuevo, vacío por defecto
             convocatoria: {
                 estado: document.getElementById('edit-estado').value,
                 fecha_apertura: document.getElementById('edit-fecha-apertura').value || null,
@@ -208,7 +239,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 intensidad: document.getElementById('edit-intensidad').value || null,
                 presupuesto_total: document.getElementById('edit-presupuesto-total').value || null,
                 presupuesto_minimo: document.getElementById('edit-presupuesto-minimo').value || null,
-                presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null
+                presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null,
+                importe_minimo_subvencionable: null,  // Campo nuevo
+                importe_maximo_subvencionable: null   // Campo nuevo
             },
             tipo_proyecto: tipo_proyecto,
             resumen_breve: document.getElementById('edit-resumen').value || null,
@@ -220,7 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
             enlaces: {
                 url_bdns: urlBdns,
                 convocatoria: urlConvocatoria,
-                bases: urlBases
+                bases_reguladoras: urlBases,  // Campo nuevo
+                bases: urlBases,  // Mantener para compatibilidad
+                extracto: null  // Campo nuevo
             }
         };
     }
