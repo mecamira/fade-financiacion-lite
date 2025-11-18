@@ -639,14 +639,17 @@ function generatePreview(data) {
                         
                         <h6 class="mt-3">Enlaces</h6>
                         <div class="row g-2">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 ${renderLink(data.enlaces?.url_bdns, 'Página BDNS', 'database')}
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 ${renderLink(data.enlaces?.convocatoria, 'Resolución Convocatoria', 'file-pdf')}
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 ${renderLink(data.enlaces?.bases_reguladoras, 'Bases Reguladoras', 'gavel')}
+                            </div>
+                            <div class="col-md-3">
+                                ${renderLink(data.enlaces?.extracto, 'Extracto Oficial', 'file-alt')}
                             </div>
                         </div>
                     </div>

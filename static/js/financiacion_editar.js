@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-id').value = p.id || '';
             // Compatibilidad: usar nombre_coloquial o nombre
             document.getElementById('edit-nombre').value = p.nombre_coloquial || p.nombre || '';
+            document.getElementById('edit-nombre-oficial').value = p.nombre_oficial || '';
             document.getElementById('edit-bdns').value = p.codigo_bdns || '';
             document.getElementById('edit-organismo').value = p.organismo || '';
             // Compatibilidad: tipo_ayuda puede ser array o string
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-fecha-cierre').value = p.convocatoria?.fecha_cierre || '';
             document.getElementById('edit-resumen').value = p.resumen_breve || '';
             document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
+            document.getElementById('edit-comentarios').value = p.comentarios || '';
 
             // Asegurar que los arrays sean arrays (compatibilidad con datos antiguos)
             const toArray = (value) => {
@@ -158,9 +160,12 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
             document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
             document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
+            document.getElementById('edit-importe-minimo-subvencionable').value = p.financiacion?.importe_minimo_subvencionable || '';
+            document.getElementById('edit-importe-maximo-subvencionable').value = p.financiacion?.importe_maximo_subvencionable || '';
             document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
             document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
             document.getElementById('edit-url-bases').value = p.enlaces?.bases_reguladoras || p.enlaces?.bases || '';
+            document.getElementById('edit-url-extracto').value = p.enlaces?.extracto || '';
 
             console.log('[DEBUG] Datos cargados exitosamente en el formulario');
         } catch (error) {
@@ -172,11 +177,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Limpiar formulario
     function limpiarFormulario() {
-        ['edit-id', 'edit-nombre', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
-         'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion',
+        ['edit-id', 'edit-nombre', 'edit-nombre-oficial', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
+         'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion', 'edit-comentarios',
          'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-gastos-subvencionables',
          'edit-origen-fondos', 'edit-intensidad', 'edit-presupuesto-total', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
-         'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases'].forEach(id => {
+         'edit-importe-minimo-subvencionable', 'edit-importe-maximo-subvencionable',
+         'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases', 'edit-url-extracto'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('edit-estado').value = 'Abierta';
@@ -245,20 +251,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
         const urlConvocatoria = document.getElementById('edit-url-convocatoria').value.trim() || null;
         const urlBases = document.getElementById('edit-url-bases').value.trim() || null;
+        const urlExtracto = document.getElementById('edit-url-extracto').value.trim() || null;
 
-        const nombre = document.getElementById('edit-nombre').value;
+        const nombreColoquial = document.getElementById('edit-nombre').value;
+        const nombreOficial = document.getElementById('edit-nombre-oficial').value.trim() || nombreColoquial;
 
         return {
             // Usar nombre_coloquial como campo principal (compatibilidad hacia atrás)
-            nombre_coloquial: nombre,
-            nombre: nombre,  // Mantener nombre también para compatibilidad
-            nombre_oficial: nombre,  // Por defecto, igual al nombre_coloquial
+            nombre_coloquial: nombreColoquial,
+            nombre: nombreColoquial,  // Mantener nombre también para compatibilidad
+            nombre_oficial: nombreOficial,  // Campo separado para el nombre oficial
             codigo_bdns: document.getElementById('edit-bdns').value || null,
             organismo: document.getElementById('edit-organismo').value,
             tipo_ayuda: tipo_ayuda,  // Ahora es array
             ambito: document.getElementById('edit-ambito').value || null,
             fondos_europeos: fondos_europeos,  // Campo nuevo (array)
-            comentarios: '',  // Campo nuevo, vacío por defecto
+            comentarios: document.getElementById('edit-comentarios').value || '',  // Campo nuevo
             convocatoria: {
                 estado: document.getElementById('edit-estado').value,
                 fecha_apertura: document.getElementById('edit-fecha-apertura').value || null,
@@ -269,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 presupuesto_total: document.getElementById('edit-presupuesto-total').value || null,
                 presupuesto_minimo: document.getElementById('edit-presupuesto-minimo').value || null,
                 presupuesto_maximo: document.getElementById('edit-presupuesto-maximo').value || null,
-                importe_minimo_subvencionable: null,  // Campo nuevo
-                importe_maximo_subvencionable: null   // Campo nuevo
+                importe_minimo_subvencionable: document.getElementById('edit-importe-minimo-subvencionable').value || null,  // Campo nuevo
+                importe_maximo_subvencionable: document.getElementById('edit-importe-maximo-subvencionable').value || null   // Campo nuevo
             },
             tipo_proyecto: tipo_proyecto,
             resumen_breve: document.getElementById('edit-resumen').value || null,
@@ -284,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 convocatoria: urlConvocatoria,
                 bases_reguladoras: urlBases,  // Campo nuevo
                 bases: urlBases,  // Mantener para compatibilidad
-                extracto: null  // Campo nuevo
+                extracto: urlExtracto  // Campo nuevo
             }
         };
     }
