@@ -77,6 +77,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="nombre-oficial" class="form-label">Título Oficial:</label>
+                            <input type="text" class="form-control" id="nombre-oficial" name="nombre_oficial" placeholder="Título oficial completo de la convocatoria">
+                            <small class="text-muted">Título oficial extraído de BDNS</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="extracto-url" class="form-label">Extracto Oficial:</label>
+                            <input type="url" class="form-control" id="extracto-url" name="extracto" placeholder="https://...">
+                            <small class="text-muted">URL del extracto oficial de la convocatoria</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Información de la Convocatoria:</label>
                             <ul class="nav nav-tabs mb-2" id="input-tabs" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -910,13 +922,31 @@ function generatePreview(data) {
                 
                 // Autocompletar campos básicos (SIEMPRE, independiente del documento)
                 document.getElementById('codigo-bdns').value = data.codigo_bdns;
-                
+
                 // URL BDNS: es la URL que el usuario pegó, no la que devuelve el backend
                 document.getElementById('url-bdns').value = urlBdns;
-                
+
                 // Bases Reguladoras: si existe, autocompletar SIEMPRE
                 if (data.bases_reguladoras_url) {
                     document.getElementById('bases-reguladoras-url').value = data.bases_reguladoras_url;
+                }
+
+                // Nombre Oficial: si existe, autocompletar
+                if (data.nombre_oficial) {
+                    document.getElementById('nombre-oficial').value = data.nombre_oficial;
+                    console.log('Nombre oficial:', data.nombre_oficial);  // DEBUG
+                }
+
+                // Extracto: si existe, autocompletar
+                if (data.extracto) {
+                    document.getElementById('extracto-url').value = data.extracto;
+                    console.log('Extracto URL:', data.extracto);  // DEBUG
+                }
+
+                // Fecha de publicación del extracto: si existe, autocompletar (prioridad sobre fecha_registro)
+                if (data.fecha_publicacion) {
+                    document.getElementById('fecha-publicacion').value = data.fecha_publicacion;
+                    console.log('Fecha de publicación del extracto:', data.fecha_publicacion);  // DEBUG
                 }
                 
                 // Si hay documentos
