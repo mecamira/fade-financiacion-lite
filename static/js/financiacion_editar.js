@@ -134,11 +134,20 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-fecha-cierre').value = p.convocatoria?.fecha_cierre || '';
             document.getElementById('edit-resumen').value = p.resumen_breve || '';
             document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
-            document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
-            document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
-            document.getElementById('edit-tipo-proyecto').value = (p.tipo_proyecto || []).join('\n');
-            document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
-            document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
+
+            // Asegurar que los arrays sean arrays (compatibilidad con datos antiguos)
+            const toArray = (value) => {
+                if (!value) return [];
+                if (Array.isArray(value)) return value;
+                if (typeof value === 'string') return [value];
+                return [];
+            };
+
+            document.getElementById('edit-beneficiarios').value = toArray(p.beneficiarios).join('\n');
+            document.getElementById('edit-sectores').value = toArray(p.sectores).join('\n');
+            document.getElementById('edit-tipo-proyecto').value = toArray(p.tipo_proyecto).join('\n');
+            document.getElementById('edit-requisitos').value = toArray(p.requisitos).join('\n');
+            document.getElementById('edit-gastos-subvencionables').value = toArray(p.gastos_subvencionables).join('\n');
             // Compatibilidad: origen_fondos vs fondos_europeos (array)
             let fondos = p.fondos_europeos || p.origen_fondos || '';
             if (Array.isArray(fondos)) {
