@@ -118,8 +118,8 @@
                         <input type="text" class="form-control" id="edit-organismo" required>
                     </div>
                     <div class="col-md-3">
-                        <label>Tipo Ayuda *</label>
-                        <input type="text" class="form-control" id="edit-tipo" required>
+                        <label>Tipo Ayuda * <small class="text-muted">(separar por comas)</small></label>
+                        <input type="text" class="form-control" id="edit-tipo" required placeholder="Subvención, Préstamo/Crédito...">
                     </div>
                     <div class="col-md-3">
                         <label>Ámbito</label>
@@ -130,7 +130,8 @@
                         <select class="form-select" id="edit-estado">
                             <option>Abierta</option>
                             <option>Cerrada</option>
-                            <option>Pendiente</option>
+                            <option>Próxima apertura</option>
+                            <option>Cierre próximo</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -170,17 +171,8 @@
                         <textarea class="form-control" id="edit-gastos-subvencionables" rows="3" placeholder="Personal, Equipamiento, Materiales..."></textarea>
                     </div>
                     <div class="col-6">
-                        <label>Origen de Fondos</label>
-                        <select class="form-select" id="edit-origen-fondos">
-                            <option value="">No especificado</option>
-                            <option value="FEDER">FEDER</option>
-                            <option value="FEMPA">FEMPA</option>
-                            <option value="FTJ">FTJ</option>
-                            <option value="Next Generation">Next Generation</option>
-                            <option value="Propios">Propios</option>
-                            <option value="Mixtos">Mixtos</option>
-                            <option value="Otros">Otros</option>
-                        </select>
+                        <label>Fondos Europeos <small class="text-muted">(separar por comas si hay varios)</small></label>
+                        <input type="text" class="form-control" id="edit-origen-fondos" placeholder="FEDER, Next Generation, FTJ, FEMPA, Otros...">
                     </div>
                     <div class="col-12">
                         <hr class="my-3">
