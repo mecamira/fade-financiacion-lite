@@ -13,6 +13,7 @@ import os
 import json
 from datetime import datetime
 import logging
+import traceback
 
 # Importar utilidades necesarias
 from utils import financing_dashboard
@@ -308,21 +309,38 @@ def extraer_convocatoria():
         
         if not texto_convocatoria:
             return jsonify({'success': False, 'error': 'No se proporcionó texto de la convocatoria'}), 400
-        
+
+        # Log de parámetros recibidos
+        logger.info(f"Extrayendo convocatoria con parámetros:")
+        logger.info(f"  - codigo_bdns: {codigo_bdns}")
+        logger.info(f"  - fecha_publicacion: {fecha_publicacion}")
+        logger.info(f"  - nombre_oficial: {nombre_oficial}")
+        logger.info(f"  - extracto_url: {extracto_url}")
+        logger.info(f"  - Longitud texto: {len(texto_convocatoria)} caracteres")
+
         # Extraer información con Gemini, pasando los parámetros adicionales
-        resultado = convocatoria_extractor.extract_convocatoria_info(
-            texto_convocatoria,
-            codigo_bdns=codigo_bdns,
-            fecha_publicacion=fecha_publicacion,
-            url_bdns=url_bdns,
-            convocatoria_url=convocatoria_url,
-            bases_reguladoras_url=bases_reguladoras_url,
-            nombre_oficial=nombre_oficial,
-            extracto_url=extracto_url
-        )
-        
+        try:
+            resultado = convocatoria_extractor.extract_convocatoria_info(
+                texto_convocatoria,
+                codigo_bdns=codigo_bdns,
+                fecha_publicacion=fecha_publicacion,
+                url_bdns=url_bdns,
+                convocatoria_url=convocatoria_url,
+                bases_reguladoras_url=bases_reguladoras_url,
+                nombre_oficial=nombre_oficial,
+                extracto_url=extracto_url
+            )
+        except Exception as extraction_error:
+            logger.error(f"Error durante extract_convocatoria_info: {str(extraction_error)}")
+            logger.error(traceback.format_exc())
+            return jsonify({
+                'success': False,
+                'error': f'Error al procesar con IA: {str(extraction_error)}'
+            }), 500
+
         # Verificar si hay error
         if 'error' in resultado:
+            logger.error(f"Error en resultado de extracción: {resultado.get('error')}")
             return jsonify({
                 'success': False,
                 'error': resultado.get('error', 'Error desconocido')
