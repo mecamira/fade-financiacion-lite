@@ -105,12 +105,16 @@
             <div class="modal-body" style="max-height:70vh;overflow-y:auto">
                 <input type="hidden" id="edit-id">
                 <div class="row g-3">
-                    <div class="col-md-8">
-                        <label>Nombre *</label>
-                        <input type="text" class="form-control" id="edit-nombre" required>
+                    <div class="col-md-6">
+                        <label>Nombre Coloquial * <small class="text-muted">(nombre de uso común)</small></label>
+                        <input type="text" class="form-control" id="edit-nombre" required placeholder="Ej: Programa FEDER Innova-Pyme">
                     </div>
-                    <div class="col-md-4">
-                        <label>BDNS</label>
+                    <div class="col-md-6">
+                        <label>Nombre Oficial <small class="text-muted">(título oficial completo)</small></label>
+                        <input type="text" class="form-control" id="edit-nombre-oficial" placeholder="Ej: Programa para el Fomento de la Innovación desde la Economía Social">
+                    </div>
+                    <div class="col-md-12">
+                        <label>Código BDNS</label>
                         <input type="text" class="form-control" id="edit-bdns">
                     </div>
                     <div class="col-md-6">
@@ -175,6 +179,10 @@
                         <input type="text" class="form-control" id="edit-origen-fondos" placeholder="FEDER, Next Generation, FTJ, FEMPA, Otros...">
                     </div>
                     <div class="col-12">
+                        <label>Comentarios <small class="text-muted">(notas internas sobre la convocatoria)</small></label>
+                        <textarea class="form-control" id="edit-comentarios" rows="2" placeholder="Notas adicionales, observaciones, cambios importantes..."></textarea>
+                    </div>
+                    <div class="col-12">
                         <hr class="my-3">
                         <h6 class="text-muted">Financiación</h6>
                     </div>
@@ -194,6 +202,14 @@
                         <label>Presupuesto Máximo del Proyecto (permitido)</label>
                         <input type="text" class="form-control" id="edit-presupuesto-maximo" placeholder="Ej: 1000000">
                     </div>
+                    <div class="col-md-6">
+                        <label>Importe Mínimo Subvencionable <small class="text-muted">(ayuda mínima que se otorga)</small></label>
+                        <input type="text" class="form-control" id="edit-importe-minimo-subvencionable" placeholder="Ej: 10000">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Importe Máximo Subvencionable <small class="text-muted">(ayuda máxima que se otorga)</small></label>
+                        <input type="text" class="form-control" id="edit-importe-maximo-subvencionable" placeholder="Ej: 500000">
+                    </div>
                     <div class="col-12">
                         <hr class="my-3">
                         <h6 class="text-muted">Enlaces</h6>
@@ -203,12 +219,16 @@
                         <input type="url" class="form-control" id="edit-url-bdns" placeholder="https://www.infosubvenciones.es/bdnstrans/...">
                     </div>
                     <div class="col-12">
-                        <label>URL Convocatoria</label>
+                        <label>URL Convocatoria (Resolución)</label>
                         <input type="url" class="form-control" id="edit-url-convocatoria" placeholder="https://...">
                     </div>
                     <div class="col-12">
                         <label>URL Bases Reguladoras</label>
                         <input type="url" class="form-control" id="edit-url-bases" placeholder="https://...">
+                    </div>
+                    <div class="col-12">
+                        <label>URL Extracto Oficial <small class="text-muted">(del BOE, DOGC, etc.)</small></label>
+                        <input type="url" class="form-control" id="edit-url-extracto" placeholder="https://www.boe.es/...">
                     </div>
                 </div>
             </div>
