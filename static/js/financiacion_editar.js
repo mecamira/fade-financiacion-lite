@@ -89,56 +89,76 @@ document.addEventListener('DOMContentLoaded', function() {
     // Editar
     window.editar = async function(id) {
         try {
+            console.log(`[DEBUG] Intentando cargar programa con ID: ${id}`);
             const response = await fetch(`/api/programa/${id}`);
+            console.log(`[DEBUG] Response status: ${response.status}`);
+
             const data = await response.json();
-            
+            console.log('[DEBUG] Datos recibidos:', data);
+
             if (data.success) {
+                console.log('[DEBUG] Programa cargado exitosamente:', data.programa);
                 cargarDatos(data.programa);
                 document.getElementById('modalTitle').textContent = 'Editar Convocatoria';
                 new bootstrap.Modal(document.getElementById('modalEditar')).show();
+            } else {
+                console.error('[ERROR] La API retornó success=false:', data);
+                alert('Error al cargar: ' + (data.error || 'Error desconocido'));
             }
         } catch (error) {
-            alert('Error al cargar');
+            console.error('[ERROR] Excepción al cargar programa:', error);
+            console.error('[ERROR] Stack trace:', error.stack);
+            alert('Error al cargar: ' + error.message);
         }
     };
     
     // Cargar datos en formulario
     function cargarDatos(p) {
-        document.getElementById('edit-id').value = p.id || '';
-        // Compatibilidad: usar nombre_coloquial o nombre
-        document.getElementById('edit-nombre').value = p.nombre_coloquial || p.nombre || '';
-        document.getElementById('edit-bdns').value = p.codigo_bdns || '';
-        document.getElementById('edit-organismo').value = p.organismo || '';
-        // Compatibilidad: tipo_ayuda puede ser array o string
-        let tipoAyuda = p.tipo_ayuda;
-        if (Array.isArray(tipoAyuda)) {
-            tipoAyuda = tipoAyuda.join(', ');
+        try {
+            console.log('[DEBUG] Iniciando carga de datos en formulario:', p);
+
+            document.getElementById('edit-id').value = p.id || '';
+            // Compatibilidad: usar nombre_coloquial o nombre
+            document.getElementById('edit-nombre').value = p.nombre_coloquial || p.nombre || '';
+            document.getElementById('edit-bdns').value = p.codigo_bdns || '';
+            document.getElementById('edit-organismo').value = p.organismo || '';
+            // Compatibilidad: tipo_ayuda puede ser array o string
+            let tipoAyuda = p.tipo_ayuda;
+            if (Array.isArray(tipoAyuda)) {
+                tipoAyuda = tipoAyuda.join(', ');
+            }
+            document.getElementById('edit-tipo').value = tipoAyuda || '';
+            document.getElementById('edit-ambito').value = p.ambito || '';
+            document.getElementById('edit-estado').value = p.convocatoria?.estado || 'Abierta';
+            document.getElementById('edit-fecha-apertura').value = p.convocatoria?.fecha_apertura || '';
+            document.getElementById('edit-fecha-cierre').value = p.convocatoria?.fecha_cierre || '';
+            document.getElementById('edit-resumen').value = p.resumen_breve || '';
+            document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
+            document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
+            document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
+            document.getElementById('edit-tipo-proyecto').value = (p.tipo_proyecto || []).join('\n');
+            document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
+            document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
+            // Compatibilidad: origen_fondos vs fondos_europeos (array)
+            let fondos = p.fondos_europeos || p.origen_fondos || '';
+            if (Array.isArray(fondos)) {
+                fondos = fondos.join(', ');
+            }
+            document.getElementById('edit-origen-fondos').value = fondos || '';
+            document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
+            document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
+            document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
+            document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
+            document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
+            document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
+            document.getElementById('edit-url-bases').value = p.enlaces?.bases_reguladoras || p.enlaces?.bases || '';
+
+            console.log('[DEBUG] Datos cargados exitosamente en el formulario');
+        } catch (error) {
+            console.error('[ERROR] Error al cargar datos en formulario:', error);
+            console.error('[ERROR] Stack trace:', error.stack);
+            throw error; // Re-lanzar el error para que lo capture el catch superior
         }
-        document.getElementById('edit-tipo').value = tipoAyuda || '';
-        document.getElementById('edit-ambito').value = p.ambito || '';
-        document.getElementById('edit-estado').value = p.convocatoria?.estado || 'Abierta';
-        document.getElementById('edit-fecha-apertura').value = p.convocatoria?.fecha_apertura || '';
-        document.getElementById('edit-fecha-cierre').value = p.convocatoria?.fecha_cierre || '';
-        document.getElementById('edit-resumen').value = p.resumen_breve || '';
-        document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
-        document.getElementById('edit-beneficiarios').value = (p.beneficiarios || []).join('\n');
-        document.getElementById('edit-sectores').value = (p.sectores || []).join('\n');
-        document.getElementById('edit-tipo-proyecto').value = (p.tipo_proyecto || []).join('\n');
-        document.getElementById('edit-requisitos').value = (p.requisitos || []).join('\n');
-        document.getElementById('edit-gastos-subvencionables').value = (p.gastos_subvencionables || []).join('\n');
-        // Compatibilidad: origen_fondos vs fondos_europeos (array)
-        let fondos = p.fondos_europeos || p.origen_fondos || '';
-        if (Array.isArray(fondos)) {
-            fondos = fondos.join(', ');
-        }
-        document.getElementById('edit-origen-fondos').value = fondos || '';
-        document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
-        document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
-        document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
-        document.getElementById('edit-presupuesto-maximo').value = p.financiacion?.presupuesto_maximo || '';
-        document.getElementById('edit-url-bdns').value = p.enlaces?.url_bdns || '';
-        document.getElementById('edit-url-convocatoria').value = p.enlaces?.convocatoria || '';
-        document.getElementById('edit-url-bases').value = p.enlaces?.bases_reguladoras || p.enlaces?.bases || '';
     }
     
     // Limpiar formulario
