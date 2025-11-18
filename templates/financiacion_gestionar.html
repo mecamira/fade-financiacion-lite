@@ -1038,17 +1038,22 @@ function generatePreview(data) {
         
         // Autocompletar campos con un documento específico
         function autocompletarConDocumento(documento) {
-            // Fecha de publicación
-            if (documento.fecha_publicacion) {
-                document.getElementById('fecha-publicacion').value = documento.fecha_publicacion;
+            // Fecha de publicación - SOLO actualizar si el campo está vacío
+            // Si ya tenemos fecha del extracto, NO sobrescribir con la fecha del documento
+            const fechaPublicacionField = document.getElementById('fecha-publicacion');
+            if (documento.fecha_publicacion && !fechaPublicacionField.value) {
+                fechaPublicacionField.value = documento.fecha_publicacion;
+                console.log('Fecha de publicación del documento:', documento.fecha_publicacion);
+            } else if (fechaPublicacionField.value) {
+                console.log('Manteniendo fecha de publicación existente (del extracto):', fechaPublicacionField.value);
             }
-            
+
             // URL de la convocatoria (documento PDF)
             // SOLO si es del tipo convocatoria
             if (documento.tipo === 'convocatoria' && documento.url) {
                 document.getElementById('convocatoria-url').value = documento.url;
             }
-            
+
             // NOTA: NO tocamos url-bdns ni bases-reguladoras-url porque ya se rellenaron automáticamente
             // y son independientes del documento seleccionado
         }
