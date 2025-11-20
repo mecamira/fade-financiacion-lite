@@ -758,6 +758,95 @@ function generatePreview(data) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Requisitos -->
+                ${data.requisitos && data.requisitos.length > 0 ? `
+                <div class="card border-0 shadow mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="mb-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-clipboard-check text-warning"></i>
+                            Requisitos
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled mb-0">
+                            ${data.requisitos.map(req => `
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    ${req}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Enlaces -->
+                ${(data.enlaces?.url_bdns || data.enlaces?.convocatoria || data.enlaces?.bases_reguladoras || data.enlaces?.bases || data.enlaces?.extracto) ? `
+                <div class="card border-0 shadow mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="mb-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-link text-primary"></i>
+                            Enlaces de Interés
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            ${data.enlaces?.url_bdns ? `
+                            <div class="col-md-6">
+                                <div class="field-label mb-2">
+                                    <i class="fas fa-database text-info"></i>
+                                    Base de Datos Nacional de Subvenciones (BDNS)
+                                </div>
+                                <a href="${data.enlaces.url_bdns}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Ver en BDNS
+                                </a>
+                            </div>
+                            ` : ''}
+
+                            ${data.enlaces?.convocatoria ? `
+                            <div class="col-md-6">
+                                <div class="field-label mb-2">
+                                    <i class="fas fa-file-pdf text-danger"></i>
+                                    Resolución de Convocatoria
+                                </div>
+                                <a href="${data.enlaces.convocatoria}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Ver Convocatoria
+                                </a>
+                            </div>
+                            ` : ''}
+
+                            ${(data.enlaces?.bases_reguladoras || data.enlaces?.bases) ? `
+                            <div class="col-md-6">
+                                <div class="field-label mb-2">
+                                    <i class="fas fa-gavel text-warning"></i>
+                                    Bases Reguladoras
+                                </div>
+                                <a href="${data.enlaces.bases_reguladoras || data.enlaces.bases}" target="_blank" class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Ver Bases
+                                </a>
+                            </div>
+                            ` : ''}
+
+                            ${data.enlaces?.extracto ? `
+                            <div class="col-md-6">
+                                <div class="field-label mb-2">
+                                    <i class="fas fa-newspaper text-primary"></i>
+                                    Extracto Oficial (BOE/DOGC/etc.)
+                                </div>
+                                <a href="${data.enlaces.extracto}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Ver Extracto
+                                </a>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
             `;
 
             container.innerHTML = html;

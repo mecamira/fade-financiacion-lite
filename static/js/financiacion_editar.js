@@ -4,6 +4,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Tagify para campos con tags
     const tagifyInstances = {};
 
+    // Configuración para organismo (solo uno)
+    tagifyInstances.organismo = new Tagify(document.getElementById('edit-organismo'), {
+        whitelist: OPCIONES_PREDEFINIDAS.organismo,
+        maxTags: 1,  // Solo un organismo
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: true
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
+    // Configuración para tipo_ayuda
+    tagifyInstances.tipo_ayuda = new Tagify(document.getElementById('edit-tipo'), {
+        whitelist: OPCIONES_PREDEFINIDAS.tipo_ayuda,
+        maxTags: Infinity,
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: false
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
     // Configuración para beneficiarios
     tagifyInstances.beneficiarios = new Tagify(document.getElementById('edit-beneficiarios'), {
         whitelist: OPCIONES_PREDEFINIDAS.beneficiarios,
@@ -181,13 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-nombre').value = p.nombre_coloquial || p.nombre || '';
             document.getElementById('edit-nombre-oficial').value = p.nombre_oficial || '';
             document.getElementById('edit-bdns').value = p.codigo_bdns || '';
-            document.getElementById('edit-organismo').value = p.organismo || '';
-            // Compatibilidad: tipo_ayuda puede ser array o string
-            let tipoAyuda = p.tipo_ayuda;
-            if (Array.isArray(tipoAyuda)) {
-                tipoAyuda = tipoAyuda.join(', ');
-            }
-            document.getElementById('edit-tipo').value = tipoAyuda || '';
             document.getElementById('edit-ambito').value = p.ambito || '';
             document.getElementById('edit-estado').value = p.convocatoria?.estado || 'Abierta';
             document.getElementById('edit-fecha-apertura').value = p.convocatoria?.fecha_apertura || '';
@@ -203,6 +224,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (typeof value === 'string') return [value];
                 return [];
             };
+
+            // Cargar organismo en Tagify (solo uno)
+            tagifyInstances.organismo.removeAllTags();
+            if (p.organismo) {
+                tagifyInstances.organismo.addTags([p.organismo]);
+            }
+
+            // Cargar tipo_ayuda en Tagify
+            const tipoAyuda = toArray(p.tipo_ayuda);
+            tagifyInstances.tipo_ayuda.removeAllTags();
+            tagifyInstances.tipo_ayuda.addTags(tipoAyuda);
 
             // Cargar tags en Tagify
             const beneficiarios = toArray(p.beneficiarios);
@@ -248,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Limpiar formulario
     function limpiarFormulario() {
-        ['edit-id', 'edit-nombre', 'edit-nombre-oficial', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
+        ['edit-id', 'edit-nombre', 'edit-nombre-oficial', 'edit-bdns', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion', 'edit-comentarios',
          'edit-requisitos', 'edit-gastos-subvencionables',
          'edit-intensidad', 'edit-presupuesto-total', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
@@ -258,6 +290,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Limpiar Tagify
+        tagifyInstances.organismo.removeAllTags();
+        tagifyInstances.tipo_ayuda.removeAllTags();
         tagifyInstances.beneficiarios.removeAllTags();
         tagifyInstances.sectores.removeAllTags();
         tagifyInstances.tipo_proyecto.removeAllTags();
@@ -307,6 +341,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Obtener datos del formulario
     function obtenerDatos() {
         // Obtener valores de Tagify
+        const organismoTags = tagifyInstances.organismo.value;
+        const organismo = organismoTags.length > 0 ? organismoTags[0].value : '';
+
+        const tipo_ayuda = tagifyInstances.tipo_ayuda.value.map(tag => tag.value);
         const beneficiarios = tagifyInstances.beneficiarios.value.map(tag => tag.value);
         const sectores = tagifyInstances.sectores.value.map(tag => tag.value);
         const tipo_proyecto = tagifyInstances.tipo_proyecto.value.map(tag => tag.value);
@@ -317,10 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .split('\n').map(s => s.trim()).filter(s => s);
         const gastos_subvencionables = document.getElementById('edit-gastos-subvencionables').value
             .split('\n').map(s => s.trim()).filter(s => s);
-
-        // Tipo de ayuda como array (separado por comas)
-        const tipoAyudaStr = document.getElementById('edit-tipo').value || '';
-        const tipo_ayuda = tipoAyudaStr.split(',').map(s => s.trim()).filter(s => s);
 
         // Obtener URLs
         const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
@@ -337,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
             nombre: nombreColoquial,  // Mantener nombre también para compatibilidad
             nombre_oficial: nombreOficial,  // Campo separado para el nombre oficial
             codigo_bdns: document.getElementById('edit-bdns').value || null,
-            organismo: document.getElementById('edit-organismo').value,
+            organismo: organismo,
             tipo_ayuda: tipo_ayuda,  // Ahora es array
             ambito: document.getElementById('edit-ambito').value || null,
             fondos_europeos: fondos_europeos,  // Campo nuevo (array)
