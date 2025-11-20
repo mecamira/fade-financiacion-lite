@@ -671,7 +671,7 @@ header {
 }
 
 .field-value-financial {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: var(--font-weight-bold);
     color: var(--color-success-500);
     line-height: 1.2;
@@ -849,7 +849,7 @@ header {
 }
 
 .financial-value {
-    font-size: 28px;
+    font-size: 20px;
     font-weight: var(--font-weight-bold);
     color: var(--color-success-500);
     line-height: 1.2;
