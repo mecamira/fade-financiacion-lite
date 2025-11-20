@@ -1,33 +1,92 @@
 // Gestión Manual de Convocatorias
 document.addEventListener('DOMContentLoaded', function() {
-    
+
+    // Inicializar Tagify para campos con tags
+    const tagifyInstances = {};
+
+    // Configuración para beneficiarios
+    tagifyInstances.beneficiarios = new Tagify(document.getElementById('edit-beneficiarios'), {
+        whitelist: OPCIONES_PREDEFINIDAS.beneficiarios,
+        maxTags: Infinity,
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: false
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
+    // Configuración para sectores
+    tagifyInstances.sectores = new Tagify(document.getElementById('edit-sectores'), {
+        whitelist: OPCIONES_PREDEFINIDAS.sectores,
+        maxTags: Infinity,
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: false
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
+    // Configuración para tipo_proyecto
+    tagifyInstances.tipo_proyecto = new Tagify(document.getElementById('edit-tipo-proyecto'), {
+        whitelist: OPCIONES_PREDEFINIDAS.tipo_proyecto,
+        maxTags: Infinity,
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: false
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
+    // Configuración para fondos europeos
+    tagifyInstances.fondos = new Tagify(document.getElementById('edit-origen-fondos'), {
+        whitelist: OPCIONES_PREDEFINIDAS.fondos_europeos,
+        maxTags: Infinity,
+        dropdown: {
+            maxItems: 20,
+            classname: "tags-look",
+            enabled: 0,
+            closeOnSelect: false
+        },
+        enforceWhitelist: false,
+        placeholder: "Escribe y presiona Enter..."
+    });
+
     // Event listeners
     document.getElementById('btn-buscar').addEventListener('click', buscar);
     document.getElementById('btn-nuevo').addEventListener('click', abrirNuevo);
     document.getElementById('btn-guardar').addEventListener('click', guardar);
     document.getElementById('btn-eliminar').addEventListener('click', confirmarEliminar);
-    
+
     document.getElementById('search-input').addEventListener('keypress', e => {
         if (e.key === 'Enter') buscar();
     });
-    
+
     // Buscar convocatorias
     async function buscar() {
         const search = document.getElementById('search-input').value;
         const organismo = document.getElementById('filter-organismo').value;
         const estado = document.getElementById('filter-estado').value;
-        
+
         document.getElementById('loading').classList.remove('d-none');
-        
+
         try {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (organismo) params.append('organismo', organismo);
             if (estado) params.append('estado', estado);
-            
+
             const response = await fetch(`/api/programas-financiacion?${params}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 mostrarResultados(data.programas);
             }
@@ -37,17 +96,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loading').classList.add('d-none');
         }
     }
-    
+
     // Mostrar resultados
     function mostrarResultados(programas) {
         const tbody = document.getElementById('tabla-body');
         document.getElementById('total').textContent = programas.length;
-        
+
         if (programas.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center">No se encontraron resultados</td></tr>';
             return;
         }
-        
+
         tbody.innerHTML = programas.map(p => {
             const nombre = p.nombre_coloquial || p.nombre || '-';
             return `
@@ -68,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }).join('');
     }
-    
+
     function getBadge(estado) {
         if (estado?.includes('Abierta')) return 'success';
         if (estado?.includes('Cierre próximo')) return 'warning';
@@ -77,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (estado?.includes('Cerrada')) return 'secondary';
         return 'secondary';
     }
-    
+
     // Abrir modal nuevo
     function abrirNuevo() {
         document.getElementById('modalTitle').textContent = 'Nueva Convocatoria';
@@ -85,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         limpiarFormulario();
         new bootstrap.Modal(document.getElementById('modalEditar')).show();
     }
-    
+
     // Editar
     window.editar = async function(id) {
         try {
@@ -111,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error al cargar: ' + error.message);
         }
     };
-    
+
     // Cargar datos en formulario
     function cargarDatos(p) {
         try {
@@ -145,17 +204,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 return [];
             };
 
-            document.getElementById('edit-beneficiarios').value = toArray(p.beneficiarios).join('\n');
-            document.getElementById('edit-sectores').value = toArray(p.sectores).join('\n');
-            document.getElementById('edit-tipo-proyecto').value = toArray(p.tipo_proyecto).join('\n');
+            // Cargar tags en Tagify
+            const beneficiarios = toArray(p.beneficiarios);
+            const sectores = toArray(p.sectores);
+            const tipo_proyecto = toArray(p.tipo_proyecto);
+
+            tagifyInstances.beneficiarios.removeAllTags();
+            tagifyInstances.beneficiarios.addTags(beneficiarios);
+
+            tagifyInstances.sectores.removeAllTags();
+            tagifyInstances.sectores.addTags(sectores);
+
+            tagifyInstances.tipo_proyecto.removeAllTags();
+            tagifyInstances.tipo_proyecto.addTags(tipo_proyecto);
+
+            // Fondos europeos
+            let fondos = toArray(p.fondos_europeos || p.origen_fondos);
+            tagifyInstances.fondos.removeAllTags();
+            tagifyInstances.fondos.addTags(fondos);
+
+            // Campos sin tags (mantenemos textarea)
             document.getElementById('edit-requisitos').value = toArray(p.requisitos).join('\n');
             document.getElementById('edit-gastos-subvencionables').value = toArray(p.gastos_subvencionables).join('\n');
-            // Compatibilidad: origen_fondos vs fondos_europeos (array)
-            let fondos = p.fondos_europeos || p.origen_fondos || '';
-            if (Array.isArray(fondos)) {
-                fondos = fondos.join(', ');
-            }
-            document.getElementById('edit-origen-fondos').value = fondos || '';
+
             document.getElementById('edit-intensidad').value = p.financiacion?.intensidad || '';
             document.getElementById('edit-presupuesto-total').value = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo || '';
             document.getElementById('edit-presupuesto-minimo').value = p.financiacion?.presupuesto_minimo || '';
@@ -174,20 +245,27 @@ document.addEventListener('DOMContentLoaded', function() {
             throw error; // Re-lanzar el error para que lo capture el catch superior
         }
     }
-    
+
     // Limpiar formulario
     function limpiarFormulario() {
         ['edit-id', 'edit-nombre', 'edit-nombre-oficial', 'edit-bdns', 'edit-organismo', 'edit-tipo', 'edit-ambito',
          'edit-fecha-apertura', 'edit-fecha-cierre', 'edit-resumen', 'edit-descripcion', 'edit-comentarios',
-         'edit-beneficiarios', 'edit-sectores', 'edit-tipo-proyecto', 'edit-requisitos', 'edit-gastos-subvencionables',
-         'edit-origen-fondos', 'edit-intensidad', 'edit-presupuesto-total', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
+         'edit-requisitos', 'edit-gastos-subvencionables',
+         'edit-intensidad', 'edit-presupuesto-total', 'edit-presupuesto-minimo', 'edit-presupuesto-maximo',
          'edit-importe-minimo-subvencionable', 'edit-importe-maximo-subvencionable',
          'edit-url-bdns', 'edit-url-convocatoria', 'edit-url-bases', 'edit-url-extracto'].forEach(id => {
             document.getElementById(id).value = '';
         });
+
+        // Limpiar Tagify
+        tagifyInstances.beneficiarios.removeAllTags();
+        tagifyInstances.sectores.removeAllTags();
+        tagifyInstances.tipo_proyecto.removeAllTags();
+        tagifyInstances.fondos.removeAllTags();
+
         document.getElementById('edit-estado').value = 'Abierta';
     }
-    
+
     // Guardar
     async function guardar() {
         const id = document.getElementById('edit-id').value;
@@ -197,20 +275,20 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Completa los campos obligatorios (nombre, organismo y tipo de ayuda)');
             return;
         }
-        
+
         const btn = document.getElementById('btn-guardar');
         btn.disabled = true;
         btn.textContent = 'Guardando...';
-        
+
         try {
             const response = await fetch(id ? `/api/programa/${id}` : '/api/guardar-programa', {
                 method: id ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 alert(id ? 'Actualizado' : 'Creado');
                 bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
@@ -225,15 +303,16 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.textContent = 'Guardar';
         }
     }
-    
+
     // Obtener datos del formulario
     function obtenerDatos() {
-        const beneficiarios = document.getElementById('edit-beneficiarios').value
-            .split('\n').map(s => s.trim()).filter(s => s);
-        const sectores = document.getElementById('edit-sectores').value
-            .split('\n').map(s => s.trim()).filter(s => s);
-        const tipo_proyecto = document.getElementById('edit-tipo-proyecto').value
-            .split('\n').map(s => s.trim()).filter(s => s);
+        // Obtener valores de Tagify
+        const beneficiarios = tagifyInstances.beneficiarios.value.map(tag => tag.value);
+        const sectores = tagifyInstances.sectores.value.map(tag => tag.value);
+        const tipo_proyecto = tagifyInstances.tipo_proyecto.value.map(tag => tag.value);
+        const fondos_europeos = tagifyInstances.fondos.value.map(tag => tag.value);
+
+        // Campos sin tags
         const requisitos = document.getElementById('edit-requisitos').value
             .split('\n').map(s => s.trim()).filter(s => s);
         const gastos_subvencionables = document.getElementById('edit-gastos-subvencionables').value
@@ -242,10 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Tipo de ayuda como array (separado por comas)
         const tipoAyudaStr = document.getElementById('edit-tipo').value || '';
         const tipo_ayuda = tipoAyudaStr.split(',').map(s => s.trim()).filter(s => s);
-
-        // Fondos europeos como array (separado por comas)
-        const fondosStr = document.getElementById('edit-origen-fondos').value || '';
-        const fondos_europeos = fondosStr.split(',').map(s => s.trim()).filter(s => s);
 
         // Obtener URLs
         const urlBdns = document.getElementById('edit-url-bdns').value.trim() || null;
@@ -296,26 +371,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
     }
-    
+
     // Eliminar
     window.eliminar = function(id, nombre) {
         document.getElementById('del-id').value = id;
         document.getElementById('del-nombre').textContent = nombre;
         new bootstrap.Modal(document.getElementById('modalEliminar')).show();
     };
-    
+
     // Confirmar eliminación
     async function confirmarEliminar() {
         const id = document.getElementById('del-id').value;
         const btn = document.getElementById('btn-eliminar');
-        
+
         btn.disabled = true;
         btn.textContent = 'Eliminando...';
-        
+
         try {
             const response = await fetch(`/api/programa/${id}`, { method: 'DELETE' });
             const data = await response.json();
-            
+
             if (data.success) {
                 alert('Eliminado');
                 bootstrap.Modal.getInstance(document.getElementById('modalEliminar')).hide();

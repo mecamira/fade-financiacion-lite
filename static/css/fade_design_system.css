@@ -990,3 +990,124 @@ header {
     background-color: var(--color-primary-500);
     color: white;
 }
+
+/* ==========================================
+   15. ESTILOS PARA TAGIFY (TAG INPUT)
+   ========================================== */
+
+/* Contenedor principal de Tagify */
+.tagify {
+    --tags-border-color: var(--color-neutral-300);
+    --tags-hover-border-color: var(--color-primary-500);
+    --tags-focus-border-color: var(--color-primary-500);
+    --tag-bg: var(--color-primary-100);
+    --tag-hover: var(--color-primary-200);
+    --tag-text-color: var(--color-primary-900);
+    --tag-text-color--edit: var(--color-neutral-900);
+    --tag-remove-bg: var(--color-error-500);
+    --tag-remove-btn-color: white;
+    --tag-pad: 0.35em 0.65em;
+    --tag-inset-shadow-size: 1.3em;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-md);
+    min-height: 42px;
+    padding: 4px 8px;
+    transition: var(--transition-base);
+}
+
+.tagify:hover {
+    border-color: var(--color-primary-400);
+}
+
+.tagify.tagify--focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 0.2rem rgba(0, 120, 191, 0.25);
+}
+
+/* Tags individuales */
+.tagify__tag {
+    margin: 3px;
+    background: var(--color-primary-100);
+    color: var(--color-primary-900);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    padding: 4px 10px;
+    transition: var(--transition-fast);
+}
+
+.tagify__tag:hover {
+    background: var(--color-primary-200);
+}
+
+/* Botón de remover tag */
+.tagify__tag__removeBtn {
+    margin-left: 6px;
+    font-size: 14px;
+    color: var(--color-primary-700);
+    opacity: 0.7;
+    transition: var(--transition-fast);
+}
+
+.tagify__tag__removeBtn:hover {
+    opacity: 1;
+    color: var(--color-error-500);
+}
+
+/* Input dentro del Tagify */
+.tagify__input {
+    margin: 3px;
+    padding: 4px 8px;
+    line-height: 1.5;
+    min-width: 150px;
+}
+
+.tagify__input::before {
+    color: var(--color-neutral-500);
+    opacity: 0.7;
+}
+
+/* Dropdown de sugerencias */
+.tagify__dropdown {
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    background: white;
+    max-height: 300px;
+    overflow: auto;
+    z-index: 1050;
+}
+
+.tagify__dropdown__item {
+    padding: 8px 12px;
+    color: var(--color-neutral-900);
+    font-size: var(--font-size-body);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.tagify__dropdown__item:hover,
+.tagify__dropdown__item--active {
+    background: var(--color-primary-50);
+    color: var(--color-primary-700);
+}
+
+.tagify__dropdown__item--hidden {
+    display: none;
+}
+
+/* Mejorar integración con Bootstrap */
+.form-label + .tagify {
+    margin-top: 0;
+}
+
+/* Estado de carga */
+.tagify.tagify--loading .tagify__input::before {
+    content: "Cargando...";
+    animation: loading-pulse 1.5s infinite;
+}
+
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}

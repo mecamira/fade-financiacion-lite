@@ -261,33 +261,37 @@
                         <div id="collapseClasificacion" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
                             <div class="accordion-body">
                                 <div class="row g-3">
-                                    <div class="col-6">
+                                    <div class="col-12">
                                         <label class="form-label">
                                             <i class="fas fa-users text-primary"></i>
                                             Beneficiarios
                                         </label>
-                                        <textarea class="form-control" id="edit-beneficiarios" rows="3" placeholder="Uno por línea"></textarea>
+                                        <input type="text" class="form-control" id="edit-beneficiarios" placeholder="Seleccionar o escribir...">
+                                        <small class="text-muted">Selecciona de las opciones o escribe para añadir nuevas. Presiona Enter para agregar.</small>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-12">
                                         <label class="form-label">
                                             <i class="fas fa-industry text-primary"></i>
                                             Sectores
                                         </label>
-                                        <textarea class="form-control" id="edit-sectores" rows="3" placeholder="Uno por línea"></textarea>
+                                        <input type="text" class="form-control" id="edit-sectores" placeholder="Seleccionar o escribir...">
+                                        <small class="text-muted">Selecciona de las opciones o escribe para añadir nuevas. Presiona Enter para agregar.</small>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label">
                                             <i class="fas fa-project-diagram text-primary"></i>
                                             Tipo de Proyecto
                                         </label>
-                                        <textarea class="form-control" id="edit-tipo-proyecto" rows="3" placeholder="I+D+i, Digitalización, Inversión productiva..."></textarea>
+                                        <input type="text" class="form-control" id="edit-tipo-proyecto" placeholder="Seleccionar o escribir...">
+                                        <small class="text-muted">Selecciona de las opciones o escribe para añadir nuevas. Presiona Enter para agregar.</small>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label">
                                             <i class="fas fa-flag text-success"></i>
                                             Fondos Europeos
                                         </label>
-                                        <input type="text" class="form-control" id="edit-origen-fondos" placeholder="FEDER, Next Generation, FTJ, FEMPA, Otros... (separar por comas)">
+                                        <input type="text" class="form-control" id="edit-origen-fondos" placeholder="Seleccionar o escribir...">
+                                        <small class="text-muted">Selecciona de las opciones o escribe para añadir nuevas. Presiona Enter para agregar.</small>
                                     </div>
                                 </div>
                             </div>
@@ -460,5 +464,13 @@
     </div>
 </div>
 
+<!-- Tagify CSS y JS para tags input -->
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+
+<!-- Opciones predefinidas -->
+<script src="{{ url_for('static', filename='js/opciones_predefinidas.js') }}"></script>
+
+<!-- Script principal -->
 <script src="{{ url_for('static', filename='js/financiacion_editar.js') }}"></script>
 {% endblock %}
