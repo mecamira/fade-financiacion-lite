@@ -2,6 +2,53 @@
 // Estas listas se usan para autocompletado en el formulario de edición manual
 
 const OPCIONES_PREDEFINIDAS = {
+    organismo: [
+        // Organismos estatales principales
+        "CDTI - Centro para el Desarrollo Tecnológico y la Innovación",
+        "ENISA",
+        "Red.es",
+        "ICO - Instituto de Crédito Oficial",
+        "ICEX - Instituto Español de Comercio Exterior",
+        "Agencia Estatal de Investigación (AEI)",
+        "IDAE - Instituto para la Diversificación y Ahorro de la Energía",
+        "SEPE - Servicio Público de Empleo Estatal",
+        "EOI - Escuela de Organización Industrial",
+
+        // Ministerios
+        "Ministerio de Ciencia, Innovación y Universidades",
+        "Ministerio de Industria y Turismo",
+        "Ministerio de Economía, Comercio y Empresa",
+        "Ministerio de Cultura",
+        "Ministerio de Agricultura, Pesca y Alimentación",
+        "Ministerio de Defensa",
+
+        // Principado de Asturias - Consejerías
+        "Consejería de Ciencia, Empresas, Formación y Empleo",
+        "Consejería de Transición Ecológica, Industria y Comercio",
+        "Consejería de Medio Rural y Política Agraria",
+        "Consejería de Cultura, Política Llingüística y Deporte",
+        "Consejería de Presidencia, Reto Demográfico, Igualdad y Turismo",
+
+        // Agencias autonómicas
+        "SEKUENS - Agencia de Ciencia, Competitividad Empresarial e Innovación Asturiana",
+        "SEPEPA - Servicio Público de Empleo del Principado de Asturias",
+        "Sociedad Regional de Promoción del Principado de Asturias",
+
+        // SGR y financiación
+        "Asturgar S.G.R.",
+        "MicroBank",
+
+        // Cámaras de Comercio
+        "Cámara de Comercio de Oviedo",
+        "Cámara de Comercio de Gijón",
+        "Cámara de Comercio de Avilés",
+
+        // Ayuntamientos principales
+        "Ayuntamiento de Oviedo",
+        "Ayuntamiento de Gijón",
+        "Ayuntamiento de Avilés"
+    ],
+
     beneficiarios: [
         // Tipos de empresa por tamaño
         "Microempresas",
