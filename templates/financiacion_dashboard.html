@@ -429,61 +429,94 @@
 
 <template id="programa-card-template">
     <div class="col-md-6 mb-4">
-        <div class="card h-100 border-0 shadow-sm programa-card" data-programa-id="">
-            <div class="card-header py-3">
-                <span class="badge float-end"></span>
-                <h5 class="card-title programa-nombre mb-0 text-truncate"></h5>
-                <div class="small text-muted programa-organismo"></div>
-            </div>
-            <div class="card-body">
-                <!-- Mejorar visualización del resumen -->
-                <div class="programa-resumen mb-3"></div>
-                
-                <!-- Mostrar fechas de forma más destacada -->
-                <div class="programa-fecha mb-3"></div>
-                
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <small class="text-muted d-block">Tipo de ayuda:</small>
-                        <div class="programa-tipo-ayuda"></div>
-                    </div>
-                    <div class="col-6">
-                        <small class="text-muted d-block">Ámbito:</small>
-                        <div class="programa-ambito"></div>
-                    </div>
-                </div>
-                
-                <!-- Mostrar presupuesto total de la convocatoria -->
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <small class="text-muted d-block">Presupuesto total:</small>
-                        <div class="programa-importe"></div>
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <small class="text-muted d-block">Beneficiarios:</small>
-                        <div class="programa-beneficiarios"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer bg-white border-top-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <a href="#" class="btn btn-primary btn-sm programa-detalle">Ver detalles</a>
-                        <button type="button" class="btn btn-outline-secondary btn-sm ms-2 programa-preview">
-                            <i class="fas fa-eye"></i> Vista previa
-                        </button>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input programa-comparar" type="checkbox" value="">
-                        <label class="form-check-label small">
+        <div class="card h-100 border-0 shadow-sm programa-card card-hover-lift" data-programa-id="">
+            <div class="card-header py-3" style="background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%); color: white; border: none;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge"></span>
+                    <div class="form-check" style="margin-top: -4px;">
+                        <input class="form-check-input programa-comparar bg-white" type="checkbox" value="" style="border-color: white;">
+                        <label class="form-check-label small text-white">
                             Comparar
                         </label>
                     </div>
                 </div>
-                <span class="text-muted float-end small programa-intensidad mt-2"></span>
+                <h5 class="card-title programa-nombre mb-1" style="color: white; font-weight: 600;"></h5>
+                <div class="small programa-organismo" style="color: rgba(255,255,255,0.9); display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-building"></i>
+                    <span class="organismo-text"></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Resumen con icono -->
+                <div class="card-section">
+                    <div class="programa-resumen" style="color: var(--color-neutral-700); line-height: 1.5; font-size: 14px;"></div>
+                </div>
+
+                <div class="section-divider-solid"></div>
+
+                <!-- Fechas con mejor visualización -->
+                <div class="card-section programa-fecha"></div>
+
+                <!-- Tipo de ayuda y Ámbito con iconos -->
+                <div class="card-section">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="field-label">
+                                <i class="fas fa-hand-holding-usd text-success"></i>
+                                Tipo de ayuda
+                            </div>
+                            <div class="programa-tipo-ayuda field-value"></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="field-label">
+                                <i class="fas fa-globe-europe text-primary"></i>
+                                Ámbito
+                            </div>
+                            <div class="programa-ambito field-value"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider-solid"></div>
+
+                <!-- Presupuesto destacado -->
+                <div class="card-section">
+                    <div class="field-label">
+                        <i class="fas fa-money-bill-wave text-success"></i>
+                        Presupuesto total
+                    </div>
+                    <div class="programa-importe field-value-financial"></div>
+                </div>
+
+                <!-- Intensidad si existe -->
+                <div class="card-section programa-intensidad-container" style="display: none;">
+                    <div class="field-label">
+                        <i class="fas fa-percentage text-info"></i>
+                        Intensidad
+                    </div>
+                    <div class="programa-intensidad field-value"></div>
+                </div>
+
+                <div class="section-divider-solid"></div>
+
+                <!-- Beneficiarios con mejor estilo -->
+                <div class="card-section">
+                    <div class="field-label">
+                        <i class="fas fa-users text-primary"></i>
+                        Beneficiarios
+                    </div>
+                    <div class="programa-beneficiarios d-flex flex-wrap gap-1"></div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top pt-3">
+                <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-primary btn-sm programa-detalle flex-grow-1">
+                        <i class="fas fa-info-circle me-1"></i> Ver detalles
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm programa-preview">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -959,7 +992,7 @@
                 
                 // Establecer valores
                 card.querySelector('.programa-nombre').textContent = programa.nombre || 'Programa sin nombre';
-                card.querySelector('.programa-organismo').textContent = programa.organismo || 'Organismo no especificado';
+                card.querySelector('.programa-organismo .organismo-text').textContent = programa.organismo || 'Organismo no especificado';
                 
                 // Mejorar resumen
                 const resumenEl = card.querySelector('.programa-resumen');
@@ -973,22 +1006,22 @@
                 const presupuesto = programa.financiacion?.presupuesto_total || programa.financiacion?.importe_maximo;
                 importeEl.textContent = formatImporte(presupuesto);
                 
-                // Beneficiarios
+                // Beneficiarios con badges diferenciados
                 const beneficiariosEl = card.querySelector('.programa-beneficiarios');
                 if (programa.beneficiarios && programa.beneficiarios.length > 0) {
-                    // Mostrar los primeros 3 y un +X más si hay más
-                    const visibleBeneficiarios = programa.beneficiarios.slice(0, 3);
-                    const resto = programa.beneficiarios.length - 3;
-                    
-                    beneficiariosEl.innerHTML = visibleBeneficiarios.map(b => 
-                        `<span class="badge bg-light text-dark me-1 mb-1" data-bs-toggle="tooltip" title="${b}">${b}</span>`
+                    // Mostrar los primeros 4 y un +X más si hay más
+                    const visibleBeneficiarios = programa.beneficiarios.slice(0, 4);
+                    const resto = programa.beneficiarios.length - 4;
+
+                    beneficiariosEl.innerHTML = visibleBeneficiarios.map(b =>
+                        `<span class="badge badge-outline-neutral" data-bs-toggle="tooltip" title="${b}">${b}</span>`
                     ).join('');
-                    
+
                     if (resto > 0) {
-                        beneficiariosEl.innerHTML += `<span class="badge bg-secondary text-white me-1 mb-1" data-bs-toggle="tooltip" title="Y ${resto} beneficiarios más">+${resto} más</span>`;
+                        beneficiariosEl.innerHTML += `<span class="badge bg-secondary text-white" data-bs-toggle="tooltip" title="Y ${resto} beneficiarios más">+${resto}</span>`;
                     }
                 } else {
-                    beneficiariosEl.textContent = 'No especificados';
+                    beneficiariosEl.innerHTML = '<span class="text-muted small">No especificados</span>';
                 }
                 
                 // Estado de la convocatoria (badge)
@@ -1029,15 +1062,50 @@
                             const options = { year: 'numeric', month: 'long', day: 'numeric' };
                             const formattedDate = date.toLocaleDateString('es-ES', options);
                             
-                            // Si faltan menos de 30 días, mostrar alerta
+                            // Calcular días restantes y mostrar con indicador visual
                             const daysRemaining = Math.floor((date - new Date()) / (1000 * 60 * 60 * 24));
-                            
+
                             if (daysRemaining < 0) {
-                                fechaHTML = `<div class="alert alert-secondary py-1 px-2"><i class="fas fa-calendar-times me-1"></i> Convocatoria cerrada</div>`;
-                            } else if (daysRemaining < 30) {
-                                fechaHTML = `<div class="alert alert-warning py-1 px-2"><i class="fas fa-exclamation-triangle me-1"></i> Cierra pronto: <strong>${formattedDate}</strong> (${daysRemaining} días)</div>`;
+                                fechaHTML = `<div class="alert alert-secondary py-2 px-3 mb-0"><i class="fas fa-calendar-times me-2"></i> Convocatoria cerrada</div>`;
+                            } else if (daysRemaining <= 15) {
+                                // Urgente - menos de 15 días
+                                fechaHTML = `
+                                    <div class="alert alert-danger py-2 px-3 mb-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span><i class="fas fa-exclamation-triangle me-2"></i><strong>¡Cierre urgente!</strong></span>
+                                            <span class="days-remaining urgent">
+                                                <i class="fas fa-clock"></i>
+                                                ${daysRemaining} ${daysRemaining === 1 ? 'día' : 'días'}
+                                            </span>
+                                        </div>
+                                        <small class="d-block">${formattedDate}</small>
+                                    </div>`;
+                            } else if (daysRemaining <= 30) {
+                                // Moderado - entre 16 y 30 días
+                                fechaHTML = `
+                                    <div class="alert alert-warning py-2 px-3 mb-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span><i class="fas fa-calendar-check me-2"></i><strong>Cierre próximo</strong></span>
+                                            <span class="days-remaining moderate">
+                                                <i class="fas fa-clock"></i>
+                                                ${daysRemaining} días
+                                            </span>
+                                        </div>
+                                        <small class="d-block">${formattedDate}</small>
+                                    </div>`;
                             } else {
-                                fechaHTML = `<div class="alert alert-info py-1 px-2"><i class="fas fa-calendar-alt me-1"></i> Cierre: <strong>${formattedDate}</strong></div>`;
+                                // Cómodo - más de 30 días
+                                fechaHTML = `
+                                    <div class="alert alert-info py-2 px-3 mb-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span><i class="fas fa-calendar-alt me-2"></i>Fecha de cierre</span>
+                                            <span class="days-remaining comfortable">
+                                                <i class="fas fa-check-circle"></i>
+                                                ${daysRemaining} días
+                                            </span>
+                                        </div>
+                                        <small class="d-block">${formattedDate}</small>
+                                    </div>`;
                             }
                         } catch (e) {
                             fechaHTML = `<small class="text-muted">Fecha de cierre: ${fechaCierre}</small>`;
@@ -1058,11 +1126,13 @@
                 }
                 
                 // Intensidad de financiación
+                const intensidadContainer = card.querySelector('.programa-intensidad-container');
                 const intensidadEl = card.querySelector('.programa-intensidad');
                 if (programa.financiacion && programa.financiacion.intensidad && programa.financiacion.intensidad !== 'nan') {
                     intensidadEl.textContent = programa.financiacion.intensidad;
+                    intensidadContainer.style.display = 'block';
                 } else {
-                    intensidadEl.textContent = '';
+                    intensidadContainer.style.display = 'none';
                 }
                 
                 // Enlace al detalle

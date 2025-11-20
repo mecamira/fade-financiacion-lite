@@ -93,6 +93,26 @@
     /* Alturas de componentes */
     --header-height: 64px;
     --sidebar-width: 240px;
+
+    /* Gradientes para cards y fondos */
+    --gradient-primary: linear-gradient(135deg, var(--color-primary-50) 0%, #ffffff 100%);
+    --gradient-success: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    --gradient-warning: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    --gradient-info: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+
+    /* Sombras específicas para estados */
+    --shadow-card-hover: 0 10px 30px rgba(0, 120, 191, 0.15);
+    --shadow-card-selected: 0 0 0 3px var(--color-primary-100);
+    --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.12);
+
+    /* Bordes */
+    --border-accent: 4px;
+    --border-thin: 1px;
+
+    /* Transiciones */
+    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s ease;
 }
 
 /* ==========================================
@@ -613,3 +633,360 @@ header {
 .chart-bg-2 { background-color: var(--color-data-2); }
 .chart-bg-3 { background-color: var(--color-data-3); }
 .chart-bg-4 { background-color: var(--color-data-4); }
+
+/* ==========================================
+   14. CLASES DE UTILIDAD MEJORADAS
+   ========================================== */
+
+/* Etiquetas de campo con iconos */
+.field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.field-label i {
+    font-size: 14px;
+}
+
+/* Valores destacados */
+.field-value {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-900);
+    line-height: 1.4;
+}
+
+.field-value-primary {
+    font-size: 20px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-500);
+    line-height: 1.3;
+}
+
+.field-value-financial {
+    font-size: 24px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-success-500);
+    line-height: 1.2;
+}
+
+.field-value-large {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-500);
+    line-height: 1.2;
+}
+
+/* Separadores de sección */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--color-neutral-200) 50%,
+        transparent 100%
+    );
+    margin: var(--spacing-3) 0;
+}
+
+.section-divider-solid {
+    height: 1px;
+    background-color: var(--color-neutral-200);
+    margin: var(--spacing-2) 0;
+}
+
+/* Cards con borde de acento y gradiente */
+.card-accent-primary {
+    border-left: var(--border-accent) solid var(--color-primary-500);
+    background: var(--gradient-primary);
+    transition: var(--transition-base);
+}
+
+.card-accent-success {
+    border-left: var(--border-accent) solid var(--color-success-500);
+    background: var(--gradient-success);
+    transition: var(--transition-base);
+}
+
+.card-accent-info {
+    border-left: var(--border-accent) solid var(--color-primary-500);
+    background: var(--gradient-info);
+    transition: var(--transition-base);
+}
+
+.card-accent-warning {
+    border-left: var(--border-accent) solid var(--color-warning-500);
+    background: var(--gradient-warning);
+    transition: var(--transition-base);
+}
+
+/* Badges diferenciados */
+.badge-outline-neutral {
+    background-color: transparent;
+    border: 1px solid var(--color-neutral-200);
+    color: var(--color-neutral-700);
+    font-weight: var(--font-weight-medium);
+}
+
+.badge-sector {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-900);
+    border: 1px solid var(--color-primary-500);
+    font-weight: var(--font-weight-semibold);
+}
+
+.badge-proyecto {
+    background-color: rgba(0, 160, 160, 0.1);
+    color: #00707e;
+    border: 1px solid var(--color-data-2);
+    font-weight: var(--font-weight-semibold);
+}
+
+.badge-fondos-eu {
+    background-color: var(--color-success-500);
+    color: white;
+    box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Estados de tarjeta */
+.programa-card.selected-for-compare {
+    box-shadow: var(--shadow-card-selected) !important;
+    border: 2px solid var(--color-primary-500);
+    transform: translateY(-2px);
+}
+
+/* Timeline visual para fechas */
+.date-timeline {
+    position: relative;
+    height: 8px;
+    background: var(--color-neutral-200);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: var(--spacing-1) 0;
+}
+
+.date-timeline-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-700));
+    transition: width 0.8s ease;
+}
+
+.date-timeline-marker {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--color-neutral-0);
+    border: 2px solid var(--color-primary-500);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+/* Indicador de días restantes */
+.days-remaining {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+}
+
+.days-remaining i {
+    font-size: 12px;
+}
+
+.days-remaining.urgent {
+    background-color: rgba(229, 62, 62, 0.1);
+    color: var(--color-error-500);
+    border: 1px solid var(--color-error-500);
+}
+
+.days-remaining.moderate {
+    background-color: rgba(214, 158, 46, 0.1);
+    color: var(--color-warning-500);
+    border: 1px solid var(--color-warning-500);
+}
+
+.days-remaining.comfortable {
+    background-color: rgba(56, 161, 105, 0.1);
+    color: var(--color-success-500);
+    border: 1px solid var(--color-success-500);
+}
+
+/* Campos financieros especiales */
+.financial-field {
+    padding: var(--spacing-2);
+    background: var(--gradient-success);
+    border-radius: var(--border-radius-md);
+    border-left: var(--border-accent) solid var(--color-success-500);
+    margin-bottom: var(--spacing-2);
+}
+
+.financial-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-neutral-700);
+    margin-bottom: 8px;
+}
+
+.financial-value {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-success-500);
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.financial-context {
+    font-size: var(--font-size-caption);
+    color: var(--color-neutral-700);
+}
+
+/* Secciones de card */
+.card-section {
+    margin-bottom: var(--spacing-3);
+}
+
+.card-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Grupos de campos */
+.field-group {
+    margin-bottom: var(--spacing-2);
+}
+
+.field-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Animaciones suaves */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slideInUp 0.4s ease-out;
+}
+
+/* Hover mejorado para cards */
+.card-hover-lift {
+    transition: var(--transition-base);
+}
+
+.card-hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* Estados de validación mejorados */
+.form-control.is-valid {
+    border-left: var(--border-accent) solid var(--color-success-500);
+    padding-left: 12px;
+}
+
+.form-control.is-invalid {
+    border-left: var(--border-accent) solid var(--color-error-500);
+    padding-left: 12px;
+}
+
+/* Progress bar de completitud */
+.form-progress {
+    margin-bottom: var(--spacing-3);
+}
+
+.form-progress .progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: var(--color-neutral-200);
+    margin-bottom: 8px;
+}
+
+.form-progress .progress-bar {
+    background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-700));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* Badge con icono */
+.badge-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-with-icon i {
+    font-size: 11px;
+}
+
+/* Card header mejorado */
+.card-header-gradient {
+    background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+    color: white;
+    border: none;
+}
+
+.card-header-gradient h2,
+.card-header-gradient h3,
+.card-header-gradient h4,
+.card-header-gradient h5,
+.card-header-gradient h6 {
+    color: white;
+}
+
+/* Iconos de estado */
+.status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.status-icon.success {
+    background-color: var(--color-success-500);
+    color: white;
+}
+
+.status-icon.warning {
+    background-color: var(--color-warning-500);
+    color: white;
+}
+
+.status-icon.error {
+    background-color: var(--color-error-500);
+    color: white;
+}
+
+.status-icon.info {
+    background-color: var(--color-primary-500);
+    color: white;
+}

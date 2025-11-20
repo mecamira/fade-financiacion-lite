@@ -12,37 +12,61 @@
     </div>
 
     <!-- Encabezado del programa -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+    <div class="card mb-4 border-0 shadow">
+        <div class="card-header card-header-gradient py-4">
             <h2 class="mb-0">{{ programa.nombre_coloquial or programa.nombre }}</h2>
             {% if programa.nombre_oficial %}
-                <p class="mb-0 mt-1 small"><em>{{ programa.nombre_oficial }}</em></p>
+                <p class="mb-0 mt-2 small opacity-75"><em>{{ programa.nombre_oficial }}</em></p>
             {% endif %}
-            <p class="mb-0 mt-2"><strong>Organismo:</strong> {{ programa.organismo }}</p>
+            <p class="mb-0 mt-3 d-flex align-items-center gap-2">
+                <i class="fas fa-building"></i>
+                <strong>{{ programa.organismo }}</strong>
+            </p>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="row">
                 <div class="col-md-8">
-                    <h5>Resumen</h5>
-                    <p class="lead">{{ programa.resumen_breve }}</p>
+                    <div class="card-section">
+                        <h5 class="d-flex align-items-center gap-2 mb-3">
+                            <i class="fas fa-file-alt text-primary"></i>
+                            Resumen
+                        </h5>
+                        <p class="lead" style="line-height: 1.6;">{{ programa.resumen_breve }}</p>
+                    </div>
 
-                    <h6>Descripción Detallada</h6>
-                    <p>{{ programa.descripcion_detallada }}</p>
+                    <div class="section-divider"></div>
+
+                    <div class="card-section">
+                        <h6 class="d-flex align-items-center gap-2 mb-3">
+                            <i class="fas fa-align-left text-primary"></i>
+                            Descripción Detallada
+                        </h6>
+                        <p style="line-height: 1.6;">{{ programa.descripcion_detallada }}</p>
+                    </div>
 
                     {% if programa.comentarios %}
-                    <div class="alert alert-info mt-3">
-                        <h6><i class="fas fa-comment me-2"></i>Comentarios</h6>
+                    <div class="alert alert-info mt-4 border-0 card-accent-info">
+                        <h6 class="d-flex align-items-center gap-2">
+                            <i class="fas fa-comment"></i>
+                            Comentarios
+                        </h6>
                         <p class="mb-0">{{ programa.comentarios }}</p>
                     </div>
                     {% endif %}
                 </div>
                 <div class="col-md-4">
-                    <div class="card bg-light">
+                    <div class="card card-accent-primary">
                         <div class="card-body">
-                            <h6>Información Básica</h6>
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2">
-                                    <strong>Tipo de Ayuda:</strong><br>
+                            <h6 class="d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-info-circle text-primary"></i>
+                                Información Básica
+                            </h6>
+                            <div class="field-group">
+                                <div class="field-label">
+                                    <i class="fas fa-hand-holding-usd text-success"></i>
+                                    Tipo de Ayuda
+                                </div>
+                                <div class="field-value">
                                     {% if programa.tipo_ayuda %}
                                         {% if programa.tipo_ayuda is string %}
                                             {{ programa.tipo_ayuda }}
@@ -52,28 +76,65 @@
                                     {% else %}
                                         <span class="text-muted">No especificado</span>
                                     {% endif %}
-                                </li>
-                                <li class="mb-2"><strong>Ámbito:</strong><br>{{ programa.ambito }}</li>
-                                <li class="mb-2">
-                                    <strong>Estado:</strong><br>
+                                </div>
+                            </div>
+
+                            <div class="section-divider-solid"></div>
+
+                            <div class="field-group">
+                                <div class="field-label">
+                                    <i class="fas fa-globe-europe text-primary"></i>
+                                    Ámbito
+                                </div>
+                                <div class="field-value">{{ programa.ambito }}</div>
+                            </div>
+
+                            <div class="section-divider-solid"></div>
+
+                            <div class="field-group">
+                                <div class="field-label">
+                                    <i class="fas fa-traffic-light text-warning"></i>
+                                    Estado
+                                </div>
+                                <div class="mt-2">
                                     {% if programa.convocatoria and programa.convocatoria.estado %}
                                         {% if 'Abierta' in programa.convocatoria.estado %}
-                                            <span class="badge bg-success">{{ programa.convocatoria.estado }}</span>
+                                            <span class="badge bg-success badge-with-icon">
+                                                <i class="fas fa-check-circle"></i>
+                                                {{ programa.convocatoria.estado }}
+                                            </span>
                                         {% elif 'Cierre próximo' in programa.convocatoria.estado %}
-                                            <span class="badge bg-warning">{{ programa.convocatoria.estado }}</span>
+                                            <span class="badge bg-warning text-dark badge-with-icon">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ programa.convocatoria.estado }}
+                                            </span>
                                         {% elif 'Próxima apertura' in programa.convocatoria.estado or 'Pendiente' in programa.convocatoria.estado %}
-                                            <span class="badge bg-info text-white">{{ programa.convocatoria.estado }}</span>
+                                            <span class="badge bg-info text-white badge-with-icon">
+                                                <i class="fas fa-clock"></i>
+                                                {{ programa.convocatoria.estado }}
+                                            </span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ programa.convocatoria.estado }}</span>
+                                            <span class="badge bg-secondary badge-with-icon">
+                                                {{ programa.convocatoria.estado }}
+                                            </span>
                                         {% endif %}
                                     {% else %}
                                         <span class="text-muted">No especificado</span>
                                     {% endif %}
-                                </li>
-                                {% if programa.codigo_bdns %}
-                                <li class="mb-2"><strong>Código BDNS:</strong><br>{{ programa.codigo_bdns }}</li>
-                                {% endif %}
-                            </ul>
+                                </div>
+                            </div>
+
+                            {% if programa.codigo_bdns %}
+                            <div class="section-divider-solid"></div>
+
+                            <div class="field-group mb-0">
+                                <div class="field-label">
+                                    <i class="fas fa-barcode text-info"></i>
+                                    Código BDNS
+                                </div>
+                                <div class="field-value">{{ programa.codigo_bdns }}</div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -83,19 +144,32 @@
 
     <!-- Fechas -->
     {% if programa.convocatoria %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Fechas</h5>
+    <div class="card mb-4 border-0 shadow card-accent-info">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-calendar text-primary"></i>
+                Fechas de la Convocatoria
+            </h5>
         </div>
-        <div class="card-body">
-            <div class="row">
+        <div class="card-body p-4">
+            <div class="row g-4">
                 <div class="col-md-6">
-                    <strong>Fecha de Apertura:</strong>
-                    <p>{{ programa.convocatoria.fecha_apertura if programa.convocatoria.fecha_apertura and programa.convocatoria.fecha_apertura != 'null' else 'No especificada' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-calendar-plus text-success"></i>
+                        Fecha de Apertura
+                    </div>
+                    <div class="field-value-primary">
+                        {{ programa.convocatoria.fecha_apertura if programa.convocatoria.fecha_apertura and programa.convocatoria.fecha_apertura != 'null' else 'No especificada' }}
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Fecha de Cierre:</strong>
-                    <p>{{ programa.convocatoria.fecha_cierre if programa.convocatoria.fecha_cierre and programa.convocatoria.fecha_cierre != 'null' else 'No especificada' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-calendar-times text-danger"></i>
+                        Fecha de Cierre
+                    </div>
+                    <div class="field-value-primary">
+                        {{ programa.convocatoria.fecha_cierre if programa.convocatoria.fecha_cierre and programa.convocatoria.fecha_cierre != 'null' else 'No especificada' }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,47 +178,101 @@
 
     <!-- Financiación -->
     {% if programa.financiacion %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-euro-sign me-2"></i>Financiación</h5>
+    <div class="card mb-4 border-0 shadow card-accent-success">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-euro-sign text-success"></i>
+                Información Financiera
+            </h5>
         </div>
-        <div class="card-body">
-            <div class="row">
+        <div class="card-body p-4">
+            <!-- Campos principales destacados -->
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <strong>Intensidad:</strong>
-                    <p>{{ programa.financiacion.intensidad if programa.financiacion.intensidad and programa.financiacion.intensidad != 'null' else 'No especificada' }}</p>
+                    <div class="financial-field">
+                        <div class="financial-label">
+                            <i class="fas fa-chart-pie text-success"></i>
+                            Intensidad de Financiación
+                        </div>
+                        <div class="financial-value">
+                            {{ programa.financiacion.intensidad if programa.financiacion.intensidad and programa.financiacion.intensidad != 'null' else 'No especificada' }}
+                        </div>
+                        <div class="financial-context">Porcentaje de ayuda</div>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Presupuesto Total de la Convocatoria:</strong>
-                    <p>
-                        {% if programa.financiacion.presupuesto_total and programa.financiacion.presupuesto_total != 'null' %}
-                            {{ programa.financiacion.presupuesto_total|format_importe }}
-                        {% elif programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
-                            {{ programa.financiacion.importe_maximo|format_importe }}
-                        {% else %}
-                            No especificado
-                        {% endif %}
-                    </p>
+                    <div class="financial-field">
+                        <div class="financial-label">
+                            <i class="fas fa-money-bill-wave text-success"></i>
+                            Presupuesto Total de la Convocatoria
+                        </div>
+                        <div class="financial-value">
+                            {% if programa.financiacion.presupuesto_total and programa.financiacion.presupuesto_total != 'null' %}
+                                {{ programa.financiacion.presupuesto_total|format_importe }}
+                            {% elif programa.financiacion.importe_maximo and programa.financiacion.importe_maximo != 'null' %}
+                                {{ programa.financiacion.importe_maximo|format_importe }}
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </div>
+                        <div class="financial-context">Fondos disponibles totales</div>
+                    </div>
                 </div>
             </div>
-            <div class="row">
+
+            <div class="section-divider"></div>
+
+            <!-- Presupuestos del proyecto -->
+            <h6 class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-project-diagram text-primary"></i>
+                Presupuesto del Proyecto
+            </h6>
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <strong>Presupuesto Mínimo del Proyecto:</strong>
-                    <p>{{ programa.financiacion.presupuesto_minimo|format_importe if programa.financiacion.presupuesto_minimo and programa.financiacion.presupuesto_minimo != 'null' else 'No especificado' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-arrow-down text-info"></i>
+                        Presupuesto Mínimo
+                    </div>
+                    <div class="field-value-financial">
+                        {{ programa.financiacion.presupuesto_minimo|format_importe if programa.financiacion.presupuesto_minimo and programa.financiacion.presupuesto_minimo != 'null' else 'No especificado' }}
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Presupuesto Máximo del Proyecto:</strong>
-                    <p>{{ programa.financiacion.presupuesto_maximo|format_importe if programa.financiacion.presupuesto_maximo and programa.financiacion.presupuesto_maximo != 'null' else 'No especificado' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-arrow-up text-info"></i>
+                        Presupuesto Máximo
+                    </div>
+                    <div class="field-value-financial">
+                        {{ programa.financiacion.presupuesto_maximo|format_importe if programa.financiacion.presupuesto_maximo and programa.financiacion.presupuesto_maximo != 'null' else 'No especificado' }}
+                    </div>
                 </div>
             </div>
-            <div class="row mt-3">
+
+            <div class="section-divider"></div>
+
+            <!-- Importes subvencionables -->
+            <h6 class="d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-hand-holding-usd text-success"></i>
+                Importe Subvencionable
+            </h6>
+            <div class="row g-4">
                 <div class="col-md-6">
-                    <strong>Importe Mínimo Subvencionable:</strong>
-                    <p>{{ programa.financiacion.importe_minimo_subvencionable|format_importe if programa.financiacion.importe_minimo_subvencionable and programa.financiacion.importe_minimo_subvencionable != 'null' else 'No especificado' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-arrow-down text-success"></i>
+                        Importe Mínimo
+                    </div>
+                    <div class="field-value-financial">
+                        {{ programa.financiacion.importe_minimo_subvencionable|format_importe if programa.financiacion.importe_minimo_subvencionable and programa.financiacion.importe_minimo_subvencionable != 'null' else 'No especificado' }}
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Importe Máximo Subvencionable:</strong>
-                    <p>{{ programa.financiacion.importe_maximo_subvencionable|format_importe if programa.financiacion.importe_maximo_subvencionable and programa.financiacion.importe_maximo_subvencionable != 'null' else 'No especificado' }}</p>
+                    <div class="field-label">
+                        <i class="fas fa-arrow-up text-success"></i>
+                        Importe Máximo
+                    </div>
+                    <div class="field-value-financial">
+                        {{ programa.financiacion.importe_maximo_subvencionable|format_importe if programa.financiacion.importe_maximo_subvencionable and programa.financiacion.importe_maximo_subvencionable != 'null' else 'No especificado' }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,14 +281,17 @@
 
     <!-- Beneficiarios -->
     {% if programa.beneficiarios %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Beneficiarios</h5>
+    <div class="card mb-4 border-0 shadow">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-users text-primary"></i>
+                Beneficiarios Elegibles
+            </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="d-flex flex-wrap gap-2">
                 {% for beneficiario in programa.beneficiarios %}
-                    <span class="badge bg-light text-dark">{{ beneficiario }}</span>
+                    <span class="badge badge-outline-neutral" style="font-size: 0.9rem; padding: 8px 14px;">{{ beneficiario }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -169,14 +300,17 @@
 
     <!-- Sectores -->
     {% if programa.sectores %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-industry me-2"></i>Sectores</h5>
+    <div class="card mb-4 border-0 shadow">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-industry text-primary"></i>
+                Sectores Aplicables
+            </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="d-flex flex-wrap gap-2">
                 {% for sector in programa.sectores %}
-                    <span class="badge bg-light text-dark">{{ sector }}</span>
+                    <span class="badge badge-sector" style="font-size: 0.9rem; padding: 8px 14px;">{{ sector }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -185,17 +319,20 @@
 
     <!-- Tipo de Proyecto -->
     {% if programa.tipo_proyecto %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Tipo de Proyecto</h5>
+    <div class="card mb-4 border-0 shadow">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-project-diagram text-primary"></i>
+                Tipos de Proyecto Financiables
+            </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="d-flex flex-wrap gap-2">
                 {% if programa.tipo_proyecto is string %}
-                    <span class="badge bg-info text-white">{{ programa.tipo_proyecto }}</span>
+                    <span class="badge badge-proyecto" style="font-size: 0.9rem; padding: 8px 14px;">{{ programa.tipo_proyecto }}</span>
                 {% else %}
                     {% for tipo in programa.tipo_proyecto %}
-                        <span class="badge bg-info text-white">{{ tipo }}</span>
+                        <span class="badge badge-proyecto" style="font-size: 0.9rem; padding: 8px 14px;">{{ tipo }}</span>
                     {% endfor %}
                 {% endif %}
             </div>
@@ -205,22 +342,31 @@
 
     <!-- Fondos Europeos -->
     {% if programa.fondos_europeos or programa.origen_fondos %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Fondos Europeos</h5>
+    <div class="card mb-4 border-0 shadow">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-flag text-success"></i>
+                Fondos Europeos
+            </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="d-flex flex-wrap gap-2">
                 {% if programa.fondos_europeos %}
                     {% if programa.fondos_europeos is string %}
-                        <span class="badge bg-success" style="font-size: 1rem;">{{ programa.fondos_europeos }}</span>
+                        <span class="badge badge-fondos-eu" style="font-size: 1rem; padding: 10px 16px;">
+                            <i class="fas fa-star me-1"></i>{{ programa.fondos_europeos }}
+                        </span>
                     {% else %}
                         {% for fondo in programa.fondos_europeos %}
-                            <span class="badge bg-success" style="font-size: 1rem;">{{ fondo }}</span>
+                            <span class="badge badge-fondos-eu" style="font-size: 1rem; padding: 10px 16px;">
+                                <i class="fas fa-star me-1"></i>{{ fondo }}
+                            </span>
                         {% endfor %}
                     {% endif %}
                 {% elif programa.origen_fondos %}
-                    <span class="badge bg-success" style="font-size: 1rem;">{{ programa.origen_fondos }}</span>
+                    <span class="badge badge-fondos-eu" style="font-size: 1rem; padding: 10px 16px;">
+                        <i class="fas fa-star me-1"></i>{{ programa.origen_fondos }}
+                    </span>
                 {% endif %}
             </div>
         </div>

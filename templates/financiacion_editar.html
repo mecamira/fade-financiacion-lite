@@ -104,131 +104,330 @@
             </div>
             <div class="modal-body" style="max-height:70vh;overflow-y:auto">
                 <input type="hidden" id="edit-id">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label>Nombre Coloquial * <small class="text-muted">(nombre de uso común)</small></label>
-                        <input type="text" class="form-control" id="edit-nombre" required placeholder="Ej: Programa FEDER Innova-Pyme">
+
+                <!-- Accordion para organizar campos -->
+                <div class="accordion" id="editAccordion">
+                    <!-- Sección 1: Información Básica -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBasica">
+                                <i class="fas fa-info-circle text-primary me-2"></i>
+                                1. Información Básica
+                                <span class="badge bg-danger ms-2">Obligatorio</span>
+                            </button>
+                        </h2>
+                        <div id="collapseBasica" class="accordion-collapse collapse show" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-tag text-primary"></i>
+                                            Nombre Coloquial
+                                            <span class="badge bg-danger badge-sm ms-1">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-nombre" required placeholder="Ej: Programa FEDER Innova-Pyme">
+                                        <small class="text-muted">Nombre de uso común</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-file-signature text-primary"></i>
+                                            Nombre Oficial
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-nombre-oficial" placeholder="Título oficial completo">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-barcode text-info"></i>
+                                            Código BDNS
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-bdns">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-building text-primary"></i>
+                                            Organismo
+                                            <span class="badge bg-danger badge-sm ms-1">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-organismo" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-hand-holding-usd text-success"></i>
+                                            Tipo Ayuda
+                                            <span class="badge bg-danger badge-sm ms-1">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-tipo" required placeholder="Separar por comas">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-globe-europe text-primary"></i>
+                                            Ámbito
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-ambito">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label>Nombre Oficial <small class="text-muted">(título oficial completo)</small></label>
-                        <input type="text" class="form-control" id="edit-nombre-oficial" placeholder="Ej: Programa para el Fomento de la Innovación desde la Economía Social">
+
+                    <!-- Sección 2: Estado y Fechas -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFechas">
+                                <i class="fas fa-calendar text-primary me-2"></i>
+                                2. Estado y Fechas
+                            </button>
+                        </h2>
+                        <div id="collapseFechas" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="fas fa-traffic-light text-warning"></i>
+                                            Estado
+                                        </label>
+                                        <select class="form-select" id="edit-estado">
+                                            <option>Abierta</option>
+                                            <option>Cerrada</option>
+                                            <option>Próxima apertura</option>
+                                            <option>Cierre próximo</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="fas fa-calendar-plus text-success"></i>
+                                            Fecha Apertura
+                                        </label>
+                                        <input type="date" class="form-control" id="edit-fecha-apertura">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">
+                                            <i class="fas fa-calendar-times text-danger"></i>
+                                            Fecha Cierre
+                                        </label>
+                                        <input type="date" class="form-control" id="edit-fecha-cierre">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-12">
-                        <label>Código BDNS</label>
-                        <input type="text" class="form-control" id="edit-bdns">
+
+                    <!-- Sección 3: Descripciones -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDescripcion">
+                                <i class="fas fa-align-left text-primary me-2"></i>
+                                3. Descripciones
+                            </button>
+                        </h2>
+                        <div id="collapseDescripcion" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                            Resumen Breve
+                                        </label>
+                                        <textarea class="form-control" id="edit-resumen" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-align-left text-primary"></i>
+                                            Descripción Detallada
+                                        </label>
+                                        <textarea class="form-control" id="edit-descripcion" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-comment text-info"></i>
+                                            Comentarios
+                                        </label>
+                                        <textarea class="form-control" id="edit-comentarios" rows="2" placeholder="Notas internas"></textarea>
+                                        <small class="text-muted">Notas adicionales, observaciones, cambios importantes</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label>Organismo *</label>
-                        <input type="text" class="form-control" id="edit-organismo" required>
+
+                    <!-- Sección 4: Clasificación -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClasificacion">
+                                <i class="fas fa-tags text-primary me-2"></i>
+                                4. Clasificación
+                            </button>
+                        </h2>
+                        <div id="collapseClasificacion" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-users text-primary"></i>
+                                            Beneficiarios
+                                        </label>
+                                        <textarea class="form-control" id="edit-beneficiarios" rows="3" placeholder="Uno por línea"></textarea>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-industry text-primary"></i>
+                                            Sectores
+                                        </label>
+                                        <textarea class="form-control" id="edit-sectores" rows="3" placeholder="Uno por línea"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-project-diagram text-primary"></i>
+                                            Tipo de Proyecto
+                                        </label>
+                                        <textarea class="form-control" id="edit-tipo-proyecto" rows="3" placeholder="I+D+i, Digitalización, Inversión productiva..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-flag text-success"></i>
+                                            Fondos Europeos
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-origen-fondos" placeholder="FEDER, Next Generation, FTJ, FEMPA, Otros... (separar por comas)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label>Tipo Ayuda * <small class="text-muted">(separar por comas)</small></label>
-                        <input type="text" class="form-control" id="edit-tipo" required placeholder="Subvención, Préstamo/Crédito...">
+
+                    <!-- Sección 5: Requisitos y Gastos -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRequisitos">
+                                <i class="fas fa-check-circle text-primary me-2"></i>
+                                5. Requisitos y Gastos Subvencionables
+                            </button>
+                        </h2>
+                        <div id="collapseRequisitos" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-list-check text-success"></i>
+                                            Requisitos
+                                        </label>
+                                        <textarea class="form-control" id="edit-requisitos" rows="4" placeholder="Añadir cada requisito en una línea nueva"></textarea>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-receipt text-success"></i>
+                                            Gastos Subvencionables
+                                        </label>
+                                        <textarea class="form-control" id="edit-gastos-subvencionables" rows="4" placeholder="Personal, Equipamiento, Materiales..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label>Ámbito</label>
-                        <input type="text" class="form-control" id="edit-ambito">
+
+                    <!-- Sección 6: Financiación -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinanciacion">
+                                <i class="fas fa-euro-sign text-success me-2"></i>
+                                6. Información Financiera
+                            </button>
+                        </h2>
+                        <div id="collapseFinanciacion" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-percentage text-info"></i>
+                                            Intensidad de Financiación
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-intensidad" placeholder="Ej: 70%, Hasta 100%...">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-money-bill-wave text-success"></i>
+                                            Presupuesto Total
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-presupuesto-total" placeholder="60000000">
+                                        <small class="text-muted">Dinero disponible total en la convocatoria</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-arrow-down text-info"></i>
+                                            Presupuesto Mínimo del Proyecto
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-presupuesto-minimo" placeholder="50000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-arrow-up text-info"></i>
+                                            Presupuesto Máximo del Proyecto
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-presupuesto-maximo" placeholder="1000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-arrow-down text-success"></i>
+                                            Importe Mínimo Subvencionable
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-importe-minimo-subvencionable" placeholder="10000">
+                                        <small class="text-muted">Ayuda mínima que se otorga</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">
+                                            <i class="fas fa-arrow-up text-success"></i>
+                                            Importe Máximo Subvencionable
+                                        </label>
+                                        <input type="text" class="form-control" id="edit-importe-maximo-subvencionable" placeholder="500000">
+                                        <small class="text-muted">Ayuda máxima que se otorga</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label>Estado</label>
-                        <select class="form-select" id="edit-estado">
-                            <option>Abierta</option>
-                            <option>Cerrada</option>
-                            <option>Próxima apertura</option>
-                            <option>Cierre próximo</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Fecha Apertura</label>
-                        <input type="date" class="form-control" id="edit-fecha-apertura">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Fecha Cierre</label>
-                        <input type="date" class="form-control" id="edit-fecha-cierre">
-                    </div>
-                    <div class="col-12">
-                        <label>Resumen Breve</label>
-                        <textarea class="form-control" id="edit-resumen" rows="2"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label>Descripción</label>
-                        <textarea class="form-control" id="edit-descripcion" rows="3"></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label>Beneficiarios (uno por línea)</label>
-                        <textarea class="form-control" id="edit-beneficiarios" rows="3"></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label>Sectores (uno por línea)</label>
-                        <textarea class="form-control" id="edit-sectores" rows="3"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label>Tipo de Proyecto (uno por línea)</label>
-                        <textarea class="form-control" id="edit-tipo-proyecto" rows="3" placeholder="I+D+i, Digitalización, Inversión productiva..."></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label>Requisitos (uno por línea)</label>
-                        <textarea class="form-control" id="edit-requisitos" rows="3" placeholder="Añadir cada requisito en una línea nueva"></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label>Gastos Subvencionables (uno por línea)</label>
-                        <textarea class="form-control" id="edit-gastos-subvencionables" rows="3" placeholder="Personal, Equipamiento, Materiales..."></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label>Fondos Europeos <small class="text-muted">(separar por comas si hay varios)</small></label>
-                        <input type="text" class="form-control" id="edit-origen-fondos" placeholder="FEDER, Next Generation, FTJ, FEMPA, Otros...">
-                    </div>
-                    <div class="col-12">
-                        <label>Comentarios <small class="text-muted">(notas internas sobre la convocatoria)</small></label>
-                        <textarea class="form-control" id="edit-comentarios" rows="2" placeholder="Notas adicionales, observaciones, cambios importantes..."></textarea>
-                    </div>
-                    <div class="col-12">
-                        <hr class="my-3">
-                        <h6 class="text-muted">Financiación</h6>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Intensidad de Financiación</label>
-                        <input type="text" class="form-control" id="edit-intensidad" placeholder="Ej: 70%, Hasta 100%...">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Presupuesto Total de la Convocatoria</label>
-                        <input type="text" class="form-control" id="edit-presupuesto-total" placeholder="Ej: 60000000 (dinero disponible total)">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Presupuesto Mínimo del Proyecto (para solicitarla)</label>
-                        <input type="text" class="form-control" id="edit-presupuesto-minimo" placeholder="Ej: 50000">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Presupuesto Máximo del Proyecto (permitido)</label>
-                        <input type="text" class="form-control" id="edit-presupuesto-maximo" placeholder="Ej: 1000000">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Importe Mínimo Subvencionable <small class="text-muted">(ayuda mínima que se otorga)</small></label>
-                        <input type="text" class="form-control" id="edit-importe-minimo-subvencionable" placeholder="Ej: 10000">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Importe Máximo Subvencionable <small class="text-muted">(ayuda máxima que se otorga)</small></label>
-                        <input type="text" class="form-control" id="edit-importe-maximo-subvencionable" placeholder="Ej: 500000">
-                    </div>
-                    <div class="col-12">
-                        <hr class="my-3">
-                        <h6 class="text-muted">Enlaces</h6>
-                    </div>
-                    <div class="col-12">
-                        <label>URL BDNS</label>
-                        <input type="url" class="form-control" id="edit-url-bdns" placeholder="https://www.infosubvenciones.es/bdnstrans/...">
-                    </div>
-                    <div class="col-12">
-                        <label>URL Convocatoria (Resolución)</label>
-                        <input type="url" class="form-control" id="edit-url-convocatoria" placeholder="https://...">
-                    </div>
-                    <div class="col-12">
-                        <label>URL Bases Reguladoras</label>
-                        <input type="url" class="form-control" id="edit-url-bases" placeholder="https://...">
-                    </div>
-                    <div class="col-12">
-                        <label>URL Extracto Oficial <small class="text-muted">(del BOE, DOGC, etc.)</small></label>
-                        <input type="url" class="form-control" id="edit-url-extracto" placeholder="https://www.boe.es/...">
+
+                    <!-- Sección 7: Enlaces -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnlaces">
+                                <i class="fas fa-link text-primary me-2"></i>
+                                7. Enlaces y Documentación
+                            </button>
+                        </h2>
+                        <div id="collapseEnlaces" class="accordion-collapse collapse" data-bs-parent="#editAccordion">
+                            <div class="accordion-body">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-database text-info"></i>
+                                            URL BDNS
+                                        </label>
+                                        <input type="url" class="form-control" id="edit-url-bdns" placeholder="https://www.infosubvenciones.es/bdnstrans/...">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-file-pdf text-danger"></i>
+                                            URL Convocatoria (Resolución)
+                                        </label>
+                                        <input type="url" class="form-control" id="edit-url-convocatoria" placeholder="https://...">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-gavel text-warning"></i>
+                                            URL Bases Reguladoras
+                                        </label>
+                                        <input type="url" class="form-control" id="edit-url-bases" placeholder="https://...">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="fas fa-newspaper text-primary"></i>
+                                            URL Extracto Oficial
+                                        </label>
+                                        <input type="url" class="form-control" id="edit-url-extracto" placeholder="https://www.boe.es/...">
+                                        <small class="text-muted">Del BOE, DOGC, etc.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
