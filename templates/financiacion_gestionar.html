@@ -89,6 +89,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="sectores-bdns" class="form-label">Sectores Económicos (CNAE):</label>
+                            <textarea class="form-control" id="sectores-bdns" name="sectores" rows="3" placeholder="Se autocompletarán desde BDNS (uno por línea)"></textarea>
+                            <small class="text-muted">Sectores económicos extraídos de BDNS. Editar si es necesario (uno por línea)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fondos-europeos-bdns" class="form-label">Fondos Europeos:</label>
+                            <textarea class="form-control" id="fondos-europeos-bdns" name="fondos_europeos" rows="2" placeholder="Se autocompletarán desde BDNS (uno por línea)"></textarea>
+                            <small class="text-muted">Fondos UE extraídos de BDNS. Editar si es necesario (uno por línea)</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Información de la Convocatoria:</label>
                             <ul class="nav nav-tabs mb-2" id="input-tabs" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -1108,7 +1120,23 @@ function generatePreview(data) {
                     document.getElementById('fecha-publicacion').value = data.fecha_publicacion;
                     console.log('Fecha de publicación del extracto:', data.fecha_publicacion);  // DEBUG
                 }
-                
+
+                // Sectores económicos: si existen, autocompletar
+                if (data.sectores && Array.isArray(data.sectores) && data.sectores.length > 0) {
+                    document.getElementById('sectores-bdns').value = data.sectores.join('\n');
+                    console.log('Sectores económicos encontrados:', data.sectores.length);  // DEBUG
+                } else {
+                    console.log('No se encontraron sectores económicos en BDNS');  // DEBUG
+                }
+
+                // Fondos europeos: si existen, autocompletar
+                if (data.fondos_europeos && Array.isArray(data.fondos_europeos) && data.fondos_europeos.length > 0) {
+                    document.getElementById('fondos-europeos-bdns').value = data.fondos_europeos.join('\n');
+                    console.log('Fondos europeos encontrados:', data.fondos_europeos.length);  // DEBUG
+                } else {
+                    console.log('No se encontraron fondos europeos (convocatoria sin cofinanciación UE)');  // DEBUG
+                }
+
                 // Si hay documentos
                 if (documentosBDNS.length === 0) {
                     showError('No se encontraron documentos en la convocatoria. Completa los campos manualmente.');

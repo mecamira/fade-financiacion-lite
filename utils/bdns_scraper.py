@@ -218,6 +218,12 @@ class BDNSScraper:
             # Extraer información de extractos (URL y fecha de publicación)
             extracto_info = self._extraer_extracto_info()
 
+            # Extraer sectores económicos (CNAE)
+            sectores_economicos = self._extraer_sectores_economicos()
+
+            # Extraer fondos europeos cofinanciadores
+            fondos_europeos = self._extraer_fondos_europeos()
+
             resultado = {
                 'success': True,
                 'codigo_bdns': codigo_bdns,
@@ -226,7 +232,9 @@ class BDNSScraper:
                 'documentos': documentos,
                 'nombre_oficial': nombre_oficial,  # Título oficial de la convocatoria
                 'extracto': extracto_info.get('extracto'),  # URL del extracto
-                'fecha_publicacion': extracto_info.get('fecha_publicacion')  # Fecha de publicación del extracto
+                'fecha_publicacion': extracto_info.get('fecha_publicacion'),  # Fecha de publicación del extracto
+                'sectores': sectores_economicos,  # Lista de sectores CNAE
+                'fondos_europeos': fondos_europeos  # Lista de fondos europeos
             }
 
             return resultado
@@ -750,7 +758,157 @@ class BDNSScraper:
         except Exception as e:
             print(f"   Error al extraer bases reguladoras: {e}")
             return None
-    
+
+    def _extraer_sectores_economicos(self) -> List[str]:
+        """
+        Extrae los sectores económicos (CNAE) de la convocatoria desde la BDNS
+
+        Formato del HTML:
+        <div class="titulo-campo">· Sector económico del beneficiario</div>
+        <div class="padding-top">
+            <div><span>N - </span>ACTIVIDADES ADMINISTRATIVAS Y SERVICIOS AUXILIARES</div>
+            <div><span>R - </span>ACTIVIDADES ARTÍSTICAS, RECREATIVAS Y DE ENTRETENIMIENTO</div>
+            ...
+        </div>
+
+        Returns:
+            Lista de sectores económicos encontrados (strings con formato "XX - Nombre completo")
+        """
+        try:
+            print("\n🔍 Buscando sectores económicos...")
+
+            sectores = []
+
+            # Buscar el div que contiene "Sector económico del beneficiario"
+            try:
+                sector_titulo = self.driver.find_element(
+                    By.XPATH,
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Sector económico del beneficiario')]"
+                )
+
+                # Buscar el div padre que contiene los sectores
+                parent_div = sector_titulo.find_element(By.XPATH, "..")
+
+                # Buscar el div con class="padding-top" que contiene los sectores
+                sectores_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+
+                # Extraer todos los divs con sectores (cada uno tiene un span con la letra y el nombre)
+                sector_elements = sectores_container.find_elements(By.XPATH, ".//div[contains(@class, 'ng-star-inserted')]")
+
+                for sector_el in sector_elements:
+                    try:
+                        # Obtener el texto completo del div
+                        texto_completo = sector_el.text.strip()
+
+                        if texto_completo:
+                            # El texto puede venir en formato "N - ACTIVIDADES..." o solo "ACTIVIDADES..."
+                            # Intentar extraer la letra del CNAE del span si existe
+                            try:
+                                letra_span = sector_el.find_element(By.TAG_NAME, "span")
+                                letra_cnae = letra_span.text.strip()
+                            except:
+                                letra_cnae = ""
+
+                            # Si el texto completo ya incluye la letra, usarlo directamente
+                            # Si no, construirlo con la letra del span
+                            if letra_cnae and not texto_completo.startswith(letra_cnae):
+                                sector_texto = f"{letra_cnae}{texto_completo}"
+                            else:
+                                sector_texto = texto_completo
+
+                            # Limpiar formato: asegurarse que tenga formato "XX - Nombre"
+                            # La BDNS usa letras (A-Z), nosotros queremos números (01-99)
+                            # Por ahora, guardamos tal cual viene de BDNS
+                            if sector_texto and len(sector_texto) > 3:
+                                sectores.append(sector_texto)
+                                print(f"   ✓ Sector encontrado: {sector_texto}")
+
+                    except Exception as e:
+                        print(f"   ⚠ Error al procesar sector individual: {e}")
+                        continue
+
+                if sectores:
+                    print(f"   ✓ Total de sectores encontrados: {len(sectores)}")
+                else:
+                    print("   ✗ No se encontraron sectores económicos")
+
+                return sectores
+
+            except Exception as e:
+                print(f"   ⚠ No se encontró la sección de sectores económicos: {e}")
+                return []
+
+        except Exception as e:
+            print(f"   Error al extraer sectores económicos: {e}")
+            return []
+
+    def _extraer_fondos_europeos(self) -> List[str]:
+        """
+        Extrae los fondos europeos cofinanciadores de la convocatoria desde la BDNS
+
+        Formato del HTML:
+        <div class="titulo-campo">· Cofinanciado con Fondos UE</div>
+        <div class="padding-top">
+            <div>FEDER - FONDO EUROPEO DE DESARROLLO REGIONAL</div>
+            <div>FSE+ - FONDO SOCIAL EUROPEO PLUS</div>
+            ...
+        </div>
+
+        Returns:
+            Lista de fondos europeos encontrados (strings con formato "SIGLA - Nombre completo")
+        """
+        try:
+            print("\n🔍 Buscando fondos europeos...")
+
+            fondos = []
+
+            # Buscar el div que contiene "Cofinanciado con Fondos UE"
+            try:
+                fondos_titulo = self.driver.find_element(
+                    By.XPATH,
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Cofinanciado con Fondos UE')]"
+                )
+
+                # Buscar el div padre
+                parent_div = fondos_titulo.find_element(By.XPATH, "..")
+
+                # Buscar el div con class="padding-top" que contiene los fondos
+                fondos_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+
+                # Extraer todos los divs con fondos
+                fondo_elements = fondos_container.find_elements(By.XPATH, ".//div[contains(@class, 'ng-star-inserted')]")
+
+                for fondo_el in fondo_elements:
+                    try:
+                        texto_fondo = fondo_el.text.strip()
+
+                        if texto_fondo and len(texto_fondo) > 5:
+                            # Normalizar el formato para que coincida con nuestro diccionario
+                            # Por ejemplo: "FEDER - FONDO EUROPEO DE DESARROLLO REGIONAL"
+                            fondos.append(texto_fondo)
+                            print(f"   ✓ Fondo encontrado: {texto_fondo}")
+
+                    except Exception as e:
+                        print(f"   ⚠ Error al procesar fondo individual: {e}")
+                        continue
+
+                if fondos:
+                    print(f"   ✓ Total de fondos encontrados: {len(fondos)}")
+                else:
+                    print("   ⚠ No se encontraron fondos europeos (posible convocatoria sin cofinanciación UE)")
+
+                return fondos
+
+            except Exception as e:
+                print(f"   ⚠ No se encontró la sección de fondos europeos: {e}")
+                # Si no se encuentra, probablemente es una convocatoria sin fondos europeos
+                # Retornamos lista vacía (no es un error grave)
+                return []
+
+        except Exception as e:
+            print(f"   Error al extraer fondos europeos: {e}")
+            return []
+
     def _extraer_fechas_multiples(self, texto: str) -> Dict[str, Optional[str]]:
         """
         Extrae múltiples fechas de un texto (fecha de registro Y fecha de publicación)
