@@ -224,6 +224,12 @@ class BDNSScraper:
             # Extraer fondos europeos cofinanciadores
             fondos_europeos = self._extraer_fondos_europeos()
 
+            # Extraer tipo de ayuda (instrumento)
+            tipo_ayuda = self._extraer_tipo_ayuda()
+
+            # Extraer tipo de convocatoria
+            tipo_convocatoria = self._extraer_tipo_convocatoria()
+
             resultado = {
                 'success': True,
                 'codigo_bdns': codigo_bdns,
@@ -234,7 +240,9 @@ class BDNSScraper:
                 'extracto': extracto_info.get('extracto'),  # URL del extracto
                 'fecha_publicacion': extracto_info.get('fecha_publicacion'),  # Fecha de publicación del extracto
                 'sectores': sectores_economicos,  # Lista de sectores CNAE
-                'fondos_europeos': fondos_europeos  # Lista de fondos europeos
+                'fondos_europeos': fondos_europeos,  # Lista de fondos europeos
+                'tipo_ayuda': tipo_ayuda,  # Tipo de ayuda simplificado
+                'tipo_convocatoria': tipo_convocatoria  # Tipo de convocatoria simplificado
             }
 
             return resultado
@@ -908,6 +916,136 @@ class BDNSScraper:
         except Exception as e:
             print(f"   Error al extraer fondos europeos: {e}")
             return []
+
+    def _extraer_tipo_ayuda(self) -> Optional[str]:
+        """
+        Extrae el tipo de ayuda (instrumento) desde la BDNS y lo mapea a categorías simplificadas
+
+        Formato del HTML:
+        <div class="titulo-campo">· Instrumento de ayuda</div>
+        <div class="padding-top">
+            <div>SUBVENCIÓN Y ENTREGA DINERARIA SIN CONTRAPRESTACIÓN</div>
+        </div>
+
+        Mapeo:
+        - "SUBVENCIÓN..." -> Subvención
+        - "ANTICIPO..." o "PRÉSTAMO" -> Préstamo
+        - "GARANTÍA" -> Garantía
+        - "AVAL" -> Aval
+        - "BONIFICACIÓN..." -> Bonificación
+
+        Returns:
+            Tipo de ayuda simplificado o None si no se encuentra
+        """
+        try:
+            print("\n🔍 Buscando tipo de ayuda (instrumento)...")
+
+            try:
+                # Buscar el div que contiene "Instrumento de ayuda"
+                instrumento_titulo = self.driver.find_element(
+                    By.XPATH,
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Instrumento de ayuda')]"
+                )
+
+                # Buscar el div padre
+                parent_div = instrumento_titulo.find_element(By.XPATH, "..")
+
+                # Buscar el div con class="padding-top" que contiene el instrumento
+                instrumento_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+
+                # Extraer el texto del instrumento
+                instrumento_text = instrumento_container.text.strip().upper()
+
+                if instrumento_text:
+                    print(f"   ✓ Instrumento encontrado: {instrumento_text}")
+
+                    # Mapear a categorías simplificadas
+                    if "SUBVENCIÓN" in instrumento_text or "SUBVENCION" in instrumento_text:
+                        tipo = "Subvención"
+                    elif "ANTICIPO" in instrumento_text or "PRÉSTAMO" in instrumento_text or "PRESTAMO" in instrumento_text:
+                        tipo = "Préstamo"
+                    elif "GARANTÍA" in instrumento_text or "GARANTIA" in instrumento_text:
+                        tipo = "Garantía"
+                    elif "AVAL" in instrumento_text:
+                        tipo = "Aval"
+                    elif "BONIFICACIÓN" in instrumento_text or "BONIFICACION" in instrumento_text:
+                        tipo = "Bonificación"
+                    else:
+                        # Por defecto, asumir subvención (es el más común)
+                        print(f"   ⚠ Instrumento no reconocido, asignando 'Subvención' por defecto")
+                        tipo = "Subvención"
+
+                    print(f"   ✓ Tipo de ayuda mapeado: {tipo}")
+                    return tipo
+
+            except Exception as e:
+                print(f"   ⚠ No se encontró la sección de instrumento de ayuda: {e}")
+                return None
+
+        except Exception as e:
+            print(f"   Error al extraer tipo de ayuda: {e}")
+            return None
+
+    def _extraer_tipo_convocatoria(self) -> Optional[str]:
+        """
+        Extrae el tipo de convocatoria desde la BDNS y lo mapea a categorías simplificadas
+
+        Formato del HTML:
+        <div class="titulo-campo">· Tipo de convocatoria</div>
+        <div class="padding-top">Concurrencia competitiva - canónica</div>
+
+        Mapeo:
+        - "Concurrencia competitiva..." -> Concurrencia Competitiva
+        - "Concurrencia no competitiva" o "Simple concurrencia" -> Concurrencia No Competitiva
+        - "Concesión directa" -> Concesión Directa
+
+        Returns:
+            Tipo de convocatoria simplificado o None si no se encuentra
+        """
+        try:
+            print("\n🔍 Buscando tipo de convocatoria...")
+
+            try:
+                # Buscar el div que contiene "Tipo de convocatoria"
+                tipo_titulo = self.driver.find_element(
+                    By.XPATH,
+                    "//div[contains(@class, 'titulo-campo') and contains(text(), 'Tipo de convocatoria')]"
+                )
+
+                # Buscar el div padre
+                parent_div = tipo_titulo.find_element(By.XPATH, "..")
+
+                # Buscar el div con class="padding-top" que contiene el tipo
+                tipo_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+
+                # Extraer el texto del tipo de convocatoria
+                tipo_text = tipo_container.text.strip().lower()
+
+                if tipo_text:
+                    print(f"   ✓ Tipo de convocatoria encontrado: {tipo_text}")
+
+                    # Mapear a categorías simplificadas
+                    if "concurrencia competitiva" in tipo_text:
+                        tipo = "Concurrencia Competitiva"
+                    elif "concurrencia no competitiva" in tipo_text or "simple concurrencia" in tipo_text:
+                        tipo = "Concurrencia No Competitiva"
+                    elif "concesión directa" in tipo_text or "concesion directa" in tipo_text:
+                        tipo = "Concesión Directa"
+                    else:
+                        # Por defecto, asumir concurrencia competitiva (es el más común)
+                        print(f"   ⚠ Tipo no reconocido, asignando 'Concurrencia Competitiva' por defecto")
+                        tipo = "Concurrencia Competitiva"
+
+                    print(f"   ✓ Tipo de convocatoria mapeado: {tipo}")
+                    return tipo
+
+            except Exception as e:
+                print(f"   ⚠ No se encontró la sección de tipo de convocatoria: {e}")
+                return None
+
+        except Exception as e:
+            print(f"   Error al extraer tipo de convocatoria: {e}")
+            return None
 
     def _extraer_fechas_multiples(self, texto: str) -> Dict[str, Optional[str]]:
         """

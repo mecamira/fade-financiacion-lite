@@ -260,19 +260,15 @@ const OPCIONES_PREDEFINIDAS = {
     tipo_ayuda: [
         "Subvención",
         "Préstamo",
-        "Préstamo participativo",
-        "Línea de crédito",
         "Garantía",
         "Aval",
-        "Inversión en capital",
-        "Venture capital",
-        "Incentivo fiscal",
-        "Deducción fiscal",
-        "Bonificación",
-        "Exención",
-        "Servicios de asesoramiento",
-        "Formación gratuita",
-        "Ayuda en especie"
+        "Bonificación"
+    ],
+
+    tipo_convocatoria: [
+        "Concurrencia Competitiva",
+        "Concurrencia No Competitiva",
+        "Concesión Directa"
     ]
 };
 

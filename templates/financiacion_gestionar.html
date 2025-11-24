@@ -101,6 +101,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="tipo-ayuda-bdns" class="form-label">Tipo de Ayuda:</label>
+                            <input type="text" class="form-control" id="tipo-ayuda-bdns" name="tipo_ayuda" placeholder="Se autocompletará desde BDNS">
+                            <small class="text-muted">Tipo de ayuda extraído de BDNS (Subvención, Préstamo, Garantía, Aval, Bonificación)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipo-convocatoria-bdns" class="form-label">Tipo de Convocatoria:</label>
+                            <input type="text" class="form-control" id="tipo-convocatoria-bdns" name="tipo_convocatoria" placeholder="Se autocompletará desde BDNS">
+                            <small class="text-muted">Tipo de convocatoria extraído de BDNS (Concurrencia Competitiva, No Competitiva, Concesión Directa)</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Información de la Convocatoria:</label>
                             <ul class="nav nav-tabs mb-2" id="input-tabs" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -1135,6 +1147,22 @@ function generatePreview(data) {
                     console.log('Fondos europeos encontrados:', data.fondos_europeos.length);  // DEBUG
                 } else {
                     console.log('No se encontraron fondos europeos (convocatoria sin cofinanciación UE)');  // DEBUG
+                }
+
+                // Tipo de ayuda: si existe, autocompletar
+                if (data.tipo_ayuda) {
+                    document.getElementById('tipo-ayuda-bdns').value = data.tipo_ayuda;
+                    console.log('Tipo de ayuda encontrado:', data.tipo_ayuda);  // DEBUG
+                } else {
+                    console.log('No se encontró el tipo de ayuda en BDNS');  // DEBUG
+                }
+
+                // Tipo de convocatoria: si existe, autocompletar
+                if (data.tipo_convocatoria) {
+                    document.getElementById('tipo-convocatoria-bdns').value = data.tipo_convocatoria;
+                    console.log('Tipo de convocatoria encontrado:', data.tipo_convocatoria);  // DEBUG
+                } else {
+                    console.log('No se encontró el tipo de convocatoria en BDNS');  // DEBUG
                 }
 
                 // Si hay documentos
