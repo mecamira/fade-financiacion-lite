@@ -89,6 +89,30 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="sectores-bdns" class="form-label">Sectores Económicos (CNAE):</label>
+                            <textarea class="form-control" id="sectores-bdns" name="sectores" rows="3" placeholder="Se autocompletarán desde BDNS (uno por línea)"></textarea>
+                            <small class="text-muted">Sectores económicos extraídos de BDNS. Editar si es necesario (uno por línea)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fondos-europeos-bdns" class="form-label">Fondos Europeos:</label>
+                            <textarea class="form-control" id="fondos-europeos-bdns" name="fondos_europeos" rows="2" placeholder="Se autocompletarán desde BDNS (uno por línea)"></textarea>
+                            <small class="text-muted">Fondos UE extraídos de BDNS. Editar si es necesario (uno por línea)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipo-ayuda-bdns" class="form-label">Tipo de Ayuda:</label>
+                            <input type="text" class="form-control" id="tipo-ayuda-bdns" name="tipo_ayuda" placeholder="Se autocompletará desde BDNS">
+                            <small class="text-muted">Tipo de ayuda extraído de BDNS (Subvención, Préstamo, Garantía, Aval, Bonificación)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipo-convocatoria-bdns" class="form-label">Tipo de Convocatoria:</label>
+                            <input type="text" class="form-control" id="tipo-convocatoria-bdns" name="tipo_convocatoria" placeholder="Se autocompletará desde BDNS">
+                            <small class="text-muted">Tipo de convocatoria extraído de BDNS (Concurrencia Competitiva, No Competitiva, Concesión Directa)</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Información de la Convocatoria:</label>
                             <ul class="nav nav-tabs mb-2" id="input-tabs" role="tablist">
                                 <li class="nav-item" role="presentation">
@@ -760,93 +784,35 @@ function generatePreview(data) {
                 </div>
 
                 <!-- Requisitos -->
-                ${data.requisitos && data.requisitos.length > 0 ? `
-                <div class="card border-0 shadow mb-4">
-                    <div class="card-header bg-transparent border-0 pt-4 px-4">
-                        <h6 class="mb-0 d-flex align-items-center gap-2">
-                            <i class="fas fa-clipboard-check text-warning"></i>
-                            Requisitos
-                        </h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <ul class="list-unstyled mb-0">
-                            ${data.requisitos.map(req => `
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    ${req}
-                                </li>
-                            `).join('')}
-                        </ul>
-                    </div>
-                </div>
+                <h6 class="mt-3">Requisitos</h6>
+                <ul>
+                    ${renderList(data.requisitos)}
+                </ul>
+
+                <!-- Gastos Subvencionables -->
+                ${data.gastos_subvencionables && data.gastos_subvencionables.length > 0 ? `
+                <h6 class="mt-3">Gastos Subvencionables</h6>
+                <ul>
+                    ${renderList(data.gastos_subvencionables)}
+                </ul>
                 ` : ''}
 
                 <!-- Enlaces -->
-                ${(data.enlaces?.url_bdns || data.enlaces?.convocatoria || data.enlaces?.bases_reguladoras || data.enlaces?.bases || data.enlaces?.extracto) ? `
-                <div class="card border-0 shadow mb-4">
-                    <div class="card-header bg-transparent border-0 pt-4 px-4">
-                        <h6 class="mb-0 d-flex align-items-center gap-2">
-                            <i class="fas fa-link text-primary"></i>
-                            Enlaces de Interés
-                        </h6>
+                <h6 class="mt-3">Enlaces</h6>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        ${renderLink(data.enlaces?.url_bdns, 'Página BDNS', 'database')}
                     </div>
-                    <div class="card-body p-4">
-                        <div class="row g-3">
-                            ${data.enlaces?.url_bdns ? `
-                            <div class="col-md-6">
-                                <div class="field-label mb-2">
-                                    <i class="fas fa-database text-info"></i>
-                                    Base de Datos Nacional de Subvenciones (BDNS)
-                                </div>
-                                <a href="${data.enlaces.url_bdns}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-external-link-alt me-1"></i>
-                                    Ver en BDNS
-                                </a>
-                            </div>
-                            ` : ''}
-
-                            ${data.enlaces?.convocatoria ? `
-                            <div class="col-md-6">
-                                <div class="field-label mb-2">
-                                    <i class="fas fa-file-pdf text-danger"></i>
-                                    Resolución de Convocatoria
-                                </div>
-                                <a href="${data.enlaces.convocatoria}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-external-link-alt me-1"></i>
-                                    Ver Convocatoria
-                                </a>
-                            </div>
-                            ` : ''}
-
-                            ${(data.enlaces?.bases_reguladoras || data.enlaces?.bases) ? `
-                            <div class="col-md-6">
-                                <div class="field-label mb-2">
-                                    <i class="fas fa-gavel text-warning"></i>
-                                    Bases Reguladoras
-                                </div>
-                                <a href="${data.enlaces.bases_reguladoras || data.enlaces.bases}" target="_blank" class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-external-link-alt me-1"></i>
-                                    Ver Bases
-                                </a>
-                            </div>
-                            ` : ''}
-
-                            ${data.enlaces?.extracto ? `
-                            <div class="col-md-6">
-                                <div class="field-label mb-2">
-                                    <i class="fas fa-newspaper text-primary"></i>
-                                    Extracto Oficial (BOE/DOGC/etc.)
-                                </div>
-                                <a href="${data.enlaces.extracto}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-external-link-alt me-1"></i>
-                                    Ver Extracto
-                                </a>
-                            </div>
-                            ` : ''}
-                        </div>
+                    <div class="col-md-3">
+                        ${renderLink(data.enlaces?.convocatoria, 'Resolución Convocatoria', 'file-pdf')}
+                    </div>
+                    <div class="col-md-3">
+                        ${renderLink(data.enlaces?.bases_reguladoras || data.enlaces?.bases, 'Bases Reguladoras', 'gavel')}
+                    </div>
+                    <div class="col-md-3">
+                        ${renderLink(data.enlaces?.extracto, 'Extracto Oficial', 'file-alt')}
                     </div>
                 </div>
-                ` : ''}
             `;
 
             container.innerHTML = html;
@@ -1166,7 +1132,39 @@ function generatePreview(data) {
                     document.getElementById('fecha-publicacion').value = data.fecha_publicacion;
                     console.log('Fecha de publicación del extracto:', data.fecha_publicacion);  // DEBUG
                 }
-                
+
+                // Sectores económicos: si existen, autocompletar
+                if (data.sectores && Array.isArray(data.sectores) && data.sectores.length > 0) {
+                    document.getElementById('sectores-bdns').value = data.sectores.join('\n');
+                    console.log('Sectores económicos encontrados:', data.sectores.length);  // DEBUG
+                } else {
+                    console.log('No se encontraron sectores económicos en BDNS');  // DEBUG
+                }
+
+                // Fondos europeos: si existen, autocompletar
+                if (data.fondos_europeos && Array.isArray(data.fondos_europeos) && data.fondos_europeos.length > 0) {
+                    document.getElementById('fondos-europeos-bdns').value = data.fondos_europeos.join('\n');
+                    console.log('Fondos europeos encontrados:', data.fondos_europeos.length);  // DEBUG
+                } else {
+                    console.log('No se encontraron fondos europeos (convocatoria sin cofinanciación UE)');  // DEBUG
+                }
+
+                // Tipo de ayuda: si existe, autocompletar
+                if (data.tipo_ayuda) {
+                    document.getElementById('tipo-ayuda-bdns').value = data.tipo_ayuda;
+                    console.log('Tipo de ayuda encontrado:', data.tipo_ayuda);  // DEBUG
+                } else {
+                    console.log('No se encontró el tipo de ayuda en BDNS');  // DEBUG
+                }
+
+                // Tipo de convocatoria: si existe, autocompletar
+                if (data.tipo_convocatoria) {
+                    document.getElementById('tipo-convocatoria-bdns').value = data.tipo_convocatoria;
+                    console.log('Tipo de convocatoria encontrado:', data.tipo_convocatoria);  // DEBUG
+                } else {
+                    console.log('No se encontró el tipo de convocatoria en BDNS');  // DEBUG
+                }
+
                 // Si hay documentos
                 if (documentosBDNS.length === 0) {
                     showError('No se encontraron documentos en la convocatoria. Completa los campos manualmente.');
