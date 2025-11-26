@@ -196,7 +196,7 @@ class BDNSScraper:
             
             # Esperar a que desaparezca el spinner de carga (si existe)
             time.sleep(3)  # Dar tiempo inicial para que Angular arranque
-            
+
             # Intentar esperar a que aparezca la sección de documentos
             try:
                 wait.until(
@@ -205,6 +205,11 @@ class BDNSScraper:
             except:
                 # Si no encontramos la sección de documentos, dar más tiempo
                 time.sleep(5)
+
+            # IMPORTANTE: Dar tiempo adicional para que Angular renderice TODOS los campos
+            # Los campos como sectores, fondos, tipo_ayuda y tipo_convocatoria pueden tardar más
+            print("⏳ Esperando a que Angular termine de renderizar todos los campos...")
+            time.sleep(5)  # Tiempo adicional para campos dinámicos
             
             # Extraer documentos (pasar codigo_bdns)
             documentos = self._extraer_documentos(codigo_bdns)
@@ -946,15 +951,28 @@ class BDNSScraper:
                     By.XPATH,
                     "//div[contains(@class, 'titulo-campo') and contains(text(), 'Instrumento de ayuda')]"
                 )
+                print(f"   → Título encontrado: {instrumento_titulo.text}")
 
                 # Buscar el div padre
                 parent_div = instrumento_titulo.find_element(By.XPATH, "..")
 
                 # Buscar el div con class="padding-top" que contiene el instrumento
                 instrumento_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+                print(f"   → Container padding-top encontrado")
 
-                # Extraer el texto del instrumento
+                # Extraer el texto del instrumento (puede estar en un div hijo o directamente en padding-top)
                 instrumento_text = instrumento_container.text.strip().upper()
+
+                # Si el texto está vacío, intentar buscar en divs hijos
+                if not instrumento_text:
+                    print(f"   → Texto vacío en padding-top, buscando en hijos...")
+                    child_divs = instrumento_container.find_elements(By.TAG_NAME, "div")
+                    for child in child_divs:
+                        texto_hijo = child.text.strip().upper()
+                        if texto_hijo:
+                            instrumento_text = texto_hijo
+                            print(f"   → Texto encontrado en hijo: {instrumento_text}")
+                            break
 
                 if instrumento_text:
                     print(f"   ✓ Instrumento encontrado: {instrumento_text}")
@@ -977,13 +995,20 @@ class BDNSScraper:
 
                     print(f"   ✓ Tipo de ayuda mapeado: {tipo}")
                     return tipo
+                else:
+                    print(f"   ✗ No se pudo extraer texto del instrumento")
+                    return None
 
             except Exception as e:
                 print(f"   ⚠ No se encontró la sección de instrumento de ayuda: {e}")
+                import traceback
+                traceback.print_exc()
                 return None
 
         except Exception as e:
             print(f"   Error al extraer tipo de ayuda: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _extraer_tipo_convocatoria(self) -> Optional[str]:
@@ -1011,15 +1036,28 @@ class BDNSScraper:
                     By.XPATH,
                     "//div[contains(@class, 'titulo-campo') and contains(text(), 'Tipo de convocatoria')]"
                 )
+                print(f"   → Título encontrado: {tipo_titulo.text}")
 
                 # Buscar el div padre
                 parent_div = tipo_titulo.find_element(By.XPATH, "..")
 
                 # Buscar el div con class="padding-top" que contiene el tipo
                 tipo_container = parent_div.find_element(By.XPATH, ".//div[contains(@class, 'padding-top')]")
+                print(f"   → Container padding-top encontrado")
 
                 # Extraer el texto del tipo de convocatoria
                 tipo_text = tipo_container.text.strip().lower()
+
+                # Si el texto está vacío, intentar buscar en divs hijos
+                if not tipo_text:
+                    print(f"   → Texto vacío en padding-top, buscando en hijos...")
+                    child_divs = tipo_container.find_elements(By.TAG_NAME, "div")
+                    for child in child_divs:
+                        texto_hijo = child.text.strip().lower()
+                        if texto_hijo:
+                            tipo_text = texto_hijo
+                            print(f"   → Texto encontrado en hijo: {tipo_text}")
+                            break
 
                 if tipo_text:
                     print(f"   ✓ Tipo de convocatoria encontrado: {tipo_text}")
@@ -1038,13 +1076,20 @@ class BDNSScraper:
 
                     print(f"   ✓ Tipo de convocatoria mapeado: {tipo}")
                     return tipo
+                else:
+                    print(f"   ✗ No se pudo extraer texto del tipo de convocatoria")
+                    return None
 
             except Exception as e:
                 print(f"   ⚠ No se encontró la sección de tipo de convocatoria: {e}")
+                import traceback
+                traceback.print_exc()
                 return None
 
         except Exception as e:
             print(f"   Error al extraer tipo de convocatoria: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _extraer_fechas_multiples(self, texto: str) -> Dict[str, Optional[str]]:
