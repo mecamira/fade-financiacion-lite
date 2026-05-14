@@ -482,55 +482,91 @@ function vbRenderDetail(raw, code) {
   function listaDesc(arr) { if (!Array.isArray(arr)||!arr.length) return null; return arr.map(x=>x.descripcion??JSON.stringify(x)).join(' · '); }
   function fmtF(v) { if (!v) return null; const dt=new Date(v); return isNaN(dt)?String(v):dt.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}); }
   function fmtE(v) { const n=Number(v); return isNaN(n)?null:n.toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}); }
+  function fmtBool(v) { if (typeof v==='boolean') return v?'Sí':'No'; if (v==='Sí'||v==='Si'||v==='true') return 'Sí'; if (v==='No'||v==='false') return 'No'; return null; }
   function row(lbl, val, isHtml=false) {
     if (!val && val!==0) return '';
     const v = isHtml ? val : vbEsc(String(val));
     return `<div class="vb-row"><span class="vb-lbl">${vbEsc(lbl)}</span><span class="vb-val">${v}</span></div>`;
   }
+  function sec(title, rows) { if (!rows) return ''; return `<div class="vb-section"><div class="vb-section-title">${vbEsc(title)}</div>${rows}</div>`; }
 
-  let s1='', s2='', s3='', s4='', s5='', sDocs='';
+  // Sección 1: Identificación
+  let s1 = '';
   s1 += row('Código BDNS', d.codigoBDNS??d.numeroConvocatoria??code);
-  s1 += row('Tipo', d.tipoConvocatoria);
+  s1 += row('Tipo convocatoria', d.tipoConvocatoria);
   s1 += row('Estado', d.abierto===true||d.abierto==='Sí'
     ? '<span style="color:#1a7a1a;font-weight:600">Abierta</span>'
     : (d.abierto===false||d.abierto==='No' ? '<span style="color:#8b0000;font-weight:600">Cerrada</span>' : null), true);
-  s1 += row('Publicación', fmtF(d.fechaRecepcion));
+  s1 += row('Fecha publicación', fmtF(d.fechaRecepcion));
   s1 += row('Inicio solicitud', fmtF(d.fechaInicioSolicitud));
   s1 += row('Fin solicitud', fmtF(d.fechaFinSolicitud));
+  if (d.textInicio) s1 += row('Plazo inicio (texto)', d.textInicio);
+  if (d.textFin)   s1 += row('Plazo fin (texto)', d.textFin);
+  s1 += row('MRR (Plan Recuperación)', fmtBool(d.mrr));
 
-  if (d._n3) s2 += row('Órgano', d._n3);
+  // Sección 2: Organismo
+  let s2 = '';
+  if (d._n3) s2 += row('Departamento / Órgano', d._n3);
   if (d._n2) s2 += row('Administración', d._n2);
   if (d._n1) s2 += row('Ámbito', d._n1);
-  if (!s2) { s2 += row('Órgano', d.nivel3); s2 += row('Administración', d.nivel2); }
+  if (!s2) { s2 += row('Departamento', d.nivel3); s2 += row('Administración', d.nivel2); s2 += row('Ámbito', d.nivel1); }
 
+  // Sección 3: Dotación económica
+  let s3 = '';
   const pres = d.presupuestoTotal??d.importeTotal??d.dotacionPresupuestaria;
-  if (pres!=null) s3 += row('Presupuesto', fmtE(pres));
-  const instr = listaDesc(d.instrumentos); if (instr) s3 += row('Instrumento', instr);
+  if (pres!=null) s3 += row('Presupuesto total', fmtE(pres));
+  const instr = listaDesc(d.instrumentos); if (instr) s3 += row('Instrumento de ayuda', instr);
   const fondos = listaDesc(d.fondos); if (fondos) s3 += row('Fondos', fondos);
+  if (d.ayudaEstado) s3 += row('Ref. Ayuda de Estado', d.ayudaEstado);
+  if (d.urlAyudaEstado) s3 += row('URL Ayuda de Estado', `<a href="${vbEsc(d.urlAyudaEstado)}" target="_blank" style="color:#0078BF">Ver documento ↗</a>`, true);
+  if (d.reglamento) s3 += row('Reglamento', d.reglamento);
 
-  const benef = listaDesc(d.tiposBeneficiarios); if (benef) s4 += row('Beneficiarios', benef);
+  // Sección 4: Beneficiarios y sectores
+  let s4 = '';
+  const benef = listaDesc(d.tiposBeneficiarios); if (benef) s4 += row('Tipos de beneficiarios', benef);
   const sect = d.sectores&&d.sectores.length ? d.sectores.map(s=>s.descripcion+(s.codigo?` (${s.codigo})`:'')).join(' · ') : null;
-  if (sect) s4 += row('Sectores', sect);
+  if (sect) s4 += row('Sectores de actividad', sect);
+  const sectProd = listaDesc(d.sectoresProductos); if (sectProd) s4 += row('Sectores de productos', sectProd);
+  const region = listaDesc(d.regiones); if (region) s4 += row('Región de impacto', region);
+  const obj = listaDesc(d.objetivos); if (obj) s4 += row('Objetivos', obj);
 
+  // Sección 5: Bases reguladoras y finalidad
+  let s5 = '';
   if (d.descripcionFinalidad) s5 += row('Finalidad', d.descripcionFinalidad);
-  if (d.urlBasesReguladoras) s5 += row('Bases reguladoras', `<a href="${vbEsc(d.urlBasesReguladoras)}" target="_blank" style="color:#0078BF">Abrir ↗</a>`, true);
+  if (d.descripcionBasesReguladoras) s5 += row('Bases reguladoras', d.descripcionBasesReguladoras);
+  if (d.urlBasesReguladoras) s5 += row('Texto bases reguladoras', `<a href="${vbEsc(d.urlBasesReguladoras)}" target="_blank" style="color:#0078BF">Abrir documento ↗</a>`, true);
+  s5 += row('Publicado en diario oficial', fmtBool(d.sePublicaDiarioOficial));
 
+  // Sección 6: Documentos adjuntos
+  let sDocs = '';
   if (Array.isArray(d.documentos)&&d.documentos.length) {
     sDocs = d.documentos.map(doc=>{
       const url=`https://www.infosubvenciones.es/bdnstrans/api/documentos/${doc.id}`;
-      return `<div class="vb-row"><span class="vb-lbl">${vbEsc(doc.datPublicacion?new Date(doc.datPublicacion).toLocaleDateString('es-ES'):'Doc.')}</span><span class="vb-val"><a href="${vbEsc(url)}" target="_blank" style="color:#0078BF;font-weight:500">${vbEsc(doc.descripcion??doc.nombreFic??'Documento')}</a></span></div>`;
+      const size = doc.long ? `<span style="color:#888;font-size:.75rem;margin-left:.4rem">(${Math.round(doc.long/1024)} KB)</span>` : '';
+      const fec = doc.datPublicacion ? new Date(doc.datPublicacion).toLocaleDateString('es-ES') : 'Doc.';
+      return `<div class="vb-row"><span class="vb-lbl">${vbEsc(fec)}</span><span class="vb-val"><a href="${vbEsc(url)}" target="_blank" style="color:#0078BF;font-weight:500">${vbEsc(doc.descripcion??doc.nombreFic??'Documento')}</a>${size}</span></div>`;
     }).join('');
   }
 
-  function sec(title, rows) { if (!rows) return ''; return `<div class="vb-section"><div class="vb-section-title">${vbEsc(title)}</div>${rows}</div>`; }
+  // Sección 7: Anuncios
+  let sAnuncios = '';
+  if (Array.isArray(d.anuncios)&&d.anuncios.length) {
+    sAnuncios = d.anuncios.map(a=>{
+      const url = a.url ? ` <a href="${vbEsc(a.url)}" target="_blank" style="color:#0078BF">Ver ↗</a>` : '';
+      return `<div class="vb-row"><span class="vb-lbl">${vbEsc(a.tipo??'Anuncio')}</span><span class="vb-val">${vbEsc(a.descripcion??'Anuncio')}${url}</span></div>`;
+    }).join('');
+  }
 
-  let html = sec('Identificación', s1) + sec('Organismo', s2);
+  let html = sec('Identificación', s1) + sec('Organismo convocante', s2);
   if (s3) html += sec('Dotación económica', s3);
   if (s4) html += sec('Beneficiarios y sectores', s4);
-  if (s5) html += sec('Bases y finalidad', s5);
-  if (sDocs) html += sec('Documentos', sDocs);
-  html += `<a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Ver ficha oficial</a>`;
+  if (s5) html += sec('Bases reguladoras y finalidad', s5);
+  if (sDocs) html += sec('Documentos adjuntos', sDocs);
+  if (sAnuncios) html += sec('Anuncios', sAnuncios);
 
+  if (!html) html = `<div class="vb-section"><p style="color:#888;font-size:.85rem">No se encontraron datos de detalle.</p></div>`;
+
+  html += `<a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Ver ficha oficial</a>`;
   document.getElementById('vb-detail-body').innerHTML = html;
 }
 
