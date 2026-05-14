@@ -629,6 +629,33 @@ def analizar_compatibilidad_api():
 
 
 # ============================================================================
+# MÓDULO 4: VIGILANCIA BDNS
+# ============================================================================
+
+@app.route('/financiacion/vigilancia-bdns')
+def vigilancia_bdns():
+    """Visor de convocatorias en tiempo real desde la BDNS"""
+    return render_template('vigilancia_bdns.html')
+
+
+@app.route('/api/bdns-proxy')
+def bdns_proxy():
+    """Proxy hacia infosubvenciones.es para evitar CORS en el navegador"""
+    import requests as req_lib
+    endpoint = request.args.get('endpoint', '')
+    params = {k: v for k, v in request.args.items() if k != 'endpoint'}
+    url = f'https://www.infosubvenciones.es/bdnstrans/api/{endpoint}'
+    try:
+        r = req_lib.get(url, params=params, timeout=30,
+                        headers={'User-Agent': 'Mozilla/5.0'})
+        return app.response_class(r.content, status=r.status_code,
+                                  mimetype='application/json')
+    except Exception as e:
+        logger.error(f"Error en proxy BDNS: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
 # RUTAS DE SALUD Y MONITORIZACIÓN
 # ============================================================================
 

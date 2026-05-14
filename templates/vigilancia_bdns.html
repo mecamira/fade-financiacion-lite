@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+
+{% block title %}Vigilancia BDNS - FADE{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Layout pantalla completa bajo el header de base.html */
+  .vigilancia-wrap {
+    display: flex;
+    height: calc(100vh - 130px);
+    margin: -1.5rem -12px 0;   /* cancela el padding del <main> de base.html */
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────── */
+  .vb-sidebar {
+    width: 270px;
+    min-width: 270px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    padding: 1.25rem 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .vb-sidebar-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bs-primary, #0078BF);
+    border-bottom: 2px solid var(--bs-primary, #0078BF);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
+  }
+  .vb-sidebar label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 0.2rem;
+  }
+  .vb-sidebar input, .vb-sidebar select {
+    font-size: 0.85rem;
+  }
+  .vb-hint {
+    font-size: 0.72rem;
+    color: #888;
+    line-height: 1.5;
+    background: #f0f7fc;
+    border-left: 3px solid #0078BF;
+    padding: 0.5rem 0.7rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* ── MAIN ────────────────────────────────────────── */
+  .vb-main {
+    flex: 1;
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto;
+    background: #f5f5f5;
+  }
+  .vb-results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid #0078BF;
+    padding-bottom: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .vb-results-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #0078BF;
+  }
+  .vb-count { font-size: 0.8rem; color: #888; }
+  .vb-count strong { color: #0078BF; font-size: 0.95rem; }
+
+  /* ── STATUS ──────────────────────────────────────── */
+  .vb-status {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+  }
+  .vb-status.error { background: #fff0f0; border-color: #ffb3b3; color: #8b0000; }
+  .vb-spinner {
+    display: inline-block;
+    width: 26px; height: 26px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #0078BF;
+    border-radius: 50%;
+    animation: vb-spin 0.7s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+  @keyframes vb-spin { to { transform: rotate(360deg); } }
+
+  /* ── CARDS ───────────────────────────────────────── */
+  .vb-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+  .vb-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid transparent;
+    border-radius: 4px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .vb-card:hover { border-left-color: #0078BF; box-shadow: 0 2px 10px rgba(0,120,191,0.12); }
+  .vb-card.active { border-left-color: #0078BF; box-shadow: 0 0 0 2px rgba(0,120,191,0.18); }
+  .vb-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.4rem; }
+  .vb-bdns-badge {
+    font-size: 0.67rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #0078BF;
+    background: #e6f3fa; padding: 2px 8px; border-radius: 2px; white-space: nowrap;
+  }
+  .vb-date { font-size: 0.74rem; color: #999; white-space: nowrap; }
+  .vb-card-title { font-size: 0.9rem; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
+  .vb-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+  .vb-tag {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #f2f2f2; color: #666; padding: 2px 7px;
+    border-radius: 2px; border: 1px solid #e0e0e0;
+  }
+  .vb-tag.org { color: #0078BF; background: #e6f3fa; border-color: rgba(0,120,191,0.25); }
+  .vb-tag.importe { color: #1a5c00; background: #f0fbf0; border-color: #b3ddb3; }
+
+  /* ── PAGINACIÓN ──────────────────────────────────── */
+  .vb-pagination { display: flex; justify-content: center; gap: 0.3rem; margin-top: 1.25rem; flex-wrap: wrap; }
+  .vb-pg {
+    padding: 5px 11px; border: 1px solid #e0e0e0; border-radius: 3px;
+    background: #fff; font-size: 0.83rem; cursor: pointer; color: #333;
+    transition: all 0.15s;
+  }
+  .vb-pg:hover:not(:disabled) { border-color: #0078BF; color: #0078BF; }
+  .vb-pg.active { background: #0078BF; color: #fff; border-color: #0078BF; }
+  .vb-pg:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── DETAIL PANEL ────────────────────────────────── */
+  .vb-detail {
+    position: fixed;
+    right: 0; top: 130px;
+    width: 480px;
+    height: calc(100vh - 130px);
+    background: #fff;
+    border-left: 3px solid #0078BF;
+    box-shadow: -6px 0 32px rgba(0,120,191,0.12);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 500;
+  }
+  .vb-detail.open { transform: translateX(0); }
+  .vb-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.2); z-index: 499;
+  }
+  .vb-overlay.show { display: block; }
+
+  .vb-detail-header {
+    background: #0078BF; color: #fff;
+    padding: 1rem 1.25rem;
+    position: sticky; top: 0;
+  }
+  .vb-detail-header h2 {
+    font-size: 0.95rem; font-weight: 700;
+    text-transform: uppercase; line-height: 1.4;
+    padding-right: 2rem; margin: 0;
+  }
+  .vb-close {
+    position: absolute; top: 0.85rem; right: 0.85rem;
+    background: rgba(255,255,255,0.18); border: none; color: #fff;
+    width: 28px; height: 28px; border-radius: 3px;
+    cursor: pointer; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .vb-close:hover { background: rgba(255,255,255,0.32); }
+
+  /* Botón Añadir a Dashboard */
+  .vb-btn-add {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    width: calc(100% - 2.5rem);
+    margin: 1.25rem 1.25rem 0;
+    padding: 0.75rem 1rem;
+    background: #0078BF; color: #fff;
+    border: none; border-radius: 4px;
+    font-size: 0.95rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.2s;
+  }
+  .vb-btn-add:hover { background: #005f99; color: #fff; }
+
+  .vb-detail-body { padding: 1.1rem 1.25rem; }
+  .vb-section { margin-bottom: 1.25rem; }
+  .vb-section-title {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #0078BF;
+    border-bottom: 2px solid #0078BF;
+    padding-bottom: 0.3rem; margin-bottom: 0.6rem;
+  }
+  .vb-row {
+    display: grid; grid-template-columns: 140px 1fr;
+    gap: 0.2rem 0.6rem; padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    align-items: start;
+  }
+  .vb-row:last-child { border-bottom: none; }
+  .vb-lbl {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: #888; padding-top: 1px;
+  }
+  .vb-val { font-size: 0.84rem; color: #1a1a1a; line-height: 1.5; word-break: break-word; }
+  .vb-btn-link {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 7px 14px; background: #0078BF; color: #fff;
+    border-radius: 3px; text-decoration: none;
+    font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-top: 0.75rem; transition: background 0.2s;
+  }
+  .vb-btn-link:hover { background: #005f99; color: #fff; }
+
+  @media (max-width: 768px) {
+    .vb-sidebar { width: 100%; min-width: unset; height: auto; }
+    .vigilancia-wrap { flex-direction: column; height: auto; }
+    .vb-detail { width: 100%; top: 0; height: 100vh; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vigilancia-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="vb-sidebar">
+    <div class="vb-sidebar-title"><i class="fas fa-search me-1"></i> Filtros</div>
+
+    <div>
+      <label for="vb-texto">Texto libre</label>
+      <input id="vb-texto" class="form-control form-control-sm" type="text" placeholder="Nombre, objeto…">
+    </div>
+    <div>
+      <label for="vb-bdns">Código BDNS</label>
+      <input id="vb-bdns" class="form-control form-control-sm" type="text" placeholder="Ej: 905527">
+    </div>
+    <div>
+      <label for="vb-desde">Fecha desde</label>
+      <input id="vb-desde" class="form-control form-control-sm" type="date">
+    </div>
+    <div>
+      <label for="vb-hasta">Fecha hasta</label>
+      <input id="vb-hasta" class="form-control form-control-sm" type="date">
+    </div>
+    <div>
+      <label for="vb-size">Resultados por página</label>
+      <select id="vb-size" class="form-select form-select-sm">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+    <div>
+      <label for="vb-vpd">Portal (VPD)</label>
+      <select id="vb-vpd" class="form-select form-select-sm">
+        <option value="GE">GE · Administración del Estado</option>
+        <option value="A03" selected>A03 · subvenciones.gob.es/A03</option>
+        <option value="A04">A04 · Asturias</option>
+        <option value="A01">A01 · Andalucía</option>
+        <option value="A02">A02 · Aragón</option>
+        <option value="A05">A05 · Baleares</option>
+        <option value="A06">A06 · Canarias</option>
+        <option value="A07">A07 · Cantabria</option>
+        <option value="A08">A08 · Castilla-La Mancha</option>
+        <option value="A09">A09 · Castilla y León</option>
+        <option value="A10">A10 · Cataluña</option>
+        <option value="A11">A11 · Extremadura</option>
+        <option value="A12">A12 · Galicia</option>
+        <option value="A13">A13 · La Rioja</option>
+        <option value="A14">A14 · Madrid</option>
+        <option value="A15">A15 · Murcia</option>
+        <option value="A16">A16 · Navarra</option>
+        <option value="A17">A17 · País Vasco</option>
+        <option value="A18">A18 · Valencia</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary btn-sm" id="vb-btn-search" onclick="vbBuscar(0)">
+      <i class="fas fa-search me-1"></i> Buscar convocatorias
+    </button>
+    <button class="btn btn-outline-secondary btn-sm" onclick="vbReset()">
+      Limpiar filtros
+    </button>
+
+    <div class="vb-hint mt-2">
+      Consulta en tiempo real la <strong>Base Nacional de Subvenciones</strong>. Con A03 verás todas las convocatorias aplicables en Asturias.
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="vb-main">
+    <div class="vb-results-header">
+      <span class="vb-results-title">Convocatorias BDNS</span>
+      <span class="vb-count" id="vb-count"></span>
+    </div>
+    <div id="vb-area">
+      <div class="vb-status">
+        <p>Usa los filtros y pulsa <strong>Buscar</strong> para cargar convocatorias en tiempo real.</p>
+      </div>
+    </div>
+    <div class="vb-pagination" id="vb-pagination"></div>
+  </main>
+</div>
+
+<!-- Overlay -->
+<div class="vb-overlay" id="vb-overlay" onclick="vbCloseDetail()"></div>
+
+<!-- Detail Panel -->
+<div class="vb-detail" id="vb-detail">
+  <div class="vb-detail-header">
+    <h2 id="vb-detail-title">Detalle convocatoria</h2>
+    <button class="vb-close" onclick="vbCloseDetail()">✕</button>
+  </div>
+  <a class="vb-btn-add" id="vb-btn-add" href="#">
+    <i class="fas fa-plus-circle"></i> Añadir a Dashboard de Programas
+  </a>
+  <div class="vb-detail-body" id="vb-detail-body">
+    <div class="vb-status"><div class="vb-spinner"></div><p>Cargando…</p></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let vbTotalPages = 0;
+let vbLastVpd = 'A03';
+let vbLastBdns = null;
+
+async function vbProxy(endpoint, params = {}) {
+  const qs = new URLSearchParams({ endpoint, ...params }).toString();
+  const res = await fetch(`/api/bdns-proxy?${qs}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function vbBuscar(page = 0) {
+  const btn = document.getElementById('vb-btn-search');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="vb-spinner" style="width:14px;height:14px;border-width:2px;vertical-align:middle;margin-right:6px"></span>Buscando…';
+
+  const area = document.getElementById('vb-area');
+  area.innerHTML = '<div class="vb-status"><div class="vb-spinner"></div><p>Consultando BDNS…</p></div>';
+  document.getElementById('vb-pagination').innerHTML = '';
+  document.getElementById('vb-count').innerHTML = '';
+
+  const texto = document.getElementById('vb-texto').value.trim();
+  const bdns  = document.getElementById('vb-bdns').value.trim();
+  const desde = document.getElementById('vb-desde').value;
+  const hasta = document.getElementById('vb-hasta').value;
+  const size  = document.getElementById('vb-size').value;
+  vbLastVpd   = document.getElementById('vb-vpd').value;
+
+  const params = { vpd: vbLastVpd, page, pageSize: size, order: 'fechaRecepcion', direccion: 'desc', nivel2: 'PRINCIPADO DE ASTURIAS' };
+  if (texto) params.descripcion = texto;
+  if (bdns)  params.numConv = bdns;
+  if (desde) params.fechaDesde = desde;
+  if (hasta) params.fechaHasta = hasta;
+
+  try {
+    const data = await vbProxy('convocatorias/busqueda', params);
+    vbRenderResults(data, page);
+  } catch(e) {
+    area.innerHTML = `<div class="vb-status error"><p><strong>Error al consultar BDNS.</strong></p><p style="margin-top:.5rem;font-size:.8rem">${vbEsc(e.message)}</p></div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-search me-1"></i> Buscar convocatorias';
+}
+
+function vbRenderResults(data, page) {
+  const area = document.getElementById('vb-area');
+  const size = parseInt(document.getElementById('vb-size').value);
+  let items = [], total = 0, pages = 0;
+
+  if (Array.isArray(data))              { items = data; total = data.length; pages = 1; }
+  else if (data.content)                { items = data.content; total = data.totalElements ?? items.length; pages = data.totalPages ?? Math.ceil(total/size); }
+  else if (data.convocatorias)          { items = data.convocatorias; total = data.total ?? items.length; pages = data.totalPaginas ?? Math.ceil(total/size); }
+  else if (data.listaConvocatorias)     { items = data.listaConvocatorias; total = data.totalElementos ?? items.length; pages = Math.ceil(total/size); }
+
+  vbTotalPages = pages;
+
+  if (!items.length) {
+    area.innerHTML = '<div class="vb-status"><p>No se encontraron convocatorias con estos filtros.</p></div>';
+    return;
+  }
+
+  document.getElementById('vb-count').innerHTML = `<strong>${total.toLocaleString('es-ES')}</strong> resultados · pág. ${page+1} de ${pages}`;
+  area.innerHTML = `<div class="vb-cards">${items.map(c => vbCardHTML(c)).join('')}</div>`;
+  vbRenderPag(page, pages);
+}
+
+function vbCardHTML(c) {
+  const code  = c.numeroConvocatoria ?? c.id ?? '—';
+  const title = c.descripcion ?? c.descripcionConvocatoria ?? 'Sin título';
+  const org   = c.nivel3 ?? c.nivel2 ?? '';
+  const fecha = c.fechaRecepcion ?? '';
+  const imp   = c.importeTotal ?? null;
+  const fmtF  = fecha ? new Date(fecha).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) : '';
+  const fmtI  = imp ? Number(imp).toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}) : null;
+  return `<div class="vb-card" onclick="vbLoadDetail('${code}')" data-bdns="${code}">
+    <div class="vb-card-top">
+      <span class="vb-bdns-badge">BDNS&nbsp;${code}</span>
+      ${fmtF ? `<span class="vb-date">${fmtF}</span>` : ''}
+    </div>
+    <div class="vb-card-title">${vbEsc(title)}</div>
+    <div class="vb-tags">
+      ${org   ? `<span class="vb-tag org">${vbEsc(org)}</span>` : ''}
+      ${fmtI  ? `<span class="vb-tag importe">${fmtI}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function vbRenderPag(cur, total) {
+  const el = document.getElementById('vb-pagination');
+  if (total <= 1) { el.innerHTML = ''; return; }
+  const range = [];
+  for (let i = Math.max(0,cur-2); i <= Math.min(total-1,cur+2); i++) range.push(i);
+  let h = `<button class="vb-pg" ${cur===0?'disabled':''} onclick="vbBuscar(${cur-1})">← Ant.</button>`;
+  if (range[0]>0) { h+=`<button class="vb-pg" onclick="vbBuscar(0)">1</button>`; if(range[0]>1) h+=`<span style="padding:0 4px;color:#999">…</span>`; }
+  range.forEach(p => { h+=`<button class="vb-pg ${p===cur?'active':''}" onclick="vbBuscar(${p})">${p+1}</button>`; });
+  const last=total-1;
+  if (range[range.length-1]<last) { if(range[range.length-1]<last-1) h+=`<span style="padding:0 4px;color:#999">…</span>`; h+=`<button class="vb-pg" onclick="vbBuscar(${last})">${total}</button>`; }
+  h += `<button class="vb-pg" ${cur>=total-1?'disabled':''} onclick="vbBuscar(${cur+1})">Sig. →</button>`;
+  el.innerHTML = h;
+}
+
+async function vbLoadDetail(code) {
+  vbLastBdns = code;
+  document.querySelectorAll('.vb-card').forEach(c => c.classList.toggle('active', c.dataset.bdns == code));
+  document.getElementById('vb-detail-title').textContent = `Convocatoria ${code}`;
+  document.getElementById('vb-detail-body').innerHTML = '<div class="vb-status"><div class="vb-spinner"></div><p>Cargando detalle…</p></div>';
+  document.getElementById('vb-detail').classList.add('open');
+  document.getElementById('vb-overlay').classList.add('show');
+
+  // Actualizar enlace "Añadir a Dashboard"
+  const addUrl = `/financiacion/gestionar-convocatorias?bdns=${code}&vpd=${vbLastVpd}`;
+  document.getElementById('vb-btn-add').href = addUrl;
+
+  try {
+    const raw = await vbProxy(`detalle/${code}`, { vpd: vbLastVpd });
+    vbRenderDetail(raw, code);
+  } catch(e) {
+    document.getElementById('vb-detail-body').innerHTML = `
+      <div class="vb-section">
+        <p style="color:#888;font-size:.85rem">No se pudo cargar el detalle.</p>
+        <p style="font-size:.78rem;margin-top:.4rem">${vbEsc(e.message)}</p>
+        <a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank">Ver ficha oficial ↗</a>
+      </div>`;
+  }
+}
+
+function vbRenderDetail(raw, code) {
+  let d = {};
+  if (raw && Array.isArray(raw.content) && raw.content.length>0) d = raw.content[0];
+  else if (Array.isArray(raw) && raw.length>0) d = raw[0];
+  else if (raw && typeof raw==='object' && !Array.isArray(raw) && !raw.content) d = raw;
+
+  if (d.organo && typeof d.organo==='object') {
+    d._n1 = d.organo.nivel1??''; d._n2 = d.organo.nivel2??''; d._n3 = d.organo.nivel3??'';
+  }
+  const titulo = d.descripcion ?? d.descripcionConvocatoria ?? `Convocatoria #${code}`;
+  document.getElementById('vb-detail-title').textContent = titulo;
+
+  function listaDesc(arr) { if (!Array.isArray(arr)||!arr.length) return null; return arr.map(x=>x.descripcion??JSON.stringify(x)).join(' · '); }
+  function fmtF(v) { if (!v) return null; const dt=new Date(v); return isNaN(dt)?String(v):dt.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}); }
+  function fmtE(v) { const n=Number(v); return isNaN(n)?null:n.toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}); }
+  function row(lbl, val, isHtml=false) {
+    if (!val && val!==0) return '';
+    const v = isHtml ? val : vbEsc(String(val));
+    return `<div class="vb-row"><span class="vb-lbl">${vbEsc(lbl)}</span><span class="vb-val">${v}</span></div>`;
+  }
+
+  let s1='', s2='', s3='', s4='', s5='', sDocs='';
+  s1 += row('Código BDNS', d.codigoBDNS??d.numeroConvocatoria??code);
+  s1 += row('Tipo', d.tipoConvocatoria);
+  s1 += row('Estado', d.abierto===true||d.abierto==='Sí'
+    ? '<span style="color:#1a7a1a;font-weight:600">Abierta</span>'
+    : (d.abierto===false||d.abierto==='No' ? '<span style="color:#8b0000;font-weight:600">Cerrada</span>' : null), true);
+  s1 += row('Publicación', fmtF(d.fechaRecepcion));
+  s1 += row('Inicio solicitud', fmtF(d.fechaInicioSolicitud));
+  s1 += row('Fin solicitud', fmtF(d.fechaFinSolicitud));
+
+  if (d._n3) s2 += row('Órgano', d._n3);
+  if (d._n2) s2 += row('Administración', d._n2);
+  if (d._n1) s2 += row('Ámbito', d._n1);
+  if (!s2) { s2 += row('Órgano', d.nivel3); s2 += row('Administración', d.nivel2); }
+
+  const pres = d.presupuestoTotal??d.importeTotal??d.dotacionPresupuestaria;
+  if (pres!=null) s3 += row('Presupuesto', fmtE(pres));
+  const instr = listaDesc(d.instrumentos); if (instr) s3 += row('Instrumento', instr);
+  const fondos = listaDesc(d.fondos); if (fondos) s3 += row('Fondos', fondos);
+
+  const benef = listaDesc(d.tiposBeneficiarios); if (benef) s4 += row('Beneficiarios', benef);
+  const sect = d.sectores&&d.sectores.length ? d.sectores.map(s=>s.descripcion+(s.codigo?` (${s.codigo})`:'')).join(' · ') : null;
+  if (sect) s4 += row('Sectores', sect);
+
+  if (d.descripcionFinalidad) s5 += row('Finalidad', d.descripcionFinalidad);
+  if (d.urlBasesReguladoras) s5 += row('Bases reguladoras', `<a href="${vbEsc(d.urlBasesReguladoras)}" target="_blank" style="color:#0078BF">Abrir ↗</a>`, true);
+
+  if (Array.isArray(d.documentos)&&d.documentos.length) {
+    sDocs = d.documentos.map(doc=>{
+      const url=`https://www.infosubvenciones.es/bdnstrans/api/documentos/${doc.id}`;
+      return `<div class="vb-row"><span class="vb-lbl">${vbEsc(doc.datPublicacion?new Date(doc.datPublicacion).toLocaleDateString('es-ES'):'Doc.')}</span><span class="vb-val"><a href="${vbEsc(url)}" target="_blank" style="color:#0078BF;font-weight:500">${vbEsc(doc.descripcion??doc.nombreFic??'Documento')}</a></span></div>`;
+    }).join('');
+  }
+
+  function sec(title, rows) { if (!rows) return ''; return `<div class="vb-section"><div class="vb-section-title">${vbEsc(title)}</div>${rows}</div>`; }
+
+  let html = sec('Identificación', s1) + sec('Organismo', s2);
+  if (s3) html += sec('Dotación económica', s3);
+  if (s4) html += sec('Beneficiarios y sectores', s4);
+  if (s5) html += sec('Bases y finalidad', s5);
+  if (sDocs) html += sec('Documentos', sDocs);
+  html += `<a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Ver ficha oficial</a>`;
+
+  document.getElementById('vb-detail-body').innerHTML = html;
+}
+
+function vbCloseDetail() {
+  document.getElementById('vb-detail').classList.remove('open');
+  document.getElementById('vb-overlay').classList.remove('show');
+  document.querySelectorAll('.vb-card').forEach(c=>c.classList.remove('active'));
+}
+
+function vbReset() {
+  ['vb-texto','vb-bdns','vb-desde','vb-hasta'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('vb-size').value='20';
+  document.getElementById('vb-vpd').value='A03';
+  document.getElementById('vb-area').innerHTML='<div class="vb-status"><p>Filtros limpiados. Pulsa <strong>Buscar</strong>.</p></div>';
+  document.getElementById('vb-pagination').innerHTML='';
+  document.getElementById('vb-count').innerHTML='';
+}
+
+function vbEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.getElementById('vb-texto').addEventListener('keydown', e=>{ if(e.key==='Enter') vbBuscar(0); });
+document.getElementById('vb-bdns').addEventListener('keydown',  e=>{ if(e.key==='Enter') vbBuscar(0); });
+</script>
+{% endblock %}

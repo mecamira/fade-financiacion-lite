@@ -1337,6 +1337,18 @@ function generatePreview(data) {
             }
         });
         
+        // Auto-fill desde parámetro ?bdns= en la URL (viene de Vigilancia BDNS)
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const bdnsCode = params.get('bdns');
+            const vpd = params.get('vpd') || 'GE';
+            if (bdnsCode) {
+                const bdnsUrl = `https://www.infosubvenciones.es/bdnstrans/${vpd}/es/convocatorias/${bdnsCode}`;
+                document.getElementById('url-bdns-input').value = bdnsUrl;
+                document.getElementById('obtener-bdns-btn').click();
+            }
+        })();
+
         // Extraer información del PDF descargado
         async function extraerInformacionPDF() {
             if (!pdfDescargadoPath) {
