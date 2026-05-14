@@ -22,6 +22,7 @@ logs/*.log
 *.log
 
 # Data
+data/*.json
 data/*.json.backup
 uploads/*
 !uploads/.gitkeep
