@@ -206,7 +206,10 @@ def normalizar_tipo_ayuda(tipo_ayuda):
     """Normaliza un tipo de ayuda a su grupo simplificado"""
     if not tipo_ayuda:
         return 'Otros'
-    
+    if isinstance(tipo_ayuda, list):
+        tipo_ayuda = tipo_ayuda[0] if tipo_ayuda else ''
+    if not tipo_ayuda:
+        return 'Otros'
     for grupo, valores in TIPO_AYUDA_GRUPOS.items():
         for valor in valores:
             if valor.lower() in tipo_ayuda.lower():
@@ -217,9 +220,12 @@ def normalizar_sector(sector):
     """Normaliza un sector a su macro-sector"""
     if not sector:
         return 'Otros'
-    
+    if isinstance(sector, list):
+        sector = sector[0] if sector else ''
+    if not sector:
+        return 'Otros'
     sector_lower = sector.lower()
-    
+
     for grupo, valores in SECTOR_GRUPOS.items():
         for valor in valores:
             if valor.lower() in sector_lower or sector_lower in valor.lower():
@@ -230,9 +236,12 @@ def normalizar_beneficiario(beneficiario):
     """Normaliza un beneficiario a su grupo simplificado"""
     if not beneficiario:
         return 'Otros'
-    
+    if isinstance(beneficiario, list):
+        beneficiario = beneficiario[0] if beneficiario else ''
+    if not beneficiario:
+        return 'Otros'
     beneficiario_lower = beneficiario.lower()
-    
+
     for grupo, valores in BENEFICIARIO_GRUPOS.items():
         for valor in valores:
             if valor.lower() in beneficiario_lower or beneficiario_lower in valor.lower():
