@@ -108,8 +108,21 @@ fi
 log_info "✅ Docker está disponible"
 echo ""
 
-# 3. DETENER CONTENEDORES EXISTENTES
-log_step "Paso 3/9: Deteniendo contenedores existentes..."
+# 3. BACKUP DE DATOS ANTES DE DEPLOY
+log_step "Paso 3/9: Backup de datos..."
+
+mkdir -p "$PROJECT_DIR/backups"
+if [ -f "$PROJECT_DIR/data/programas_financiacion.json" ]; then
+    cp "$PROJECT_DIR/data/programas_financiacion.json" \
+       "$PROJECT_DIR/backups/programas_$(date +%Y%m%d_%H%M%S).json"
+    log_info "✅ Backup creado en backups/"
+    # Mantener solo los últimos 10 backups
+    ls -t "$PROJECT_DIR/backups"/programas_*.json | tail -n +11 | xargs -r rm
+fi
+echo ""
+
+# 4. DETENER CONTENEDORES EXISTENTES
+log_step "Paso 4/9: Deteniendo contenedores existentes..."
 
 if docker compose ps -q 2>/dev/null | grep -q .; then
     log_info "Deteniendo contenedores..."
