@@ -455,7 +455,7 @@ async function vbLoadDetail(code) {
   document.getElementById('vb-btn-add').href = addUrl;
 
   try {
-    const raw = await vbProxy(`detalle/${code}`, { vpd: vbLastVpd });
+    const raw = await vbProxy('convocatorias/busqueda', { vpd: vbLastVpd, numConv: code, pageSize: 1 });
     vbRenderDetail(raw, code);
   } catch(e) {
     document.getElementById('vb-detail-body').innerHTML = `
