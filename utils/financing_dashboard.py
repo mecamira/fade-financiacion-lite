@@ -671,8 +671,8 @@ def agregar_programa(datos_programa):
         with open(json_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
         
-        # Generar ID único basado en el nombre
-        nombre = datos_programa.get('nombre', 'programa')
+        # Generar ID único basado en el nombre (nombre_coloquial tiene prioridad)
+        nombre = datos_programa.get('nombre_coloquial') or datos_programa.get('nombre') or 'programa'
         programa_id = nombre.lower().replace(' ', '-').replace('/', '-').replace('(', '').replace(')', '')
         programa_id = programa_id[:50]  # Limitar longitud
         

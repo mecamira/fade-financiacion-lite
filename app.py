@@ -467,7 +467,11 @@ def guardar_programa():
         
         # Guardar en base de datos
         programa_id = financing_dashboard.agregar_programa(data)
-        
+
+        if not programa_id:
+            logger.error("agregar_programa devolvió None — revisa los logs del proceso")
+            return jsonify({'success': False, 'error': 'Error interno al guardar el programa. Revisa los logs.'}), 500
+
         logger.info(f"Programa guardado exitosamente: {programa_id}")
         return jsonify({
             'success': True,
