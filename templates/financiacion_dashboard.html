@@ -915,8 +915,8 @@
                 let valueA, valueB;
                 
                 if (sortField === 'nombre') {
-                    valueA = a.nombre || '';
-                    valueB = b.nombre || '';
+                    valueA = a.nombre_coloquial || a.nombre || '';
+                    valueB = b.nombre_coloquial || b.nombre || '';
                 } else if (sortField === 'organismo') {
                     valueA = a.organismo || '';
                     valueB = b.organismo || '';
@@ -991,7 +991,7 @@
                 card.querySelector('.programa-card').setAttribute('data-programa-id', programa.id);
                 
                 // Establecer valores
-                card.querySelector('.programa-nombre').textContent = programa.nombre || 'Programa sin nombre';
+                card.querySelector('.programa-nombre').textContent = programa.nombre_coloquial || programa.nombre || 'Programa sin nombre';
                 card.querySelector('.programa-organismo .organismo-text').textContent = programa.organismo || 'Organismo no especificado';
                 
                 // Mejorar resumen
@@ -1362,7 +1362,7 @@
                         if (fechaCierre > hoy && fechaCierre < seisProximosMeses) {
                             convocatorias.push({
                                 id: p.id,
-                                nombre: p.nombre,
+                                nombre: p.nombre_coloquial || p.nombre,
                                 fecha: fechaCierre,
                                 estado: p.convocatoria.estado,
                                 organismo: p.organismo
@@ -1455,7 +1455,7 @@
             programas.forEach(p => {
                 const presupuesto = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo;
                 const row = [
-                    p.nombre || '',
+                    p.nombre_coloquial || p.nombre || '',
                     p.organismo || '',
                     p.tipo_ayuda || '',
                     p.convocatoria?.estado || '',
@@ -1622,7 +1622,7 @@
             for (let i = 0; i < programasSeleccionados.length; i++) {
                 const headerEl = document.getElementById(`compare-program-${i+1}`);
                 if (headerEl) {
-                    headerEl.textContent = programasSeleccionados[i].nombre;
+                    headerEl.textContent = programasSeleccionados[i].nombre_coloquial || programasSeleccionados[i].nombre;
                 }
             }
             

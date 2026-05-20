@@ -262,7 +262,7 @@ def buscar_en_programa(programa, search_term):
     search_term = search_term.lower()
     
     # Buscar en campos de texto principales
-    campos_texto = ['nombre', 'organismo', 'tipo_proyecto', 'resumen_breve', 'descripcion_detallada']
+    campos_texto = ['nombre_coloquial', 'nombre', 'organismo', 'tipo_proyecto', 'resumen_breve', 'descripcion_detallada']
     for campo in campos_texto:
         if campo in programa and programa[campo] and search_term in str(programa[campo]).lower():
             return True
