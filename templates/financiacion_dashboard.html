@@ -3,79 +3,8 @@
 {% block title %}Dashboard de Financiación{% endblock %}
 
 {% block extra_css %}
-<!-- Select2 CSS para filtros con búsqueda -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    /* Personalización de Select2 para FADE Design System */
-    .select2-container--default .select2-selection--single {
-        border: 1px solid var(--color-neutral-200);
-        border-radius: var(--border-radius-sm);
-        height: 38px;
-        padding: var(--spacing-1) 12px;
-        font-size: var(--font-size-body);
-        font-family: var(--font-family-base);
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 22px;
-        color: var(--color-neutral-900);
-        padding-left: 0;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px;
-    }
-
-    .select2-container--default.select2-container--focus .select2-selection--single {
-        border-color: var(--color-primary-500);
-        box-shadow: 0 0 0 3px var(--color-primary-50);
-    }
-
-    .select2-dropdown {
-        border: 1px solid var(--color-primary-500);
-        border-radius: var(--border-radius-sm);
-        box-shadow: var(--shadow-md);
-    }
-
-    .select2-container--default .select2-search--dropdown .select2-search__field {
-        border: 1px solid var(--color-neutral-200);
-        border-radius: var(--border-radius-sm);
-        padding: var(--spacing-1);
-        font-family: var(--font-family-base);
-        font-size: var(--font-size-body);
-    }
-
-    .select2-container--default .select2-search--dropdown .select2-search__field:focus {
-        border-color: var(--color-primary-500);
-        outline: none;
-    }
-
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: var(--color-primary-500);
-        color: var(--color-neutral-0);
-    }
-
-    .select2-container--default .select2-results__option[aria-selected=true] {
-        background-color: var(--color-primary-50);
-        color: var(--color-primary-900);
-    }
-
-    .select2-results__option {
-        font-family: var(--font-family-base);
-        font-size: var(--font-size-body);
-        padding: var(--spacing-1) 12px;
-    }
-
-    /* Placeholder personalizado */
-    .select2-container--default .select2-selection--single .select2-selection__placeholder {
-        color: var(--color-neutral-700);
-        opacity: 0.7;
-    }
-
-    /* Ajustar ancho para que ocupe el 100% del contenedor */
-    .select2-container {
-        width: 100% !important;
-    }
+    /* Estilos específicos del dashboard de financiación */
 </style>
 {% endblock %}
 
@@ -128,122 +57,106 @@
                     <h5 class="mb-0">Filtros</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Datos de opciones de filtro para JS -->
+                    <script>
+                    const filterOptionsData = {
+                        estado:        {{ filter_options.estados | tojson | safe }},
+                        organismo:     {{ filter_options.organismos | tojson | safe }},
+                        tipo_ayuda:    {{ filter_options.tipos_ayuda | tojson | safe }},
+                        ambito:        {{ filter_options.ambitos | tojson | safe }},
+                        beneficiario:  {{ filter_options.beneficiarios | tojson | safe }},
+                        sector:        {{ filter_options.sectores | tojson | safe }},
+                        tipo_proyecto: {{ filter_options.tipos_proyecto | tojson | safe }},
+                        fondos_europeos: {{ filter_options.origenes_fondos | tojson | safe }}
+                    };
+                    </script>
+
                     <form id="filter-form">
-                        <!-- Búsqueda general -->
+                        <!-- Búsqueda general — sin cambios -->
                         <div class="mb-3">
-                            <label for="search" class="form-label">Buscar:</label>
+                            <label for="search" class="form-label fw-semibold">
+                                <i class="fas fa-search me-1 text-primary"></i>Buscar
+                            </label>
                             <input type="text" class="form-control" id="search" placeholder="Palabra clave...">
                         </div>
-                        
-                        <!-- Estado -->
-                        <div class="mb-3">
-                            <label for="estado" class="form-label">Estado:</label>
-                            <select class="form-select" id="estado">
-                                <option value="">Todos</option>
-                                {% for estado in filter_options.estados %}
-                                <option value="{{ estado }}">{{ estado }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Organismo -->
-                        <div class="mb-3">
-                            <label for="organismo" class="form-label">Organismo:</label>
-                            <select class="form-select" id="organismo">
-                                <option value="">Todos</option>
-                                {% for org in filter_options.organismos %}
-                                <option value="{{ org }}">{{ org }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- BDNS (Base de Datos Nacional de Subvenciones) -->
-                        <div class="mb-3">
-                            <label for="bdns" class="form-label">BDNS:</label>
-                            <input type="text" class="form-control" id="bdns" placeholder="Código BDNS...">
-                        </div>
-                        
-                        <!-- Tipo de ayuda -->
-                        <div class="mb-3">
-                            <label for="tipo_ayuda" class="form-label">Tipo de ayuda:</label>
-                            <select class="form-select" id="tipo_ayuda">
-                                <option value="">Todos</option>
-                                {% for tipo in filter_options.tipos_ayuda %}
-                                <option value="{{ tipo }}">{{ tipo }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Ámbito -->
-                        <div class="mb-3">
-                            <label for="ambito" class="form-label">Ámbito:</label>
-                            <select class="form-select" id="ambito">
-                                <option value="">Todos</option>
-                                {% for amb in filter_options.ambitos %}
-                                <option value="{{ amb }}">{{ amb }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Beneficiario -->
-                        <div class="mb-3">
-                            <label for="beneficiario" class="form-label">Beneficiario:</label>
-                            <select class="form-select" id="beneficiario">
-                                <option value="">Todos</option>
-                                {% for ben in filter_options.beneficiarios %}
-                                <option value="{{ ben }}">{{ ben }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Sector -->
-                        <div class="mb-3">
-                            <label for="sector" class="form-label">Sector:</label>
-                            <select class="form-select" id="sector">
-                                <option value="">Todos</option>
-                                {% for sec in filter_options.sectores %}
-                                <option value="{{ sec }}">{{ sec }}</option>
-                                {% endfor %}
+
+                        <hr class="my-3">
+
+                        <!-- Constructor dinámico de filtros -->
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold mb-2">
+                                <i class="fas fa-filter me-1 text-primary"></i>Filtros
+                            </label>
+
+                            <!-- Selector de tipo de filtro -->
+                            <select class="form-select form-select-sm" id="filter-type-select">
+                                <option value="">Añadir filtro…</option>
+                                <option value="estado">Estado</option>
+                                <option value="organismo">Organismo</option>
+                                <option value="tipo_ayuda">Tipo de ayuda</option>
+                                <option value="ambito">Ámbito</option>
+                                <option value="beneficiario">Beneficiario</option>
+                                <option value="sector">Sector</option>
+                                <option value="tipo_proyecto">Tipo de Proyecto</option>
+                                <option value="fondos_europeos">Fondos Europeos</option>
+                                <option value="bdns">BDNS</option>
+                                <option value="presupuesto">Presupuesto</option>
                             </select>
                         </div>
 
-                        <!-- Tipo de Proyecto -->
-                        <div class="mb-3">
-                            <label for="tipo_proyecto" class="form-label">Tipo de Proyecto:</label>
-                            <select class="form-select" id="tipo_proyecto">
-                                <option value="">Todos</option>
-                                {% for tipo in filter_options.tipos_proyecto %}
-                                <option value="{{ tipo }}">{{ tipo }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Fondos Europeos -->
-                        <div class="mb-3">
-                            <label for="fondos_europeos" class="form-label">Fondos Europeos:</label>
-                            <select class="form-select" id="fondos_europeos">
-                                <option value="">Todos</option>
-                                {% for origen in filter_options.origenes_fondos %}
-                                <option value="{{ origen }}">{{ origen }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Presupuesto -->
-                        <div class="mb-3">
-                            <label class="form-label">Presupuesto proyecto:</label>
-                            <div class="row">
-                                <div class="col">
-                                    <input type="number" class="form-control" id="presupuesto_min" placeholder="Min">
-                                </div>
-                                <div class="col">
-                                    <input type="number" class="form-control" id="presupuesto_max" placeholder="Max">
+                        <!-- Opciones dinámicas según tipo seleccionado -->
+                        <div id="filter-value-container" class="mb-3 p-2 border rounded bg-light" style="display:none;">
+                            <!-- Para filtros de tipo "select" con búsqueda -->
+                            <div id="fv-select-wrap" style="display:none;">
+                                <input type="text" class="form-control form-control-sm mb-1" id="fv-select-search" placeholder="Buscar opción…" autocomplete="off">
+                                <select class="form-select form-select-sm" id="fv-select" size="5" style="height:auto; max-height:160px; overflow-y:auto;">
+                                </select>
+                            </div>
+                            <!-- Para BDNS (texto libre) -->
+                            <div id="fv-text-wrap" style="display:none;">
+                                <input type="text" class="form-control form-control-sm" id="fv-text" placeholder="Código BDNS…">
+                            </div>
+                            <!-- Para Presupuesto (rango) -->
+                            <div id="fv-range-wrap" style="display:none;">
+                                <div class="d-flex gap-1">
+                                    <input type="number" class="form-control form-control-sm" id="fv-range-min" placeholder="Min €">
+                                    <input type="number" class="form-control form-control-sm" id="fv-range-max" placeholder="Max €">
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-primary btn-sm w-100 mt-2" id="fv-add-btn">
+                                <i class="fas fa-plus me-1"></i>Añadir filtro
+                            </button>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mb-2">Aplicar filtros</button>
-                        <button type="button" id="reset-filters" class="btn btn-outline-secondary w-100">Limpiar filtros</button>
+
+                        <!-- Tags de filtros activos -->
+                        <div id="active-filters-area" style="display:none;" class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted fw-semibold">Filtros activos:</small>
+                                <button type="button" id="reset-filters" class="btn btn-link btn-sm p-0 text-danger" style="font-size:0.75rem; text-decoration:none;">
+                                    <i class="fas fa-trash-alt me-1"></i>Limpiar todos
+                                </button>
+                            </div>
+                            <div id="active-filters-tags" class="d-flex flex-wrap gap-1">
+                                <!-- Tags generados por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Inputs ocultos — compatibles con loadPrograms() -->
+                        <input type="hidden" id="estado" value="">
+                        <input type="hidden" id="organismo" value="">
+                        <input type="hidden" id="bdns" value="">
+                        <input type="hidden" id="tipo_ayuda" value="">
+                        <input type="hidden" id="ambito" value="">
+                        <input type="hidden" id="beneficiario" value="">
+                        <input type="hidden" id="sector" value="">
+                        <input type="hidden" id="tipo_proyecto" value="">
+                        <input type="hidden" id="fondos_europeos" value="">
+                        <input type="hidden" id="presupuesto_min" value="">
+                        <input type="hidden" id="presupuesto_max" value="">
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i>Aplicar filtros
+                        </button>
                     </form>
                 </div>
             </div>
@@ -412,16 +325,28 @@
 </div>
 
 <!-- Barra flotante de comparación -->
-<div id="compare-bar" class="position-fixed bottom-0 start-0 w-100 bg-dark text-white py-2 px-3 d-none">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <span class="badge bg-primary rounded-pill me-2" id="compare-count">0</span>
-                <span>programas seleccionados para comparar</span>
+<div id="compare-bar" class="position-fixed bottom-0 start-0 w-100 text-white d-none" style="z-index:1040; background: linear-gradient(90deg, #1a2035 0%, #1e3a5f 100%); box-shadow: 0 -3px 15px rgba(0,0,0,0.3); border-top: 2px solid var(--color-primary-500);">
+    <div class="container-fluid py-2 px-3">
+        <div class="d-flex align-items-center gap-3">
+            <!-- Contador -->
+            <div class="flex-shrink-0 text-center" style="min-width:48px;">
+                <div class="badge bg-primary rounded-pill" id="compare-count" style="font-size:1rem; padding:4px 10px;">0</div>
+                <div style="font-size:0.65rem; opacity:0.7; line-height:1.2; margin-top:2px;">para comparar</div>
             </div>
-            <div>
-                <button id="compare-button" class="btn btn-primary btn-sm me-2" disabled>Comparar programas</button>
-                <button id="compare-clear" class="btn btn-outline-light btn-sm">Limpiar selección</button>
+
+            <!-- Chips de programas seleccionados -->
+            <div id="compare-preview" class="d-flex flex-wrap gap-2 flex-grow-1">
+                <!-- chips generados por JS -->
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex-shrink-0 d-flex gap-2 ms-auto">
+                <button id="compare-button" class="btn btn-primary btn-sm" disabled>
+                    <i class="fas fa-balance-scale me-1"></i>Comparar
+                </button>
+                <button id="compare-clear" class="btn btn-outline-light btn-sm" title="Limpiar selección">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
             </div>
         </div>
     </div>
@@ -590,124 +515,108 @@
         font-weight: var(--font-weight-semibold);
         border-bottom: 2px solid var(--color-primary-500);
     }
+
+    /* ===== Compare chips en barra inferior ===== */
+    .compare-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 20px;
+        padding: 4px 6px 4px 12px;
+        font-size: 0.8em;
+        color: white;
+        max-width: 220px;
+        min-width: 80px;
+    }
+    .compare-chip-name {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .compare-chip-remove {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.85em;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        transition: background 0.15s;
+    }
+    .compare-chip-remove:hover {
+        background: rgba(255,255,255,0.4);
+    }
+
+    /* ===== Filter tags en panel lateral ===== */
+    .filter-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--color-primary-50, #e8f4fd);
+        color: var(--color-primary-900, #003d6b);
+        border: 1px solid var(--color-primary-200, #b8ddf7);
+        border-radius: 20px;
+        padding: 3px 6px 3px 10px;
+        font-size: 0.75rem;
+        font-weight: normal;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    .filter-tag-label {
+        font-weight: 600;
+        opacity: 0.75;
+        flex-shrink: 0;
+    }
+    .filter-tag-value {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
+    .filter-tag-remove {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background: var(--color-primary-200, #b8ddf7);
+        border: none;
+        border-radius: 50%;
+        color: var(--color-primary-800, #004f82);
+        font-size: 0.75em;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: background 0.15s;
+    }
+    .filter-tag-remove:hover {
+        background: var(--color-primary-400, #5ab0e8);
+        color: white;
+    }
+
+    /* Tamaño del selector de opciones en el constructor de filtros */
+    #fv-select option {
+        padding: 4px 8px;
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- Select2 JS - se carga después de jQuery -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar Select2 en los filtros (excepto búsqueda, BDNS y presupuestos)
-        // Usar jQuery explícitamente para evitar conflictos
-        jQuery(document).ready(function($) {
-            $('#estado').select2({
-                placeholder: 'Selecciona un estado',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#organismo').select2({
-                placeholder: 'Selecciona un organismo',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#tipo_ayuda').select2({
-                placeholder: 'Selecciona tipo de ayuda',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#ambito').select2({
-                placeholder: 'Selecciona un ámbito',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#beneficiario').select2({
-                placeholder: 'Selecciona un beneficiario',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#sector').select2({
-                placeholder: 'Selecciona un sector',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#tipo_proyecto').select2({
-                placeholder: 'Selecciona tipo de proyecto',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-
-            $('#fondos_europeos').select2({
-                placeholder: 'Selecciona fondos europeos',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "No se encontraron resultados";
-                    },
-                    searching: function() {
-                        return "Buscando...";
-                    }
-                }
-            });
-        });
 
         // Función para formatear importes al estilo español
         function formatImporte(valor) {
@@ -746,6 +655,176 @@
         let sectorChart = null;
         let timelineChart = null;
         
+        // =====================================================================
+        // SISTEMA DE FILTROS DINÁMICO
+        // =====================================================================
+
+        const filterLabels = {
+            estado: 'Estado',
+            organismo: 'Organismo',
+            tipo_ayuda: 'Tipo de ayuda',
+            ambito: 'Ámbito',
+            beneficiario: 'Beneficiario',
+            sector: 'Sector',
+            tipo_proyecto: 'Tipo de Proyecto',
+            fondos_europeos: 'Fondos Europeos',
+            bdns: 'BDNS',
+            presupuesto: 'Presupuesto',
+        };
+
+        // Estado de filtros activos: { tipo: valor } o { presupuesto: { min, max } }
+        const activeFilters = {};
+
+        // ---- Selector de tipo de filtro ----
+        document.getElementById('filter-type-select').addEventListener('change', function() {
+            const type = this.value;
+            const container = document.getElementById('filter-value-container');
+            const selectWrap = document.getElementById('fv-select-wrap');
+            const textWrap = document.getElementById('fv-text-wrap');
+            const rangeWrap = document.getElementById('fv-range-wrap');
+
+            if (!type) {
+                container.style.display = 'none';
+                return;
+            }
+
+            selectWrap.style.display = 'none';
+            textWrap.style.display = 'none';
+            rangeWrap.style.display = 'none';
+
+            if (type === 'bdns') {
+                textWrap.style.display = 'block';
+                document.getElementById('fv-text').value = activeFilters['bdns'] || '';
+                document.getElementById('fv-text').focus();
+            } else if (type === 'presupuesto') {
+                rangeWrap.style.display = 'block';
+                const cur = activeFilters['presupuesto'] || {};
+                document.getElementById('fv-range-min').value = cur.min || '';
+                document.getElementById('fv-range-max').value = cur.max || '';
+            } else {
+                // Construir opciones del selector
+                const opts = (filterOptionsData[type] || []);
+                const fvSelect = document.getElementById('fv-select');
+                fvSelect.innerHTML = opts
+                    .map(opt => `<option value="${opt}"${activeFilters[type] === opt ? ' selected' : ''}>${opt}</option>`)
+                    .join('');
+                document.getElementById('fv-select-search').value = '';
+                selectWrap.style.display = 'block';
+                document.getElementById('fv-select-search').focus();
+            }
+
+            container.style.display = 'block';
+        });
+
+        // Búsqueda rápida dentro del selector de opciones
+        document.getElementById('fv-select-search').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const fvSelect = document.getElementById('fv-select');
+            Array.from(fvSelect.options).forEach(opt => {
+                opt.style.display = opt.text.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        // Doble clic en opción = añadir directamente
+        document.getElementById('fv-select').addEventListener('dblclick', function() {
+            document.getElementById('fv-add-btn').click();
+        });
+
+        // ---- Botón Añadir filtro ----
+        document.getElementById('fv-add-btn').addEventListener('click', function() {
+            const type = document.getElementById('filter-type-select').value;
+            if (!type) return;
+
+            if (type === 'bdns') {
+                const val = document.getElementById('fv-text').value.trim();
+                if (!val) return;
+                activeFilters['bdns'] = val;
+            } else if (type === 'presupuesto') {
+                const min = document.getElementById('fv-range-min').value;
+                const max = document.getElementById('fv-range-max').value;
+                if (!min && !max) return;
+                activeFilters['presupuesto'] = { min, max };
+            } else {
+                const val = document.getElementById('fv-select').value;
+                if (!val) return;
+                activeFilters[type] = val;
+            }
+
+            // Resetear el selector de tipo
+            document.getElementById('filter-type-select').value = '';
+            document.getElementById('filter-value-container').style.display = 'none';
+
+            syncFiltersToInputs();
+            renderFilterTags();
+            loadPrograms();
+        });
+
+        // ---- Sync filtros activos → inputs ocultos ----
+        function syncFiltersToInputs() {
+            ['estado','organismo','tipo_ayuda','ambito','beneficiario','sector','tipo_proyecto','fondos_europeos','bdns'].forEach(id => {
+                document.getElementById(id).value = activeFilters[id] || '';
+            });
+            const pres = activeFilters['presupuesto'] || {};
+            document.getElementById('presupuesto_min').value = pres.min || '';
+            document.getElementById('presupuesto_max').value = pres.max || '';
+        }
+
+        // ---- Renderizar tags de filtros activos ----
+        function renderFilterTags() {
+            const tagsEl = document.getElementById('active-filters-tags');
+            const areaEl = document.getElementById('active-filters-area');
+            const entries = Object.entries(activeFilters);
+
+            if (entries.length === 0) {
+                areaEl.style.display = 'none';
+                tagsEl.innerHTML = '';
+                return;
+            }
+
+            areaEl.style.display = 'block';
+            tagsEl.innerHTML = entries.map(([key, value]) => {
+                let displayValue;
+                if (key === 'presupuesto') {
+                    const parts = [];
+                    if (value.min) parts.push('≥ ' + parseInt(value.min).toLocaleString('es-ES') + ' €');
+                    if (value.max) parts.push('≤ ' + parseInt(value.max).toLocaleString('es-ES') + ' €');
+                    displayValue = parts.join(' — ');
+                } else {
+                    displayValue = value;
+                }
+                const label = filterLabels[key] || key;
+                return `<span class="filter-tag">
+                    <span class="filter-tag-label">${label}:</span>
+                    <span class="filter-tag-value" title="${displayValue}">${displayValue}</span>
+                    <button type="button" class="filter-tag-remove" data-key="${key}" aria-label="Eliminar filtro ${label}">×</button>
+                </span>`;
+            }).join('');
+
+            tagsEl.querySelectorAll('.filter-tag-remove').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    delete activeFilters[this.getAttribute('data-key')];
+                    syncFiltersToInputs();
+                    renderFilterTags();
+                    loadPrograms();
+                });
+            });
+        }
+
+        // ---- Limpiar todos los filtros ----
+        function clearAllFilters() {
+            Object.keys(activeFilters).forEach(k => delete activeFilters[k]);
+            syncFiltersToInputs();
+            renderFilterTags();
+            document.getElementById('search').value = '';
+            document.getElementById('filter-type-select').value = '';
+            document.getElementById('filter-value-container').style.display = 'none';
+            loadPrograms();
+        }
+
+        // =====================================================================
+        // FIN SISTEMA DE FILTROS DINÁMICO
+        // =====================================================================
+
         // Cargar programas al inicio
         loadPrograms();
         
@@ -757,32 +836,12 @@
         
         // Manejar reset de filtros
         document.getElementById('reset-filters').addEventListener('click', function() {
-            document.getElementById('filter-form').reset();
-            // Resetear también los Select2
-            jQuery('#estado').val(null).trigger('change');
-            jQuery('#organismo').val(null).trigger('change');
-            jQuery('#tipo_ayuda').val(null).trigger('change');
-            jQuery('#ambito').val(null).trigger('change');
-            jQuery('#beneficiario').val(null).trigger('change');
-            jQuery('#sector').val(null).trigger('change');
-            jQuery('#tipo_proyecto').val(null).trigger('change');
-            jQuery('#fondos_europeos').val(null).trigger('change');
-            loadPrograms();
+            clearAllFilters();
         });
-        
+
         // Manejar clear all filters desde no-results
         document.getElementById('clear-all-filters').addEventListener('click', function() {
-            document.getElementById('filter-form').reset();
-            // Resetear también los Select2
-            jQuery('#estado').val(null).trigger('change');
-            jQuery('#organismo').val(null).trigger('change');
-            jQuery('#tipo_ayuda').val(null).trigger('change');
-            jQuery('#ambito').val(null).trigger('change');
-            jQuery('#beneficiario').val(null).trigger('change');
-            jQuery('#sector').val(null).trigger('change');
-            jQuery('#tipo_proyecto').val(null).trigger('change');
-            jQuery('#fondos_europeos').val(null).trigger('change');
-            loadPrograms();
+            clearAllFilters();
         });
         
         // Manejar ordenación
@@ -1585,19 +1644,43 @@
         
         // Actualizar interfaz con programas seleccionados
         function updateCompareInterface() {
-            // Mostrar barra de comparación si hay programas seleccionados
             const compareBar = document.getElementById('compare-bar');
-            
+            const preview = document.getElementById('compare-preview');
+
             if (programasParaComparar.length > 0) {
                 compareBar.classList.remove('d-none');
-                
-                // Actualizar contador
                 document.getElementById('compare-count').textContent = programasParaComparar.length;
-                
-                // Habilitar botón de comparar si hay al menos 2 programas
                 document.getElementById('compare-button').disabled = programasParaComparar.length < 2;
+
+                // Renderizar chips con nombre y botón de quitar
+                preview.innerHTML = programasSeleccionadosInfo
+                    .filter(p => programasParaComparar.includes(p.id))
+                    .map(p => {
+                        const nombre = p.nombre_coloquial || p.nombre || 'Sin nombre';
+                        const short = nombre.length > 40 ? nombre.substring(0, 38) + '…' : nombre;
+                        return `<span class="compare-chip">
+                            <span class="compare-chip-name" title="${nombre}">${short}</span>
+                            <button type="button" class="compare-chip-remove" data-id="${p.id}" aria-label="Quitar de comparación">×</button>
+                        </span>`;
+                    }).join('');
+
+                // Eventos en los botones × de cada chip
+                preview.querySelectorAll('.compare-chip-remove').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = this.getAttribute('data-id');
+                        removeFromCompare(id);
+                        // Desmarcar checkbox en la tarjeta si es visible
+                        const cb = document.querySelector(`.programa-comparar[value="${id}"]`);
+                        if (cb) {
+                            cb.checked = false;
+                            cb.closest('.programa-card')?.classList.remove('selected-for-compare');
+                        }
+                    });
+                });
             } else {
                 compareBar.classList.add('d-none');
+                preview.innerHTML = '';
             }
         }
         
