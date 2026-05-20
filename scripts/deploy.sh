@@ -161,6 +161,9 @@ if [ ! -f "data/programas_financiacion.json" ]; then
     echo "[]" > data/programas_financiacion.json
 fi
 
+# El contenedor Docker escribe en este fichero: debe tener permisos de escritura
+chmod 666 data/programas_financiacion.json
+
 log_info "✅ Directorios preparados"
 echo ""
 
