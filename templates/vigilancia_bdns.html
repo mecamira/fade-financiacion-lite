@@ -479,6 +479,13 @@ function vbRenderDetail(raw, code) {
   const titulo = d.descripcion ?? d.descripcionConvocatoria ?? `Convocatoria #${code}`;
   document.getElementById('vb-detail-title').textContent = titulo;
 
+  // Actualizar enlace "Añadir a Dashboard" incluyendo la fecha de publicación BDNS
+  const fechaRaw = d.fechaRecepcion ?? null;
+  const addBase = `/financiacion/gestionar-convocatorias?bdns=${code}&vpd=${vbLastVpd}`;
+  document.getElementById('vb-btn-add').href = fechaRaw
+    ? `${addBase}&fecha_pub=${encodeURIComponent(fechaRaw)}`
+    : addBase;
+
   function listaDesc(arr) { if (!Array.isArray(arr)||!arr.length) return null; return arr.map(x=>x.descripcion??JSON.stringify(x)).join(' · '); }
   function fmtF(v) { if (!v) return null; const dt=new Date(v); return isNaN(dt)?String(v):dt.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}); }
   function fmtE(v) { const n=Number(v); return isNaN(n)?null:n.toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}); }

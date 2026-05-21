@@ -1311,12 +1311,18 @@ function generatePreview(data) {
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
             
             try {
+                // Construir datos a guardar, añadiendo fecha_publicacion_bdns si viene de Vigilancia
+                const dataToSave = Object.assign({}, currentProgramaData);
+                if (window._fechaPublicacionBdns) {
+                    dataToSave.fecha_publicacion_bdns = window._fechaPublicacionBdns;
+                }
+
                 const response = await fetch('/api/guardar-programa', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(currentProgramaData)
+                    body: JSON.stringify(dataToSave)
                 });
                 
                 const data = await response.json();
@@ -1337,11 +1343,29 @@ function generatePreview(data) {
             }
         });
         
-        // Auto-fill desde parámetro ?bdns= en la URL (viene de Vigilancia BDNS)
+        // Auto-fill desde parámetros de URL (viene de Vigilancia BDNS)
         (function() {
             const params = new URLSearchParams(window.location.search);
             const bdnsCode = params.get('bdns');
             const vpd = params.get('vpd') || 'GE';
+            const fechaPub = params.get('fecha_pub');
+
+            // Guardar fecha de publicación BDNS para inyectarla al guardar
+            if (fechaPub) {
+                window._fechaPublicacionBdns = fechaPub;
+                // Pre-rellenar también el campo fecha-publicacion si está vacío
+                try {
+                    const d = new Date(fechaPub);
+                    if (!isNaN(d)) {
+                        const isoDate = d.toISOString().split('T')[0];
+                        const fechaField = document.getElementById('fecha-publicacion');
+                        if (fechaField && !fechaField.value) {
+                            fechaField.value = isoDate;
+                        }
+                    }
+                } catch(e) {}
+            }
+
             if (bdnsCode) {
                 const bdnsUrl = `https://www.infosubvenciones.es/bdnstrans/${vpd}/es/convocatorias/${bdnsCode}`;
                 document.getElementById('url-bdns-input').value = bdnsUrl;
