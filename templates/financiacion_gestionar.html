@@ -56,6 +56,16 @@
                         <div class="mb-3">
                             <label for="fecha-publicacion" class="form-label">Fecha de Publicación:</label>
                             <input type="date" class="form-control" id="fecha-publicacion" name="fecha_publicacion">
+                            <small class="text-muted">Fecha de publicación en el BOPA / diario oficial</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fecha-publicacion-bdns" class="form-label">
+                                Fecha de Publicación BDNS:
+                                <span class="badge bg-info text-white ms-1" style="font-size:0.65rem;">BDNS</span>
+                            </label>
+                            <input type="date" class="form-control" id="fecha-publicacion-bdns" name="fecha_publicacion_bdns">
+                            <small class="text-muted">Fecha en que se publicó la convocatoria en la Base de Datos Nacional de Subvenciones</small>
                         </div>
 
                         <div class="mb-3">
@@ -1311,10 +1321,13 @@ function generatePreview(data) {
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
             
             try {
-                // Construir datos a guardar, añadiendo fecha_publicacion_bdns si viene de Vigilancia
+                // Construir datos a guardar, incluyendo campos del formulario manual
                 const dataToSave = Object.assign({}, currentProgramaData);
-                if (window._fechaPublicacionBdns) {
-                    dataToSave.fecha_publicacion_bdns = window._fechaPublicacionBdns;
+                // Fecha publicación BDNS: tomar del campo del formulario (tiene prioridad sobre URL param)
+                const bdnsDateField = document.getElementById('fecha-publicacion-bdns');
+                const bdnsDateValue = bdnsDateField && bdnsDateField.value ? bdnsDateField.value : window._fechaPublicacionBdns;
+                if (bdnsDateValue) {
+                    dataToSave.fecha_publicacion_bdns = bdnsDateValue;
                 }
 
                 const response = await fetch('/api/guardar-programa', {
@@ -1353,14 +1366,14 @@ function generatePreview(data) {
             // Guardar fecha de publicación BDNS para inyectarla al guardar
             if (fechaPub) {
                 window._fechaPublicacionBdns = fechaPub;
-                // Pre-rellenar también el campo fecha-publicacion si está vacío
+                // Pre-rellenar el campo "Fecha Publicación BDNS" (campo nuevo, no el BOPA)
                 try {
                     const d = new Date(fechaPub);
                     if (!isNaN(d)) {
                         const isoDate = d.toISOString().split('T')[0];
-                        const fechaField = document.getElementById('fecha-publicacion');
-                        if (fechaField && !fechaField.value) {
-                            fechaField.value = isoDate;
+                        const bdnsDateField = document.getElementById('fecha-publicacion-bdns');
+                        if (bdnsDateField) {
+                            bdnsDateField.value = isoDate;
                         }
                     }
                 } catch(e) {}

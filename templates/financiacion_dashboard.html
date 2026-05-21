@@ -358,11 +358,21 @@
             <div class="card-header py-3" style="background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%); color: white; border: none;">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="badge"></span>
-                    <div class="form-check" style="margin-top: -4px;">
-                        <input class="form-check-input programa-comparar bg-white" type="checkbox" value="" style="border-color: white;">
-                        <label class="form-check-label small text-white">
-                            Comparar
-                        </label>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        <!-- Fecha publicación BDNS (esquina superior derecha) -->
+                        <div class="programa-fecha-bdns-container" style="display:none;">
+                            <span class="programa-fecha-bdns-badge">
+                                <i class="fas fa-database" style="font-size:0.6em; opacity:0.8;"></i>
+                                <span class="programa-fecha-bdns-valor"></span>
+                            </span>
+                        </div>
+                        <!-- Checkbox comparar -->
+                        <div class="form-check" style="margin-top: 0;">
+                            <input class="form-check-input programa-comparar bg-white" type="checkbox" value="" style="border-color: white;">
+                            <label class="form-check-label small text-white">
+                                Comparar
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <h5 class="card-title programa-nombre mb-1" style="color: white; font-weight: 600;"></h5>
@@ -607,6 +617,21 @@
     /* Tamaño del selector de opciones en el constructor de filtros */
     #fv-select option {
         padding: 4px 8px;
+    }
+
+    /* Badge de fecha publicación BDNS en la tarjeta */
+    .programa-fecha-bdns-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 10px;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.9);
+        white-space: nowrap;
+        backdrop-filter: blur(2px);
     }
 </style>
 {% endblock %}
@@ -1052,6 +1077,18 @@
                 // Establecer valores
                 card.querySelector('.programa-nombre').textContent = programa.nombre_coloquial || programa.nombre || 'Programa sin nombre';
                 card.querySelector('.programa-organismo .organismo-text').textContent = programa.organismo || 'Organismo no especificado';
+
+                // Fecha publicación BDNS (esquina superior derecha del header)
+                if (programa.fecha_publicacion_bdns) {
+                    try {
+                        const fechaBdns = new Date(programa.fecha_publicacion_bdns);
+                        if (!isNaN(fechaBdns)) {
+                            card.querySelector('.programa-fecha-bdns-valor').textContent =
+                                fechaBdns.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+                            card.querySelector('.programa-fecha-bdns-container').style.display = 'block';
+                        }
+                    } catch(e) {}
+                }
                 
                 // Mejorar resumen
                 const resumenEl = card.querySelector('.programa-resumen');
@@ -1817,13 +1854,30 @@
             const programa = programasCargados.find(p => p.id === programaId);
             
             if (programa) {
+                // Fecha publicación BDNS formateada
+                let fechaBdnsHtml = '';
+                if (programa.fecha_publicacion_bdns) {
+                    try {
+                        const fb = new Date(programa.fecha_publicacion_bdns);
+                        if (!isNaN(fb)) {
+                            const fbStr = fb.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+                            fechaBdnsHtml = `<div class="text-end mb-2">
+                                <span class="badge" style="background:var(--color-primary-100);color:var(--color-primary-800);border:1px solid var(--color-primary-200);font-size:0.75rem;font-weight:500;">
+                                    <i class="fas fa-database me-1" style="opacity:0.7;"></i>Publicado en BDNS: ${fbStr}
+                                </span>
+                            </div>`;
+                        }
+                    } catch(e) {}
+                }
+
                 // Llenar contenido
                 let content = `
                     <div class="card border-0 programa-preview-card">
                         <div class="card-body">
+                            ${fechaBdnsHtml}
                             <h6>Resumen</h6>
                             <p>${programa.resumen_breve || 'Sin resumen disponible'}</p>
-                            
+
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <h6>Organismo</h6>
