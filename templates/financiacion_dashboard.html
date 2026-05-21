@@ -191,12 +191,13 @@
                         </div>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownSortButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                Ordenar por
+                                Ordenar: Fecha de cierre
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownSortButton">
+                                <li><a class="dropdown-item sort-option active" data-sort="fecha_cierre">Fecha de cierre</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="fecha_publicacion_bdns">Publicación BDNS</a></li>
                                 <li><a class="dropdown-item sort-option" data-sort="nombre">Nombre</a></li>
                                 <li><a class="dropdown-item sort-option" data-sort="organismo">Organismo</a></li>
-                                <li><a class="dropdown-item sort-option" data-sort="fecha_cierre">Fecha de cierre</a></li>
                                 <li><a class="dropdown-item sort-option" data-sort="importe_maximo">Presupuesto total</a></li>
                             </ul>
                         </div>
@@ -663,8 +664,8 @@
             return formatoEspanol + ' €';
         }
 
-        // Variables para ordenación
-        let sortField = 'nombre';
+        // Variables para ordenación (por defecto: fecha de cierre más próxima)
+        let sortField = 'fecha_cierre';
         let sortDirection = 'asc';
 
         // Variable para almacenar programas cargados (global para usar en exportación)
@@ -873,19 +874,29 @@
         document.querySelectorAll('.sort-option').forEach(option => {
             option.addEventListener('click', function() {
                 const newSortField = this.getAttribute('data-sort');
-                
-                // Si el campo es el mismo, cambia la dirección
+
+                // Si el campo es el mismo, alternar dirección
                 if (newSortField === sortField) {
                     sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
                 } else {
                     sortField = newSortField;
-                    sortDirection = 'asc';
+                    // "Publicación BDNS" por defecto descendente (más reciente primero)
+                    sortDirection = (newSortField === 'fecha_publicacion_bdns') ? 'desc' : 'asc';
                 }
-                
-                // Actualiza el texto del botón
-                document.getElementById('dropdownSortButton').textContent = 
-                    'Ordenar por: ' + this.textContent + ' (' + (sortDirection === 'asc' ? 'A-Z' : 'Z-A') + ')';
-                
+
+                // Marcar opción activa
+                document.querySelectorAll('.sort-option').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+
+                // Actualizar texto del botón
+                const dirLabel = sortField === 'fecha_cierre'
+                    ? (sortDirection === 'asc' ? '↑ próximo' : '↓ lejano')
+                    : sortField === 'fecha_publicacion_bdns'
+                        ? (sortDirection === 'desc' ? '↓ reciente' : '↑ antiguo')
+                        : (sortDirection === 'asc' ? 'A→Z' : 'Z→A');
+                document.getElementById('dropdownSortButton').textContent =
+                    'Ordenar: ' + this.textContent.trim() + ' ' + dirLabel;
+
                 // Reordenar programas ya cargados
                 sortAndRenderPrograms(programasCargados);
             });
@@ -1005,11 +1016,14 @@
                     valueA = a.organismo || '';
                     valueB = b.organismo || '';
                 } else if (sortField === 'fecha_cierre') {
-                    // Para fechas
-                    valueA = a.convocatoria && a.convocatoria.fecha_cierre ? a.convocatoria.fecha_cierre : '9999-12-31';
-                    valueB = b.convocatoria && b.convocatoria.fecha_cierre ? b.convocatoria.fecha_cierre : '9999-12-31';
+                    // Fecha de cierre: sin fecha = va al final (9999)
+                    valueA = a.convocatoria?.fecha_cierre || '9999-12-31';
+                    valueB = b.convocatoria?.fecha_cierre || '9999-12-31';
+                } else if (sortField === 'fecha_publicacion_bdns') {
+                    // Publicación BDNS: sin fecha = va al final (0001)
+                    valueA = a.fecha_publicacion_bdns || '0001-01-01';
+                    valueB = b.fecha_publicacion_bdns || '0001-01-01';
                 } else if (sortField === 'importe_maximo') {
-                    // Para presupuesto total (con fallback a importe_maximo)
                     const presupuestoA = a.financiacion?.presupuesto_total || a.financiacion?.importe_maximo;
                     const presupuestoB = b.financiacion?.presupuesto_total || b.financiacion?.importe_maximo;
                     valueA = presupuestoA ? (isNaN(presupuestoA) ? 0 : parseFloat(presupuestoA)) : 0;

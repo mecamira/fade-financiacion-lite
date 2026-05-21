@@ -241,10 +241,13 @@ class ConvocatoriaExtractor:
 
         2. Para "nombre_coloquial" y "nombre_oficial":
            - **nombre_coloquial**: Título CONCISO de máximo 100 caracteres
-             * NO incluir fechas, plazos ni años
-             * NO incluir información sobre el tipo de ayuda
+             * SIEMPRE termina con el año de la convocatoria en formato YYYY (ej: 2026)
+             * El año debe ser el de la fecha de cierre/fin de solicitud; si no existe, el de apertura; si tampoco, el año actual
+             * NO incluir información sobre el tipo de ayuda (subvención, préstamo, etc.)
              * Eliminar frases como "Convocatoria de", "Programa de"
-             * Ejemplos: "Subvenciones contratación indefinida personas con discapacidad"
+             * Ejemplos: "Subvenciones contratación indefinida personas con discapacidad 2026"
+                         "Programa Jovellanos y Doctorados Industriales 2026"
+                         "Ayudas Neotec 2025"
            - **nombre_oficial**: Nombre LITERAL y COMPLETO de la convocatoria tal como aparece en el documento
              * Mantener el nombre oficial exacto, aunque sea largo
              * Incluir referencias completas, años, y numeración oficial
@@ -756,6 +759,25 @@ class ConvocatoriaExtractor:
             data['nombre_coloquial'] = data['nombre']
         if 'nombre' in data and 'nombre_oficial' not in data:
             data['nombre_oficial'] = data['nombre']
+
+        # Garantizar que nombre_coloquial termina con el año de la convocatoria
+        import re as _re
+        from datetime import datetime as _dt
+        nombre_col = data.get('nombre_coloquial')
+        if nombre_col and not _re.search(r'\b20\d{2}\s*$', str(nombre_col)):
+            year = None
+            conv = data.get('convocatoria') or {}
+            for date_field in ('fecha_cierre', 'fecha_apertura'):
+                val = conv.get(date_field) if isinstance(conv, dict) else None
+                if val:
+                    try:
+                        year = _dt.fromisoformat(str(val).split('T')[0]).year
+                        break
+                    except Exception:
+                        pass
+            if not year:
+                year = _dt.now().year
+            data['nombre_coloquial'] = f"{nombre_col.rstrip()} {year}"
 
         # Compatibilidad hacia atrás: si existe 'origen_fondos' pero no 'fondos_europeos'
         if 'origen_fondos' in data and 'fondos_europeos' not in data:
