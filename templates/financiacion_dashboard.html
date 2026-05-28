@@ -993,54 +993,78 @@
         
         // Función para ordenar y renderizar programas
         function sortAndRenderPrograms(programas) {
-            // Ordenar primero por estado (abiertas primero)
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+
+            // Devuelve el objeto Date de fecha_cierre, o null si no existe / es inválida
+            function getFechaCierre(p) {
+                const fc = p.convocatoria?.fecha_cierre;
+                if (!fc || fc === 'null' || fc === null) return null;
+                const d = new Date(fc);
+                return isNaN(d) ? null : d;
+            }
+
+            // Un programa está "activo" si su fecha de cierre es hoy o futura,
+            // o si tiene estado "Todo el año", o si su estado indica apertura sin fecha
+            function estaActivo(p) {
+                const estado = (p.convocatoria?.estado || '').toLowerCase();
+                if (estado.includes('todo el año')) return true;
+                const d = getFechaCierre(p);
+                if (d !== null) return d >= hoy;           // tiene fecha → depende de si es futura
+                // Sin fecha: usar texto del estado como fallback
+                return estado.includes('abierta') ||
+                       estado.includes('cierre próximo') ||
+                       estado.includes('cierre urgente') ||
+                       estado.includes('pendiente');
+            }
+
             programas.sort((a, b) => {
-                // Primero ordenar por estado (abiertas primero)
-                const estadoA = a.convocatoria?.estado || '';
-                const estadoB = b.convocatoria?.estado || '';
-                
-                const isAbiertoA = estadoA.includes('Abierta');
-                const isAbiertoB = estadoB.includes('Abierta');
-                
-                // Si uno está abierto y el otro no, el abierto va primero
-                if (isAbiertoA && !isAbiertoB) return -1;
-                if (!isAbiertoA && isAbiertoB) return 1;
-                
-                // Si ambos tienen el mismo estado, usar el criterio de ordenación seleccionado
+                // "Publicación BDNS" no agrupa por activo/cerrado; el resto sí
+                if (sortField !== 'fecha_publicacion_bdns') {
+                    const activoA = estaActivo(a);
+                    const activoB = estaActivo(b);
+                    if (activoA !== activoB) return activoA ? -1 : 1;
+                }
+
+                // Criterio secundario según el campo de ordenación
+                if (sortField === 'fecha_cierre') {
+                    // Comparar timestamps; sin fecha → al final (Infinity)
+                    const dA = getFechaCierre(a);
+                    const dB = getFechaCierre(b);
+                    const tA = dA ? dA.getTime() : Infinity;
+                    const tB = dB ? dB.getTime() : Infinity;
+                    // Siempre ascendente (más próximo primero)
+                    return tA - tB;
+                }
+
+                if (sortField === 'importe_maximo') {
+                    const pA = a.financiacion?.presupuesto_total || a.financiacion?.importe_maximo;
+                    const pB = b.financiacion?.presupuesto_total || b.financiacion?.importe_maximo;
+                    const nA = pA && !isNaN(pA) ? parseFloat(pA) : 0;
+                    const nB = pB && !isNaN(pB) ? parseFloat(pB) : 0;
+                    return sortDirection === 'asc' ? nA - nB : nB - nA;
+                }
+
+                // Para campos de texto (nombre, organismo) y fecha_publicacion_bdns
                 let valueA, valueB;
-                
                 if (sortField === 'nombre') {
-                    valueA = a.nombre_coloquial || a.nombre || '';
-                    valueB = b.nombre_coloquial || b.nombre || '';
+                    valueA = (a.nombre_coloquial || a.nombre || '').toLowerCase();
+                    valueB = (b.nombre_coloquial || b.nombre || '').toLowerCase();
                 } else if (sortField === 'organismo') {
-                    valueA = a.organismo || '';
-                    valueB = b.organismo || '';
-                } else if (sortField === 'fecha_cierre') {
-                    // Fecha de cierre: sin fecha = va al final (9999)
-                    valueA = a.convocatoria?.fecha_cierre || '9999-12-31';
-                    valueB = b.convocatoria?.fecha_cierre || '9999-12-31';
+                    valueA = (a.organismo || '').toLowerCase();
+                    valueB = (b.organismo || '').toLowerCase();
                 } else if (sortField === 'fecha_publicacion_bdns') {
-                    // Publicación BDNS: sin fecha = va al final (0001)
                     valueA = a.fecha_publicacion_bdns || '0001-01-01';
                     valueB = b.fecha_publicacion_bdns || '0001-01-01';
-                } else if (sortField === 'importe_maximo') {
-                    const presupuestoA = a.financiacion?.presupuesto_total || a.financiacion?.importe_maximo;
-                    const presupuestoB = b.financiacion?.presupuesto_total || b.financiacion?.importe_maximo;
-                    valueA = presupuestoA ? (isNaN(presupuestoA) ? 0 : parseFloat(presupuestoA)) : 0;
-                    valueB = presupuestoB ? (isNaN(presupuestoB) ? 0 : parseFloat(presupuestoB)) : 0;
                 } else {
-                    valueA = a[sortField] || '';
-                    valueB = b[sortField] || '';
+                    valueA = (a[sortField] || '').toString().toLowerCase();
+                    valueB = (b[sortField] || '').toString().toLowerCase();
                 }
-                
-                // Dirección de ordenación
-                if (sortDirection === 'asc') {
-                    return valueA > valueB ? 1 : -1;
-                } else {
-                    return valueA < valueB ? 1 : -1;
-                }
+
+                const cmp = valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                return sortDirection === 'asc' ? cmp : -cmp;
             });
-            
+
             // Renderizar resultados
             renderPrograms(programas);
         }
