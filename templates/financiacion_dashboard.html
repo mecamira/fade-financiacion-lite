@@ -174,7 +174,7 @@
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="visualizations-tab" data-bs-toggle="tab" data-bs-target="#visualizations-view" type="button" role="tab" aria-controls="visualizations-view" aria-selected="false">
-                                <i class="fas fa-chart-pie me-1"></i> Visualizaciones
+                                <i class="fas fa-chart-bar me-1"></i> Estadísticas
                             </button>
                         </li>
                     </ul>
@@ -225,42 +225,123 @@
                             </div>
                         </div>
                         
-                        <!-- Nueva vista de visualizaciones -->
-                        <div class="tab-pane fade" id="visualizations-view" role="tabpanel" aria-labelledby="visualizations-view">
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
+                        <!-- Estadísticas -->
+                        <div class="tab-pane fade" id="visualizations-view" role="tabpanel" aria-labelledby="visualizations-tab">
+
+                            <!-- KPIs resumen estadísticas -->
+                            <div class="row g-3 mb-4" id="stats-kpi-row">
+                                <div class="col-6 col-md-3">
+                                    <div class="card text-center border-0 bg-light h-100 py-3">
+                                        <div class="fw-bold fs-3 text-primary" id="stat-presupuesto-abiertos">—</div>
+                                        <div class="small text-muted">Presupuesto convocatorias abiertas</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card text-center border-0 bg-light h-100 py-3">
+                                        <div class="fw-bold fs-3 text-success" id="stat-num-organismos">—</div>
+                                        <div class="small text-muted">Organismos distintos</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card text-center border-0 bg-light h-100 py-3">
+                                        <div class="fw-bold fs-3 text-info" id="stat-fondos-europeos">—</div>
+                                        <div class="small text-muted">Con fondos europeos</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card text-center border-0 bg-light h-100 py-3">
+                                        <div class="fw-bold fs-3 text-warning" id="stat-tipos-ayuda">—</div>
+                                        <div class="small text-muted">Tipos de ayuda distintos</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fila 1: Estado + Tipo de ayuda -->
+                            <div class="row mb-4">
+                                <div class="col-md-5 mb-4">
                                     <div class="card h-100">
                                         <div class="card-header">
-                                            <h5 class="mb-0">Distribución por Organismo</h5>
+                                            <h6 class="mb-0"><i class="fas fa-traffic-light me-2 text-primary"></i>Estado de convocatorias</h6>
+                                        </div>
+                                        <div class="card-body d-flex align-items-center justify-content-center">
+                                            <canvas id="estado-chart" height="220"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-hand-holding-usd me-2 text-primary"></i>Tipo de ayuda</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="tipo-ayuda-chart" height="220"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fila 2: Organismo + Ámbito -->
+                            <div class="row mb-4">
+                                <div class="col-md-7 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-building me-2 text-primary"></i>Distribución por Organismo <small class="text-muted">(top 10)</small></h6>
                                         </div>
                                         <div class="card-body">
                                             <canvas id="organismos-chart" height="250"></canvas>
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-5 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-globe-europe me-2 text-primary"></i>Ámbito geográfico</h6>
+                                        </div>
+                                        <div class="card-body d-flex align-items-center justify-content-center">
+                                            <canvas id="ambito-chart" height="220"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fila 3: Cronograma (full width) -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i>Cronograma — próximas fechas de cierre (6 meses)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="timeline-chart" height="120"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fila 4: Sector + Beneficiarios -->
+                            <div class="row mb-4">
                                 <div class="col-md-6 mb-4">
                                     <div class="card h-100">
                                         <div class="card-header">
-                                            <h5 class="mb-0">Distribución por Sector</h5>
+                                            <h6 class="mb-0"><i class="fas fa-industry me-2 text-primary"></i>Distribución por Sector <small class="text-muted">(top 10)</small></h6>
                                         </div>
                                         <div class="card-body" style="max-height: 400px; overflow: auto;">
                                             <canvas id="sectores-chart" height="250"></canvas>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
                                         <div class="card-header">
-                                            <h5 class="mb-0">Cronograma de Convocatorias</h5>
+                                            <h6 class="mb-0"><i class="fas fa-users me-2 text-primary"></i>Beneficiarios más frecuentes</h6>
                                         </div>
-                                        <div class="card-body" style="max-height: 400px; overflow: auto;">
-                                            <canvas id="timeline-chart" height="150"></canvas>
+                                        <div class="card-body">
+                                            <canvas id="beneficiarios-chart" height="250"></canvas>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -677,9 +758,13 @@
         let programasSeleccionadosInfo = [];
         
         // Contenedores de chart.js
-        let organismoChart = null;
-        let sectorChart = null;
-        let timelineChart = null;
+        let organismoChart    = null;
+        let sectorChart       = null;
+        let timelineChart     = null;
+        let estadoChart       = null;
+        let tipoAyudaChart    = null;
+        let ambitoChart       = null;
+        let beneficiariosChart = null;
         
         // =====================================================================
         // SISTEMA DE FILTROS DINÁMICO
@@ -1376,202 +1461,189 @@
         // Generar visualizaciones
         function generateVisualizations(programas) {
             // Destruir charts existentes si ya se crearon
-            if (organismoChart) organismoChart.destroy();
-            if (sectorChart) sectorChart.destroy();
-            if (timelineChart) timelineChart.destroy();
-            
-            // 1. Gráfico de organismos
-            const organismos = {};
+            if (organismoChart)     organismoChart.destroy();
+            if (sectorChart)        sectorChart.destroy();
+            if (timelineChart)      timelineChart.destroy();
+            if (estadoChart)        estadoChart.destroy();
+            if (tipoAyudaChart)     tipoAyudaChart.destroy();
+            if (ambitoChart)        ambitoChart.destroy();
+            if (beneficiariosChart) beneficiariosChart.destroy();
+
+            const PALETTE = [
+                'rgba(0,120,191,0.75)', 'rgba(0,160,160,0.75)', 'rgba(85,82,163,0.75)',
+                'rgba(224,124,0,0.75)', 'rgba(56,161,105,0.75)', 'rgba(214,158,46,0.75)',
+                'rgba(0,90,145,0.75)',  'rgba(0,130,130,0.75)',  'rgba(105,102,183,0.75)',
+                'rgba(244,144,20,0.75)',
+            ];
+            const PALETTE_SOLID = PALETTE.map(c => c.replace('0.75','1'));
+
+            const OPTS_DONUT = {
+                responsive: true, maintainAspectRatio: true,
+                plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } }
+            };
+            const OPTS_HBAR = {
+                responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+            };
+
+            // ── KPIs resumen ──────────────────────────────────────────────────
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            let presupuestoAbiertos = 0;
+            const tiposAyudaSet = new Set();
+            let conFondosEuropeos = 0;
             programas.forEach(p => {
-                if (p.organismo) {
-                    // Simplificar nombre del organismo (tomar primera palabra)
-                    const nombreSimple = p.organismo.split(' ')[0];
-                    organismos[nombreSimple] = (organismos[nombreSimple] || 0) + 1;
+                const fc = p.convocatoria?.fecha_cierre;
+                const estaAbierto = fc && fc !== 'null' ? new Date(fc) >= hoy : false;
+                if (estaAbierto) {
+                    const pr = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo;
+                    if (pr && !isNaN(pr)) presupuestoAbiertos += parseFloat(pr);
                 }
+                (Array.isArray(p.tipo_ayuda) ? p.tipo_ayuda : [p.tipo_ayuda]).filter(Boolean).forEach(t => tiposAyudaSet.add(t));
+                const fe = p.fondos_europeos;
+                if (fe && (Array.isArray(fe) ? fe.length > 0 : fe !== 'Propios' && fe !== 'Mixtos')) conFondosEuropeos++;
             });
-            
-            // Ordenar por cantidad
-            const organismosOrdenados = Object.entries(organismos)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10); // Mostrar top 10
-            
+            const organismoSet = new Set(programas.map(p => p.organismo).filter(Boolean));
+            document.getElementById('stat-presupuesto-abiertos').textContent =
+                presupuestoAbiertos > 0 ? new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(presupuestoAbiertos) : '—';
+            document.getElementById('stat-num-organismos').textContent = organismoSet.size || '—';
+            document.getElementById('stat-fondos-europeos').textContent = conFondosEuropeos || '—';
+            document.getElementById('stat-tipos-ayuda').textContent = tiposAyudaSet.size || '—';
+
+            // ── 1. Estado de convocatorias ────────────────────────────────────
+            const estadoCount = { 'Abierta': 0, 'Cierre próximo': 0, 'Pendiente/Futura': 0, 'Cerrada': 0 };
+            programas.forEach(p => {
+                const e = (p.convocatoria?.estado || '').toLowerCase();
+                if (e.includes('cierre próximo') || e.includes('urgente')) estadoCount['Cierre próximo']++;
+                else if (e.includes('abierta')) estadoCount['Abierta']++;
+                else if (e.includes('próxima') || e.includes('pendiente')) estadoCount['Pendiente/Futura']++;
+                else estadoCount['Cerrada']++;
+            });
+            estadoChart = new Chart(document.getElementById('estado-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(estadoCount),
+                    datasets: [{ data: Object.values(estadoCount),
+                        backgroundColor: ['rgba(56,161,105,0.8)','rgba(214,158,46,0.8)','rgba(0,160,160,0.8)','rgba(150,150,150,0.8)'],
+                        borderWidth: 2 }]
+                },
+                options: OPTS_DONUT,
+            });
+
+            // ── 2. Tipo de ayuda ──────────────────────────────────────────────
+            const tiposAyuda = {};
+            programas.forEach(p => {
+                const tipos = Array.isArray(p.tipo_ayuda) ? p.tipo_ayuda : [p.tipo_ayuda];
+                tipos.filter(Boolean).forEach(t => { tiposAyuda[t] = (tiposAyuda[t] || 0) + 1; });
+            });
+            const tiposOrdenados = Object.entries(tiposAyuda).sort((a,b) => b[1]-a[1]).slice(0,8);
+            tipoAyudaChart = new Chart(document.getElementById('tipo-ayuda-chart').getContext('2d'), {
+                type: 'bar', indexAxis: 'y',
+                data: {
+                    labels: tiposOrdenados.map(e => e[0]),
+                    datasets: [{ label: 'Programas', data: tiposOrdenados.map(e => e[1]),
+                        backgroundColor: PALETTE.slice(0, tiposOrdenados.length),
+                        borderColor: PALETTE_SOLID.slice(0, tiposOrdenados.length), borderWidth: 1 }]
+                },
+                options: OPTS_HBAR,
+            });
+
+            // ── 3. Organismo (top 10, nombres completos) ─────────────────────
+            const organismos = {};
+            programas.forEach(p => { if (p.organismo) organismos[p.organismo] = (organismos[p.organismo]||0)+1; });
+            const organismosOrdenados = Object.entries(organismos).sort((a,b)=>b[1]-a[1]).slice(0,10);
             const organismosCtx = document.getElementById('organismos-chart').getContext('2d');
             organismoChart = new Chart(organismosCtx, {
                 type: 'bar',
                 data: {
-                    labels: organismosOrdenados.map(e => e[0]),
-                    datasets: [{
-                        label: 'Número de programas',
-                        data: organismosOrdenados.map(e => e[1]),
-                        backgroundColor: 'rgba(0, 120, 191, 0.5)',  /* color-data-1: Azul FADE */
-                        borderColor: 'rgba(0, 120, 191, 1)',
-                        borderWidth: 1
-                    }]
+                    labels: organismosOrdenados.map(e => e[0].length > 25 ? e[0].substring(0,23)+'…' : e[0]),
+                    datasets: [{ label: 'Programas', data: organismosOrdenados.map(e=>e[1]),
+                        backgroundColor: 'rgba(0,120,191,0.6)', borderColor: 'rgba(0,120,191,1)', borderWidth: 1 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
+                options: { responsive:true, maintainAspectRatio:true,
+                    plugins:{ legend:{display:false} },
+                    scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
             });
-            
-            // 2. Gráfico de sectores
-            const sectores = {};
-            programas.forEach(p => {
-                if (p.sectores && p.sectores.length) {
-                    p.sectores.forEach(sector => {
-                        sectores[sector] = (sectores[sector] || 0) + 1;
-                    });
-                }
-            });
-            
-            // Ordenar por cantidad
-            const sectoresOrdenados = Object.entries(sectores)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10); // Mostrar top 10
-            
-            const sectoresCtx = document.getElementById('sectores-chart').getContext('2d');
-            sectorChart = new Chart(sectoresCtx, {
+
+            // ── 4. Ámbito geográfico ──────────────────────────────────────────
+            const ambitos = {};
+            programas.forEach(p => { if (p.ambito) ambitos[p.ambito] = (ambitos[p.ambito]||0)+1; });
+            const ambitosOrdenados = Object.entries(ambitos).sort((a,b)=>b[1]-a[1]);
+            ambitoChart = new Chart(document.getElementById('ambito-chart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: sectoresOrdenados.map(e => e[0]),
-                    datasets: [{
-                        data: sectoresOrdenados.map(e => e[1]),
-                        backgroundColor: [
-                            'rgba(0, 120, 191, 0.7)',    /* color-data-1: Azul FADE */
-                            'rgba(0, 160, 160, 0.7)',    /* color-data-2: Teal */
-                            'rgba(85, 82, 163, 0.7)',    /* color-data-3: Púrpura */
-                            'rgba(224, 124, 0, 0.7)',    /* color-data-4: Naranja */
-                            'rgba(56, 161, 105, 0.7)',   /* color-success-500 */
-                            'rgba(214, 158, 46, 0.7)',   /* color-warning-500 */
-                            'rgba(0, 90, 145, 0.7)',     /* color-primary-700 */
-                            'rgba(0, 130, 130, 0.7)',    /* Variante Teal */
-                            'rgba(105, 102, 183, 0.7)',  /* Variante Púrpura */
-                            'rgba(244, 144, 20, 0.7)',   /* Variante Naranja */
-                        ],
-                        borderColor: [
-                            'rgba(0, 120, 191, 1)',
-                            'rgba(0, 160, 160, 1)',
-                            'rgba(85, 82, 163, 1)',
-                            'rgba(224, 124, 0, 1)',
-                            'rgba(56, 161, 105, 1)',
-                            'rgba(214, 158, 46, 1)',
-                            'rgba(0, 90, 145, 1)',
-                            'rgba(0, 130, 130, 1)',
-                            'rgba(105, 102, 183, 1)',
-                            'rgba(244, 144, 20, 1)',
-                        ],
-                        borderWidth: 2
-                    }]
+                    labels: ambitosOrdenados.map(e=>e[0]),
+                    datasets: [{ data: ambitosOrdenados.map(e=>e[1]),
+                        backgroundColor: PALETTE.slice(0,ambitosOrdenados.length),
+                        borderColor: PALETTE_SOLID.slice(0,ambitosOrdenados.length), borderWidth: 2 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
+                options: OPTS_DONUT,
             });
-            
-            // 3. Cronograma de fechas de cierre
+
+            // ── 5. Cronograma de fechas de cierre ─────────────────────────────
             const convocatorias = [];
-            const hoy = new Date();
-            const seisProximosMeses = new Date();
-            seisProximosMeses.setMonth(hoy.getMonth() + 6);
-
+            const seisProximosMeses = new Date(); seisProximosMeses.setMonth(hoy.getMonth()+6);
             programas.forEach(p => {
-                if (p.convocatoria && p.convocatoria.fecha_cierre && p.convocatoria.fecha_cierre !== 'null') {
+                if (p.convocatoria?.fecha_cierre && p.convocatoria.fecha_cierre !== 'null') {
                     try {
-                        const fechaCierre = new Date(p.convocatoria.fecha_cierre);
-                        // Filtrar solo fechas futuras en los próximos 6 meses
-                        if (fechaCierre > hoy && fechaCierre < seisProximosMeses) {
-                            convocatorias.push({
-                                id: p.id,
-                                nombre: p.nombre_coloquial || p.nombre,
-                                fecha: fechaCierre,
-                                estado: p.convocatoria.estado,
-                                organismo: p.organismo
-                            });
-                        }
-                    } catch (e) {
-                        // Ignorar fechas inválidas
-                    }
+                        const fc = new Date(p.convocatoria.fecha_cierre);
+                        if (fc > hoy && fc < seisProximosMeses)
+                            convocatorias.push({ nombre: p.nombre_coloquial||p.nombre, fecha: fc });
+                    } catch(e) {}
                 }
             });
-
-            // Ordenar por fecha
-            convocatorias.sort((a, b) => a.fecha - b.fecha);
-
-            // Agrupar por meses para simplificar la visualización
+            convocatorias.sort((a,b) => a.fecha-b.fecha);
             const meses = {};
-            convocatorias.forEach(conv => {
-                const mesKey = conv.fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-                if (!meses[mesKey]) {
-                    meses[mesKey] = [];
-                }
-                meses[mesKey].push(conv);
+            convocatorias.forEach(c => {
+                const k = c.fecha.toLocaleString('es-ES',{month:'long',year:'numeric'});
+                if (!meses[k]) meses[k]=[];
+                meses[k].push(c);
             });
-
             const mesesLabels = Object.keys(meses);
-            const convocatoriasPorMes = mesesLabels.map(mes => meses[mes].length);
-
             const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
             timelineChart = new Chart(timelineCtx, {
                 type: 'bar',
-                data: {
-                    labels: mesesLabels,
-                    datasets: [{
-                        label: 'Número de convocatorias que cierran',
-                        data: convocatoriasPorMes,
-                        backgroundColor: 'rgba(0, 160, 160, 0.5)',  /* color-data-2: Teal */
-                        borderColor: 'rgba(0, 160, 160, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    return tooltipItems[0].label;
-                                },
-                                afterTitle: function(tooltipItems) {
-                                    const mesKey = tooltipItems[0].label;
-                                    return meses[mesKey].length + ' convocatorias';
-                                },
-                                label: function(context) {
-                                    return ''; // No mostrar etiqueta por defecto
-                                },
-                                afterLabel: function(context) {
-                                    const mesKey = context.label;
-                                    return meses[mesKey].map(conv => 
-                                        '- ' + conv.nombre + ' (' + conv.fecha.toLocaleDateString('es-ES') + ')'
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
+                data: { labels: mesesLabels, datasets: [{
+                    label: 'Convocatorias que cierran',
+                    data: mesesLabels.map(m=>meses[m].length),
+                    backgroundColor: 'rgba(0,160,160,0.6)', borderColor: 'rgba(0,160,160,1)', borderWidth: 1
+                }]},
+                options: { responsive:true, maintainAspectRatio:true,
+                    plugins:{ tooltip:{ callbacks:{
+                        afterTitle: ti => meses[ti[0].label].length+' convocatorias',
+                        label: ()=>'',
+                        afterLabel: ctx => meses[ctx.label].map(c => '– '+c.nombre+' ('+c.fecha.toLocaleDateString('es-ES')+')')
+                    }}},
+                    scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
             });
+
+            // ── 6. Sectores ───────────────────────────────────────────────────
+            const sectores = {};
+            programas.forEach(p => { (p.sectores||[]).forEach(s => { sectores[s]=(sectores[s]||0)+1; }); });
+            const sectoresOrdenados = Object.entries(sectores).sort((a,b)=>b[1]-a[1]).slice(0,10);
+            const sectoresCtx = document.getElementById('sectores-chart').getContext('2d');
+            sectorChart = new Chart(sectoresCtx, {
+                type: 'doughnut',
+                data: { labels: sectoresOrdenados.map(e=>e[0]),
+                    datasets:[{ data:sectoresOrdenados.map(e=>e[1]),
+                        backgroundColor:PALETTE.slice(0,sectoresOrdenados.length),
+                        borderColor:PALETTE_SOLID.slice(0,sectoresOrdenados.length), borderWidth:2 }]},
+                options: OPTS_DONUT,
+            });
+
+            // ── 7. Beneficiarios más frecuentes ──────────────────────────────
+            const beneficiarios = {};
+            programas.forEach(p => { (p.beneficiarios||[]).forEach(b => { beneficiarios[b]=(beneficiarios[b]||0)+1; }); });
+            const benefOrdenados = Object.entries(beneficiarios).sort((a,b)=>b[1]-a[1]).slice(0,8);
+            beneficiariosChart = new Chart(document.getElementById('beneficiarios-chart').getContext('2d'), {
+                type: 'bar', indexAxis: 'y',
+                data: { labels: benefOrdenados.map(e=>e[0].length>35?e[0].substring(0,33)+'…':e[0]),
+                    datasets:[{ label:'Programas', data:benefOrdenados.map(e=>e[1]),
+                        backgroundColor:PALETTE.slice(0,benefOrdenados.length),
+                        borderColor:PALETTE_SOLID.slice(0,benefOrdenados.length), borderWidth:1 }]},
+                options: OPTS_HBAR,
+            });
+            
         }
         
         // Exportar a Excel
