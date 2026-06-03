@@ -271,6 +271,7 @@
     <div>
       <label for="vb-vpd">Portal (VPD)</label>
       <select id="vb-vpd" class="form-select form-select-sm">
+        <option value="ASTURIAS_EXT">🏛️ Cámaras y entidades locales (Asturias)</option>
         <option value="GE">GE · Administración del Estado</option>
         <option value="A03" selected>A03 · subvenciones.gob.es/A03</option>
         <option value="A04">A04 · Asturias</option>
@@ -366,16 +367,31 @@ async function vbBuscar(page = 0) {
   const desde = document.getElementById('vb-desde').value;
   const hasta = document.getElementById('vb-hasta').value;
   const size  = document.getElementById('vb-size').value;
-  vbLastVpd   = document.getElementById('vb-vpd').value;
-
-  const params = { vpd: vbLastVpd, page, pageSize: size, order: 'fechaRecepcion', direccion: 'desc', nivel2: 'PRINCIPADO DE ASTURIAS' };
-  if (texto) params.descripcion = texto;
-  if (bdns)  params.numConv = bdns;
-  if (desde) params.fechaDesde = desde;
-  if (hasta) params.fechaHasta = hasta;
+  vbLastVpd = document.getElementById('vb-vpd').value;
 
   try {
-    const data = await vbProxy('convocatorias/busqueda', params);
+    let data;
+
+    if (vbLastVpd === 'ASTURIAS_EXT') {
+      // Búsqueda combinada: cámaras de comercio asturianas + entidades locales
+      const qs = new URLSearchParams({ page, pageSize: size });
+      if (texto) qs.set('descripcion', texto);
+      if (bdns)  qs.set('numConv', bdns);
+      if (desde) qs.set('fechaDesde', desde);
+      if (hasta) qs.set('fechaHasta', hasta);
+      const res = await fetch(`/api/bdns-asturias-extended?${qs}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+    } else {
+      // Búsqueda estándar con filtro de Asturias
+      const params = { vpd: vbLastVpd, page, pageSize: size, order: 'fechaRecepcion', direccion: 'desc', nivel2: 'PRINCIPADO DE ASTURIAS' };
+      if (texto) params.descripcion = texto;
+      if (bdns)  params.numConv = bdns;
+      if (desde) params.fechaDesde = desde;
+      if (hasta) params.fechaHasta = hasta;
+      data = await vbProxy('convocatorias/busqueda', params);
+    }
+
     vbRenderResults(data, page);
   } catch(e) {
     area.innerHTML = `<div class="vb-status error"><p><strong>Error al consultar BDNS.</strong></p><p style="margin-top:.5rem;font-size:.8rem">${vbEsc(e.message)}</p></div>`;
@@ -450,19 +466,22 @@ async function vbLoadDetail(code) {
   document.getElementById('vb-detail').classList.add('open');
   document.getElementById('vb-overlay').classList.add('show');
 
+  // Para el VPD especial, el detalle real está en GE
+  const vpdDetalle = vbLastVpd === 'ASTURIAS_EXT' ? 'GE' : vbLastVpd;
+
   // Actualizar enlace "Añadir a Dashboard"
-  const addUrl = `/financiacion/gestionar-convocatorias?bdns=${code}&vpd=${vbLastVpd}`;
+  const addUrl = `/financiacion/gestionar-convocatorias?bdns=${code}&vpd=${vpdDetalle}`;
   document.getElementById('vb-btn-add').href = addUrl;
 
   try {
-    const raw = await vbProxy('convocatorias', { vpd: vbLastVpd, numConv: code });
+    const raw = await vbProxy('convocatorias', { vpd: vpdDetalle, numConv: code });
     vbRenderDetail(raw, code);
   } catch(e) {
     document.getElementById('vb-detail-body').innerHTML = `
       <div class="vb-section">
         <p style="color:#888;font-size:.85rem">No se pudo cargar el detalle.</p>
         <p style="font-size:.78rem;margin-top:.4rem">${vbEsc(e.message)}</p>
-        <a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank">Ver ficha oficial ↗</a>
+        <a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vpdDetalle}/es/convocatorias/${code}" target="_blank">Ver ficha oficial ↗</a>
       </div>`;
   }
 }
@@ -573,7 +592,8 @@ function vbRenderDetail(raw, code) {
 
   if (!html) html = `<div class="vb-section"><p style="color:#888;font-size:.85rem">No se encontraron datos de detalle.</p></div>`;
 
-  html += `<a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${vbLastVpd}/es/convocatorias/${code}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Ver ficha oficial</a>`;
+  const _vpdFicha = vbLastVpd === 'ASTURIAS_EXT' ? 'GE' : vbLastVpd;
+  html += `<a class="vb-btn-link" href="https://www.subvenciones.gob.es/bdnstrans/${_vpdFicha}/es/convocatorias/${code}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Ver ficha oficial</a>`;
   document.getElementById('vb-detail-body').innerHTML = html;
 }
 

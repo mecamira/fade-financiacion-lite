@@ -659,6 +659,80 @@ def bdns_proxy():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/bdns-asturias-extended')
+def bdns_asturias_extended():
+    """
+    Búsqueda combinada (sin CORS) de convocatorias de:
+      - Cámara de Comercio de Avilés
+      - Cámara de Comercio de Gijón
+      - Cámara de Comercio de Oviedo
+      - Entidades locales de Asturias (nivel2=ASTURIAS)
+    Hace 4 sub-búsquedas en paralelo al GE de BDNS, combina, desduplicada
+    por codigoBDNS y pagina el resultado.
+    """
+    import requests as req_lib
+    import concurrent.futures
+
+    BDNS_URL = 'https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda'
+    HEADERS  = {'User-Agent': 'Mozilla/5.0'}
+
+    # Parámetros libres (texto, fechas, etc.) que envía el frontend
+    base = {k: v for k, v in request.args.items()
+            if k not in ('page', 'pageSize', 'nivel2')}
+    base['vpd']       = 'GE'
+    base['order']     = 'fechaRecepcion'
+    base['direccion'] = 'desc'
+
+    page_req  = int(request.args.get('page', 0))
+    page_size = int(request.args.get('pageSize', 20))
+
+    # Filtros por nivel2 — una sub-búsqueda por cada órgano asturiano de interés
+    nivel2_filters = [
+        'CÁMARA DE COMERCIO DE AVILÉS',
+        'CÁMARA DE COMERCIO DE GIJÓN',
+        'CÁMARA DE COMERCIO DE OVIEDO',
+        'ASTURIAS',            # Entidades locales (provincias/municipios asturianos)
+    ]
+
+    def fetch(nivel2):
+        try:
+            params = {**base, 'nivel2': nivel2, 'pageSize': 100, 'page': 0}
+            r = req_lib.get(BDNS_URL, params=params, timeout=30, headers=HEADERS)
+            if r.ok:
+                return r.json().get('content', [])
+        except Exception as exc:
+            logger.warning(f"Sub-búsqueda BDNS extendida ({nivel2}): {exc}")
+        return []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        all_items = []
+        for chunk in pool.map(fetch, nivel2_filters):
+            all_items.extend(chunk)
+
+    # Deduplicar por código BDNS
+    seen, unique = set(), []
+    for item in all_items:
+        key = item.get('codigoBDNS') or item.get('numeroConvocatoria')
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(item)
+
+    # Ordenar por fecha de recepción descendente
+    unique.sort(key=lambda x: x.get('fechaRecepcion', ''), reverse=True)
+
+    total  = len(unique)
+    pages  = max(1, (total + page_size - 1) // page_size)
+    start  = page_req * page_size
+
+    return jsonify({
+        'content':       unique[start: start + page_size],
+        'totalElements': total,
+        'totalPages':    pages,
+        'number':        page_req,
+        'size':          page_size,
+    })
+
+
 # ============================================================================
 # RUTAS DE SALUD Y MONITORIZACIÓN
 # ============================================================================
