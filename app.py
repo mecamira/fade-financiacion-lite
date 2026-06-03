@@ -662,21 +662,43 @@ def bdns_proxy():
 @app.route('/api/bdns-asturias-extended')
 def bdns_asturias_extended():
     """
-    Búsqueda combinada (sin CORS) de convocatorias de:
-      - Cámara de Comercio de Avilés
-      - Cámara de Comercio de Gijón
-      - Cámara de Comercio de Oviedo
-      - Entidades locales de Asturias (nivel2=ASTURIAS)
-    Hace 4 sub-búsquedas en paralelo al GE de BDNS, combina, desduplicada
-    por codigoBDNS y pagina el resultado.
+    Búsqueda combinada de convocatorias de entidades asturianas en GE:
+      - Cámaras de Comercio de Avilés, Gijón y Oviedo
+      - Todas las entidades locales de Asturias (municipios, mancomunidades…)
+    Lanza una sub-búsqueda nivel2 por cada órgano de la lista, en paralelo,
+    combina, deduplicada por codigoBDNS, ordena por fecha y pagina.
     """
     import requests as req_lib
     import concurrent.futures
 
+    # ── Lista canónica de órganos asturianos a vigilar ──────────────────────
+    ORGANOS_ASTURIAS = [
+        # Cámaras de Comercio
+        'CÁMARA DE COMERCIO DE AVILÉS',
+        'CÁMARA DE COMERCIO DE GIJÓN',
+        'CÁMARA DE COMERCIO DE OVIEDO',
+        # Entidades locales (municipios y mancomunidades de Asturias)
+        'ALLER', 'AVILÉS', 'BIMENES', 'BOAL', 'CABRANES', 'CANDAMO',
+        'CANGAS DEL NARCEA', 'CARAVIA', 'CARREÑO', 'CASTRILLÓN', 'CASTROPOL',
+        'COAÑA', 'COLUNGA', 'CORVERA DE ASTURIAS', 'CUDILLERO',
+        'GIJÓN', 'GOZÓN', 'GRADO', 'GRANDAS DE SALIME',
+        'IBIAS', 'ILLAS', 'LANGREO', 'LENA', 'LLANERA', 'LLANES',
+        'MANCOMUNIDAD "COMARCA DE LA SIDRA"',
+        'MANCOMUNIDAD DE CONCEJOS DE CANGAS DE ONÍS, AMIEVA, ONÍS Y PONGA',
+        'MANCOMUNIDAD DE LOS CONCEJOS DE LLANES Y RIBADEDEVA',
+        'MIERES', 'NAVA', 'NAVIA', 'NOREÑA', 'OVIEDO', 'PARRES',
+        'PEÑAMELLERA BAJA', 'PILOÑA', 'PRAVIA', 'QUIRÓS', 'REGUERAS, LAS',
+        'RIBADEDEVA', 'RIBADESELLA', 'RIBERA DE ARRIBA', 'SALAS',
+        'SAN MARTÍN DE OSCOS', 'SAN MARTÍN DEL REY AURELIO',
+        'SANTA EULALIA DE OSCOS', 'SARIEGO', 'SIERO', 'SOBRESCOBIO',
+        'SOTO DEL BARCO', 'TAPIA DE CASARIEGO', 'TARAMUNDI', 'TEVERGA',
+        'TINEO', 'VALDÉS', 'VEGADEO', 'VILLAVICIOSA',
+    ]
+
     BDNS_URL = 'https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda'
     HEADERS  = {'User-Agent': 'Mozilla/5.0'}
 
-    # Parámetros libres (texto, fechas, etc.) que envía el frontend
+    # Parámetros libres (texto, fechas, tamaño de página…) del frontend
     base = {k: v for k, v in request.args.items()
             if k not in ('page', 'pageSize', 'nivel2')}
     base['vpd']       = 'GE'
@@ -686,30 +708,26 @@ def bdns_asturias_extended():
     page_req  = int(request.args.get('page', 0))
     page_size = int(request.args.get('pageSize', 20))
 
-    # Filtros por nivel2 — una sub-búsqueda por cada órgano asturiano de interés
-    nivel2_filters = [
-        'CÁMARA DE COMERCIO DE AVILÉS',
-        'CÁMARA DE COMERCIO DE GIJÓN',
-        'CÁMARA DE COMERCIO DE OVIEDO',
-        'ASTURIAS',            # Entidades locales (provincias/municipios asturianos)
-    ]
-
     def fetch(nivel2):
         try:
-            params = {**base, 'nivel2': nivel2, 'pageSize': 100, 'page': 0}
-            r = req_lib.get(BDNS_URL, params=params, timeout=30, headers=HEADERS)
+            params = {**base, 'nivel2': nivel2, 'pageSize': 50, 'page': 0}
+            r = req_lib.get(BDNS_URL, params=params, timeout=20, headers=HEADERS)
             if r.ok:
-                return r.json().get('content', [])
+                items = r.json().get('content', [])
+                if items:
+                    logger.debug(f"BDNS extendida nivel2={nivel2!r}: {len(items)} resultados")
+                return items
         except Exception as exc:
-            logger.warning(f"Sub-búsqueda BDNS extendida ({nivel2}): {exc}")
+            logger.warning(f"Sub-búsqueda BDNS nivel2={nivel2!r}: {exc}")
         return []
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+    # Lanzar todas las sub-búsquedas en paralelo (max 20 a la vez)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as pool:
         all_items = []
-        for chunk in pool.map(fetch, nivel2_filters):
+        for chunk in pool.map(fetch, ORGANOS_ASTURIAS):
             all_items.extend(chunk)
 
-    # Deduplicar por código BDNS
+    # Deduplicar por codigoBDNS
     seen, unique = set(), []
     for item in all_items:
         key = item.get('codigoBDNS') or item.get('numeroConvocatoria')
@@ -720,9 +738,11 @@ def bdns_asturias_extended():
     # Ordenar por fecha de recepción descendente
     unique.sort(key=lambda x: x.get('fechaRecepcion', ''), reverse=True)
 
-    total  = len(unique)
-    pages  = max(1, (total + page_size - 1) // page_size)
-    start  = page_req * page_size
+    total = len(unique)
+    pages = max(1, (total + page_size - 1) // page_size)
+    start = page_req * page_size
+
+    logger.info(f"BDNS extendida Asturias: {total} convocatorias únicas en {len(ORGANOS_ASTURIAS)} órganos")
 
     return jsonify({
         'content':       unique[start: start + page_size],
