@@ -659,6 +659,29 @@ def bdns_proxy():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/bdns-debug-fields')
+@login_required
+def bdns_debug_fields():
+    """Debug temporal: muestra los campos nivel1/nivel2/nivel3 de los primeros resultados de GE."""
+    import requests as req_lib
+    url = 'https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda'
+    r = req_lib.get(url, params={'vpd': 'GE', 'order': 'fechaRecepcion',
+                                  'direccion': 'desc', 'pageSize': 30, 'page': 0},
+                    timeout=20, headers={'User-Agent': 'Mozilla/5.0'})
+    items = r.json().get('content', [])
+    sample = []
+    for it in items:
+        sample.append({
+            'codigoBDNS': it.get('codigoBDNS') or it.get('numeroConvocatoria'),
+            'descripcion': (it.get('descripcion') or '')[:60],
+            'nivel1': it.get('nivel1'),
+            'nivel2': it.get('nivel2'),
+            'nivel3': it.get('nivel3'),
+            'all_keys': list(it.keys()),
+        })
+    return jsonify(sample)
+
+
 @app.route('/api/bdns-asturias-extended')
 def bdns_asturias_extended():
     """
