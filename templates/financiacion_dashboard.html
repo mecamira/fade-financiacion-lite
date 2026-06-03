@@ -177,6 +177,11 @@
                                 <i class="fas fa-chart-bar me-1"></i> Estadísticas
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="listado-tab" data-bs-toggle="tab" data-bs-target="#listado-view" type="button" role="tab" aria-controls="listado-view" aria-selected="false">
+                                <i class="fas fa-table me-1"></i> Listado
+                            </button>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body">
@@ -204,6 +209,41 @@
                     </div>
                     
                     <div class="tab-content" id="view-tabs-content">
+                        <!-- Vista de Listado (tabla) -->
+                        <div class="tab-pane fade" id="listado-view" role="tabpanel" aria-labelledby="listado-tab">
+                            <div id="listado-loading" class="text-center my-5" style="display:none;">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2 text-muted">Cargando listado…</p>
+                            </div>
+                            <div id="listado-no-results" class="text-center my-5" style="display:none;">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No hay programas con los filtros actuales.</p>
+                            </div>
+                            <div id="listado-table-wrap" style="overflow-x:auto; max-height:62vh; overflow-y:auto; display:none;">
+                                <table class="table table-hover table-sm align-middle mb-0" id="listado-table" style="min-width:880px;">
+                                    <thead class="listado-thead">
+                                        <tr>
+                                            <th class="listado-th-sort px-3" data-col="estado" style="width:80px;">Estado <span class="sort-arrow"></span></th>
+                                            <th class="listado-th-sort" data-col="nombre">Nombre del programa <span class="sort-arrow"></span></th>
+                                            <th class="listado-th-sort d-none d-md-table-cell" data-col="organismo" style="width:170px;">Organismo <span class="sort-arrow"></span></th>
+                                            <th class="d-none d-xl-table-cell" style="width:130px;">Tipo de ayuda</th>
+                                            <th class="d-none d-xl-table-cell" style="width:80px;">Ámbito</th>
+                                            <th class="listado-th-sort" data-col="fecha_cierre" style="width:100px;">Cierre <span class="sort-arrow"></span></th>
+                                            <th class="listado-th-sort d-none d-md-table-cell text-end" data-col="importe_maximo" style="width:125px;">Presupuesto <span class="sort-arrow"></span></th>
+                                            <th style="width:68px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listado-tbody"></tbody>
+                                </table>
+                            </div>
+                            <div id="listado-footer" class="d-flex justify-content-between align-items-center px-1 py-2 border-top bg-light rounded-bottom" style="display:none!important;">
+                                <small class="text-muted" id="listado-count"></small>
+                                <button class="btn btn-sm btn-outline-success" id="listado-export">
+                                    <i class="fas fa-file-excel me-1"></i>Exportar Excel
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Vista de tarjetas (actual) -->
                         <div class="tab-pane fade show active" id="cards-view" role="tabpanel" aria-labelledby="cards-tab">
                             <div id="loading" class="text-center my-5">
@@ -701,6 +741,57 @@
         padding: 4px 8px;
     }
 
+    /* ===== Tabla Listado ===== */
+    .listado-thead th {
+        position: sticky;
+        top: 0;
+        background: var(--color-primary-700, #005a91);
+        color: white;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        border: none;
+        padding: 10px 10px;
+        white-space: nowrap;
+        z-index: 2;
+    }
+    .listado-th-sort { cursor: pointer; user-select: none; }
+    .listado-th-sort:hover { background: var(--color-primary-600, #006aab); }
+    .sort-arrow { font-style: normal; opacity: 0.5; font-size: 0.7em; margin-left: 3px; }
+    .sort-arrow.asc::after  { content: ' ▲'; opacity: 1; }
+    .sort-arrow.desc::after { content: ' ▼'; opacity: 1; }
+
+    #listado-tbody tr {
+        border-left: 3px solid transparent;
+        transition: background 0.1s;
+    }
+    #listado-tbody tr:hover { background-color: var(--color-primary-50, #e8f4fd) !important; }
+    #listado-tbody tr.row-abierta      { border-left-color: #38a169; }
+    #listado-tbody tr.row-urgente      { border-left-color: #e53e3e; }
+    #listado-tbody tr.row-proximo      { border-left-color: #d69e2e; }
+    #listado-tbody tr.row-futura       { border-left-color: #00a0a0; }
+    #listado-tbody tr.row-cerrada      { border-left-color: #cbd5e0; }
+
+    #listado-tbody td { font-size: 0.82rem; padding: 7px 10px; vertical-align: middle; }
+    .listado-nombre { font-weight: 600; color: var(--color-primary-800, #004f82); text-decoration: none; }
+    .listado-nombre:hover { text-decoration: underline; }
+    .listado-organismo { font-size: 0.75rem; color: var(--color-neutral-600, #4a5568); }
+    .listado-dias {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+    .listado-dias.urgente { background: #fed7d7; color: #c53030; }
+    .listado-dias.proximo { background: #fefcbf; color: #975a16; }
+    .listado-dias.normal  { background: #c6f6d5; color: #276749; }
+    .listado-dias.cerrada { background: #e2e8f0; color: #4a5568; }
+    .listado-presupuesto  { font-size: 0.8rem; font-weight: 600; text-align:right; color: var(--color-neutral-800); white-space: nowrap; }
+
+    /* ===== Badge de fecha publicación BDNS en la tarjeta ===== */
     /* Badge de fecha publicación BDNS en la tarjeta */
     .programa-fecha-bdns-badge {
         display: inline-flex;
@@ -1417,7 +1508,10 @@
                 // Añadir a contenedor
                 container.appendChild(card);
             });
-            
+
+            // Actualizar vista Listado con los mismos datos
+            renderTable(programasAMostrar);
+
             // Inicializar tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1646,6 +1740,183 @@
             
         }
         
+        // =====================================================================
+        // VISTA LISTADO (TABLA)
+        // =====================================================================
+
+        function renderTable(programas) {
+            const wrap    = document.getElementById('listado-table-wrap');
+            const tbody   = document.getElementById('listado-tbody');
+            const footer  = document.getElementById('listado-footer');
+            const noRes   = document.getElementById('listado-no-results');
+            const loading = document.getElementById('listado-loading');
+
+            loading.style.display = 'none';
+
+            if (!programas || programas.length === 0) {
+                wrap.style.display   = 'none';
+                footer.style.display = 'none';
+                noRes.style.display  = 'block';
+                return;
+            }
+
+            noRes.style.display  = 'none';
+            wrap.style.display   = 'block';
+            footer.style.display = 'flex';
+            document.getElementById('listado-count').textContent = programas.length + ' programas';
+
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+            function diasRestantes(fechaStr) {
+                if (!fechaStr || fechaStr === 'null') return null;
+                try {
+                    const d = new Date(fechaStr); d.setHours(0,0,0,0);
+                    return Math.floor((d - hoy) / 86400000);
+                } catch(e) { return null; }
+            }
+
+            function diasHTML(dias) {
+                if (dias === null) return '<span class="listado-dias cerrada">—</span>';
+                if (dias < 0)      return '<span class="listado-dias cerrada">Cerrada</span>';
+                if (dias <= 10)    return `<span class="listado-dias urgente">⚠ ${dias}d</span>`;
+                if (dias <= 30)    return `<span class="listado-dias proximo">${dias}d</span>`;
+                return `<span class="listado-dias normal">${dias}d</span>`;
+            }
+
+            function rowClass(p) {
+                const estado = (p.convocatoria?.estado || '').toLowerCase();
+                const fc     = p.convocatoria?.fecha_cierre;
+                const dias   = diasRestantes(fc);
+                if (dias === null || dias < 0) return 'row-cerrada';
+                if (estado.includes('próxima') || estado.includes('pendiente')) return 'row-futura';
+                if (dias <= 10) return 'row-urgente';
+                if (dias <= 30) return 'row-proximo';
+                return 'row-abierta';
+            }
+
+            function estadoBadge(p) {
+                const estado = (p.convocatoria?.estado || 'Sin estado');
+                const e = estado.toLowerCase();
+                let cls = 'bg-secondary';
+                if (e.includes('abierta') && !e.includes('cierre')) cls = 'bg-success';
+                else if (e.includes('urgente') || (e.includes('cierre') && e.includes('próximo'))) cls = 'bg-warning text-dark';
+                else if (e.includes('próxima') || e.includes('pendiente')) cls = 'bg-info text-dark';
+                else if (e.includes('cerrada')) cls = 'bg-secondary';
+                // Texto corto
+                let txt = estado;
+                if (e.includes('todo el año')) txt = 'Todo el año';
+                else if (e.includes('cerrada')) txt = 'Cerrada';
+                else if (e.includes('urgente')) txt = '¡Urgente!';
+                else if (e.includes('cierre próximo') || e.includes('próximo cierre')) txt = 'Cierre próx.';
+                else if (e.includes('abierta')) txt = 'Abierta';
+                else if (e.includes('próxima') || e.includes('pendiente')) txt = 'Próxima';
+                return `<span class="badge ${cls}" style="font-size:0.7rem;">${txt}</span>`;
+            }
+
+            function fmtFecha(fechaStr) {
+                if (!fechaStr || fechaStr === 'null') return '—';
+                try {
+                    return new Date(fechaStr).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+                } catch(e) { return fechaStr; }
+            }
+
+            function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+            tbody.innerHTML = programas.map(p => {
+                const nombre     = p.nombre_coloquial || p.nombre || 'Sin nombre';
+                const organismo  = p.organismo || '—';
+                const tipoAyuda  = Array.isArray(p.tipo_ayuda) ? p.tipo_ayuda.join(', ') : (p.tipo_ayuda || '—');
+                const ambito     = p.ambito || '—';
+                const fc         = p.convocatoria?.fecha_cierre;
+                const dias       = diasRestantes(fc);
+                const presupuesto = p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo;
+                const isSelected = programasParaComparar.includes(p.id);
+
+                return `<tr class="${rowClass(p)}${isSelected ? ' table-primary' : ''}" data-id="${esc(p.id)}">
+                    <td class="px-3">${estadoBadge(p)}</td>
+                    <td>
+                        <a class="listado-nombre" href="/financiacion/programa/${esc(p.id)}">${esc(nombre)}</a>
+                        <div class="listado-organismo d-md-none">${esc(organismo)}</div>
+                    </td>
+                    <td class="d-none d-md-table-cell listado-organismo">${esc(organismo)}</td>
+                    <td class="d-none d-xl-table-cell"><small>${esc(tipoAyuda)}</small></td>
+                    <td class="d-none d-xl-table-cell"><small>${esc(ambito)}</small></td>
+                    <td>
+                        <small class="d-block text-muted" style="font-size:0.73rem;">${fmtFecha(fc)}</small>
+                        ${diasHTML(dias)}
+                    </td>
+                    <td class="d-none d-md-table-cell listado-presupuesto">${presupuesto && !isNaN(presupuesto) ? formatImporte(presupuesto) : '—'}</td>
+                    <td>
+                        <div class="d-flex gap-1 align-items-center">
+                            <button type="button" class="btn btn-outline-primary btn-sm py-0 px-1 listado-preview-btn" data-id="${esc(p.id)}" title="Vista previa" style="font-size:0.75rem;"><i class="fas fa-eye"></i></button>
+                            <div class="form-check mb-0" title="Comparar">
+                                <input class="form-check-input listado-comparar-cb" type="checkbox" value="${esc(p.id)}" ${isSelected ? 'checked' : ''} style="cursor:pointer;">
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            // Eventos: vista previa
+            tbody.querySelectorAll('.listado-preview-btn').forEach(btn => {
+                btn.addEventListener('click', () => showProgramPreview(btn.getAttribute('data-id')));
+            });
+
+            // Eventos: comparar
+            tbody.querySelectorAll('.listado-comparar-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id  = this.value;
+                    const row = this.closest('tr');
+                    if (this.checked) {
+                        if (!addToCompare(id)) { this.checked = false; return; }
+                        row.classList.add('table-primary');
+                        // Marcar también el checkbox de la tarjeta si existe
+                        const cardCb = document.querySelector(`.programa-comparar[value="${id}"]`);
+                        if (cardCb) { cardCb.checked = true; cardCb.closest('.programa-card')?.classList.add('selected-for-compare'); }
+                    } else {
+                        removeFromCompare(id);
+                        row.classList.remove('table-primary');
+                        const cardCb = document.querySelector(`.programa-comparar[value="${id}"]`);
+                        if (cardCb) { cardCb.checked = false; cardCb.closest('.programa-card')?.classList.remove('selected-for-compare'); }
+                    }
+                });
+            });
+        }
+
+        // Ordenación por cabecera de columna en la tabla
+        document.querySelectorAll('.listado-th-sort').forEach(th => {
+            th.addEventListener('click', function() {
+                const col = this.getAttribute('data-col');
+                if (col === sortField) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortField = col;
+                    sortDirection = col === 'fecha_publicacion_bdns' ? 'desc' : 'asc';
+                }
+                // Actualizar estilos de flechas
+                document.querySelectorAll('.listado-th-sort .sort-arrow').forEach(a => {
+                    a.className = 'sort-arrow';
+                });
+                const arrow = this.querySelector('.sort-arrow');
+                if (arrow) arrow.className = 'sort-arrow ' + sortDirection;
+                // Sincronizar botón de sort del header
+                const label = this.textContent.trim().replace(/[▲▼]/g,'').trim();
+                const dirLabel = sortField === 'fecha_cierre'
+                    ? (sortDirection==='asc' ? '↑ próximo' : '↓ lejano')
+                    : sortField === 'fecha_publicacion_bdns' ? (sortDirection==='desc'?'↓ reciente':'↑ antiguo')
+                    : (sortDirection==='asc'?'A→Z':'Z→A');
+                document.getElementById('dropdownSortButton').textContent = 'Ordenar: ' + label + ' ' + dirLabel;
+                sortAndRenderPrograms(programasCargados);
+            });
+        });
+
+        // Botón exportar del listado (reutiliza la misma función)
+        document.getElementById('listado-export').addEventListener('click', () => exportToExcel(programasCargados));
+
+        // =====================================================================
+        // FIN VISTA LISTADO
+        // =====================================================================
+
         // Exportar a Excel
         function exportToExcel(programas) {
             if (!programas || programas.length === 0) {
