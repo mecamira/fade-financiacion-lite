@@ -739,22 +739,32 @@ def bdns_asturias_extended():
     BDNS_URL = 'https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda'
     HEADERS  = {'User-Agent': 'Mozilla/5.0'}
 
-    # Ventana temporal por defecto: últimos 6 meses (evita escanear toda la historia)
-    fecha_desde = request.args.get('fechaDesde')
-    if not fecha_desde:
-        fecha_desde = (_dt.now() - _td(days=180)).strftime('%Y-%m-%d')
+    # ── Fechas: la API BDNS exige DD/MM/YYYY (YYYY-MM-DD devuelve 0 resultados) ──
+    def to_bdns_date(iso_or_slash):
+        """Convierte YYYY-MM-DD a DD/MM/YYYY; deja otros formatos intactos."""
+        if iso_or_slash and '-' in iso_or_slash and len(iso_or_slash) == 10:
+            y, m, d = iso_or_slash.split('-')
+            return f"{d}/{m}/{y}"
+        return iso_or_slash
+
+    fecha_desde_raw = request.args.get('fechaDesde')
+    if fecha_desde_raw:
+        fecha_desde = to_bdns_date(fecha_desde_raw)
+    else:
+        # Ventana por defecto: últimos 6 meses
+        fecha_desde = (_dt.now() - _td(days=180)).strftime('%d/%m/%Y')
 
     base = {
-        'vpd':       'GE',
-        'order':     'fechaRecepcion',
-        'direccion': 'desc',
-        'pageSize':  100,
+        'vpd':        'GE',
+        'order':      'fechaRecepcion',
+        'direccion':  'desc',
+        'pageSize':   100,
         'fechaDesde': fecha_desde,
     }
     for arg in ('fechaHasta', 'descripcion', 'numConv'):
         val = request.args.get(arg)
         if val:
-            base[arg] = val
+            base[arg] = to_bdns_date(val) if arg == 'fechaHasta' else val
 
     page_req  = int(request.args.get('page', 0))
     page_size = int(request.args.get('pageSize', 20))
