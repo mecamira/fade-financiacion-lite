@@ -759,80 +759,49 @@ def bdns_asturias_extended():
     page_req  = int(request.args.get('page', 0))
     page_size = int(request.args.get('pageSize', 20))
 
-    # ── Estrategia de búsqueda ────────────────────────────────────────────────
+    # ── Estrategia ───────────────────────────────────────────────────────────
+    # Los municipios asturianos publican en GE (no en A03).
+    # nivel1="LOCAL",  nivel2="AVILÉS"/"GIJÓN"/…,  nivel3="AYUNTAMIENTO DE …"
+    # Las cámaras:     nivel1="OTROS",  nivel2="CÁMARA DE COMERCIO DE GIJÓN"
     #
-    # PROBLEMA: GE recibe miles de ayuntamientos españoles cada día. 15 páginas
-    # × 100 sólo cubre las últimas horas → los asturianos no aparecen.
+    # El parámetro nivel2 en la URL no filtra por órgano → debemos traer
+    # páginas de GE y filtrar server-side.
     #
-    # SOLUCIÓN:
-    #  · Entidades locales → buscar en A03 (portal Asturias, ya acotado) sin
-    #    nivel2=PRINCIPADO DE ASTURIAS. A03 tiene muchos menos resultados que GE
-    #    por lo que 15 páginas cubren semanas/meses. Filtrar por nivel1=="LOCAL".
-    #  · Cámaras de Comercio → nivel2 exacto en GE (son únicos en España).
+    # Con ~100 convocatorias/día en GE y Asturias con ~1-2% del total,
+    # 50 páginas × 100 items = 5 000 items ≈ 50 días de cobertura.
     # ─────────────────────────────────────────────────────────────────────────
 
-    CAMARAS = {
-        'CÁMARA DE COMERCIO DE AVILÉS',
-        'CÁMARA DE COMERCIO DE GIJÓN',
-        'CÁMARA DE COMERCIO DE OVIEDO',
-    }
-    CAMARAS_NORM = {_norm(c) for c in CAMARAS}
+    N_PAGES = 50   # cubre ~50 días de publicaciones GE
 
-    N_PAGES = 15
+    base_ge = {k: v for k, v in base.items()}
+    base_ge['vpd']      = 'GE'
+    base_ge['pageSize'] = 100
 
-    # 1) Entidades locales: A03 sin filtro nivel2, guardando solo nivel1=="LOCAL"
-    base_a03 = {k: v for k, v in base.items()}
-    base_a03['vpd'] = 'A03'
-    # Quitar nivel2 si alguien lo mandó; no queremos restringir al Principado
-    base_a03.pop('nivel2', None)
-
-    def fetch_a03(n):
+    def fetch_page(n):
         try:
-            r = req_lib.get(BDNS_URL, params={**base_a03, 'page': n},
+            r = req_lib.get(BDNS_URL, params={**base_ge, 'page': n},
                             timeout=20, headers=HEADERS)
             if r.ok:
-                items = r.json().get('content', [])
-                return [it for it in items
-                        if (it.get('nivel1') or '').upper() == 'LOCAL']
+                return r.json().get('content', [])
         except Exception as exc:
-            logger.warning(f"BDNS A03 pág {n}: {exc}")
+            logger.warning(f"BDNS extendida pág {n}: {exc}")
         return []
 
-    # 2) Cámaras de Comercio: GE, nivel2 coincide con cada cámara
-    def fetch_camara(camara_norm_name):
-        """Busca en GE filtrando los resultados por nivel2 normalizado == cámara."""
-        try:
-            # Traemos hasta 3 páginas por cámara (suficiente)
-            items = []
-            for pg in range(3):
-                r = req_lib.get(BDNS_URL,
-                                params={**base, 'vpd': 'GE', 'page': pg},
-                                timeout=20, headers=HEADERS)
-                if not r.ok:
-                    break
-                chunk = r.json().get('content', [])
-                items.extend([it for it in chunk
-                              if _norm(it.get('nivel2') or '') == camara_norm_name])
-                if not chunk:
-                    break
-            return items
-        except Exception as exc:
-            logger.warning(f"BDNS cámara {camara_norm_name}: {exc}")
-        return []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=25) as pool:
+        all_items = list(itertools.chain.from_iterable(
+            pool.map(fetch_page, range(N_PAGES))
+        ))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=N_PAGES + len(CAMARAS)) as pool:
-        # A03 local entities
-        a03_future  = [pool.submit(fetch_a03, n) for n in range(N_PAGES)]
-        # Chambers (GE, nivel2 exact match)
-        cam_futures = [pool.submit(fetch_camara, cn) for cn in CAMARAS_NORM]
+    logger.info(
+        f"BDNS extendida: {len(all_items)} items GE descargados "
+        f"(ventana desde {fecha_desde})"
+    )
 
-        all_items = []
-        for f in a03_future + cam_futures:
-            all_items.extend(f.result())
-
-    # Deduplicar y ordenar
+    # Filtrar por órgano asturiano y deduplicar
     seen, unique = set(), []
     for item in all_items:
+        if not is_asturian(item):
+            continue
         key = item.get('codigoBDNS') or item.get('numeroConvocatoria')
         if key and key not in seen:
             seen.add(key)
@@ -845,8 +814,7 @@ def bdns_asturias_extended():
     start = page_req * page_size
 
     logger.info(
-        f"BDNS extendida Asturias: {total} convocatorias únicas "
-        f"(A03-LOCAL + cámaras GE, ventana desde {fecha_desde})"
+        f"BDNS extendida Asturias: {total} asturianos de {len(all_items)} items GE"
     )
 
     return jsonify({
