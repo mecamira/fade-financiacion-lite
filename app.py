@@ -662,22 +662,26 @@ def bdns_proxy():
 @app.route('/api/bdns-asturias-extended')
 def bdns_asturias_extended():
     """
-    Búsqueda combinada de convocatorias de entidades asturianas en GE:
-      - Cámaras de Comercio de Avilés, Gijón y Oviedo
-      - Todas las entidades locales de Asturias (municipios, mancomunidades…)
-    Lanza una sub-búsqueda nivel2 por cada órgano de la lista, en paralelo,
-    combina, deduplicada por codigoBDNS, ordena por fecha y pagina.
+    Vigilancia BDNS — cámaras de comercio asturianas + entidades locales de Asturias.
+
+    El parámetro nivel2 del endpoint de búsqueda de BDNS no funciona como
+    filtro de órgano en el portal GE (se ignora y devuelve todos los resultados).
+    Solución: pedir páginas de GE sin filtro de órgano y filtrar server-side
+    comprobando si nivel2 o nivel3 del item están en la lista canónica asturiana.
     """
     import requests as req_lib
     import concurrent.futures
+    import unicodedata
+    import itertools
+    from datetime import datetime as _dt, timedelta as _td
 
-    # ── Lista canónica de órganos asturianos a vigilar ──────────────────────
-    ORGANOS_ASTURIAS = [
+    # ── Órganos asturianos de interés ────────────────────────────────────────
+    ORGANOS_ASTURIAS = {
         # Cámaras de Comercio
         'CÁMARA DE COMERCIO DE AVILÉS',
         'CÁMARA DE COMERCIO DE GIJÓN',
         'CÁMARA DE COMERCIO DE OVIEDO',
-        # Entidades locales (municipios y mancomunidades de Asturias)
+        # Entidades locales asturianas (municipios y mancomunidades)
         'ALLER', 'AVILÉS', 'BIMENES', 'BOAL', 'CABRANES', 'CANDAMO',
         'CANGAS DEL NARCEA', 'CARAVIA', 'CARREÑO', 'CASTRILLÓN', 'CASTROPOL',
         'COAÑA', 'COLUNGA', 'CORVERA DE ASTURIAS', 'CUDILLERO',
@@ -693,56 +697,83 @@ def bdns_asturias_extended():
         'SANTA EULALIA DE OSCOS', 'SARIEGO', 'SIERO', 'SOBRESCOBIO',
         'SOTO DEL BARCO', 'TAPIA DE CASARIEGO', 'TARAMUNDI', 'TEVERGA',
         'TINEO', 'VALDÉS', 'VEGADEO', 'VILLAVICIOSA',
-    ]
+    }
 
+    def _norm(s):
+        """Normaliza para comparación: sin tildes, mayúsculas, sin espacios extra."""
+        return ''.join(
+            c for c in unicodedata.normalize('NFD', (s or '').strip())
+            if unicodedata.category(c) != 'Mn'
+        ).upper().strip()
+
+    ORGANOS_NORM = {_norm(x) for x in ORGANOS_ASTURIAS}
+
+    def is_asturian(item):
+        return (_norm(item.get('nivel2') or '') in ORGANOS_NORM or
+                _norm(item.get('nivel3') or '') in ORGANOS_NORM)
+
+    # ── Parámetros de búsqueda ────────────────────────────────────────────────
     BDNS_URL = 'https://www.infosubvenciones.es/bdnstrans/api/convocatorias/busqueda'
     HEADERS  = {'User-Agent': 'Mozilla/5.0'}
 
-    # Parámetros libres (texto, fechas, tamaño de página…) del frontend
-    base = {k: v for k, v in request.args.items()
-            if k not in ('page', 'pageSize', 'nivel2')}
-    base['vpd']       = 'GE'
-    base['order']     = 'fechaRecepcion'
-    base['direccion'] = 'desc'
+    # Ventana temporal por defecto: últimos 6 meses (evita escanear toda la historia)
+    fecha_desde = request.args.get('fechaDesde')
+    if not fecha_desde:
+        fecha_desde = (_dt.now() - _td(days=180)).strftime('%Y-%m-%d')
+
+    base = {
+        'vpd':       'GE',
+        'order':     'fechaRecepcion',
+        'direccion': 'desc',
+        'pageSize':  100,
+        'fechaDesde': fecha_desde,
+    }
+    for arg in ('fechaHasta', 'descripcion', 'numConv'):
+        val = request.args.get(arg)
+        if val:
+            base[arg] = val
 
     page_req  = int(request.args.get('page', 0))
     page_size = int(request.args.get('pageSize', 20))
 
-    def fetch(nivel2):
+    # ── Recuperar páginas de GE en paralelo y filtrar ─────────────────────────
+    N_PAGES = 15   # 15 × 100 = 1 500 items de GE → filtrar asturianos
+
+    def fetch_page(n):
         try:
-            params = {**base, 'nivel2': nivel2, 'pageSize': 50, 'page': 0}
-            r = req_lib.get(BDNS_URL, params=params, timeout=20, headers=HEADERS)
+            r = req_lib.get(BDNS_URL, params={**base, 'page': n},
+                            timeout=20, headers=HEADERS)
             if r.ok:
-                items = r.json().get('content', [])
-                if items:
-                    logger.debug(f"BDNS extendida nivel2={nivel2!r}: {len(items)} resultados")
-                return items
+                return r.json().get('content', [])
         except Exception as exc:
-            logger.warning(f"Sub-búsqueda BDNS nivel2={nivel2!r}: {exc}")
+            logger.warning(f"BDNS extendida pág {n}: {exc}")
         return []
 
-    # Lanzar todas las sub-búsquedas en paralelo (max 20 a la vez)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as pool:
-        all_items = []
-        for chunk in pool.map(fetch, ORGANOS_ASTURIAS):
-            all_items.extend(chunk)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=N_PAGES) as pool:
+        all_items = list(itertools.chain.from_iterable(
+            pool.map(fetch_page, range(N_PAGES))
+        ))
 
-    # Deduplicar por codigoBDNS
+    # Filtrar por órgano asturiano y deduplicar
     seen, unique = set(), []
     for item in all_items:
+        if not is_asturian(item):
+            continue
         key = item.get('codigoBDNS') or item.get('numeroConvocatoria')
         if key and key not in seen:
             seen.add(key)
             unique.append(item)
 
-    # Ordenar por fecha de recepción descendente
     unique.sort(key=lambda x: x.get('fechaRecepcion', ''), reverse=True)
 
     total = len(unique)
     pages = max(1, (total + page_size - 1) // page_size)
     start = page_req * page_size
 
-    logger.info(f"BDNS extendida Asturias: {total} convocatorias únicas en {len(ORGANOS_ASTURIAS)} órganos")
+    logger.info(
+        f"BDNS extendida Asturias: {total} asturianos de {len(all_items)} "
+        f"resultados GE (ventana desde {fecha_desde})"
+    )
 
     return jsonify({
         'content':       unique[start: start + page_size],
