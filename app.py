@@ -837,6 +837,133 @@ def bdns_asturias_extended():
 
 
 # ============================================================================
+# PANEL DE CONTROL DEL SERVIDOR (ADMIN)
+# ============================================================================
+
+def _leer_sistema():
+    """Lee métricas del sistema desde /proc (sin dependencias externas)."""
+    import shutil
+    stats = {}
+    try:
+        with open('/proc/meminfo') as f:
+            mem = {line.split(':')[0].strip(): int(line.split(':')[1].strip().split()[0])
+                   for line in f if ':' in line}
+        total = mem.get('MemTotal', 0)
+        avail = mem.get('MemAvailable', 0)
+        stats['mem_total_mb']  = total  // 1024
+        stats['mem_used_mb']   = (total - avail) // 1024
+        stats['mem_free_mb']   = avail  // 1024
+        stats['mem_percent']   = round((total - avail) / total * 100, 1) if total else 0
+    except Exception:
+        stats.update({'mem_total_mb': 0, 'mem_used_mb': 0, 'mem_free_mb': 0, 'mem_percent': 0})
+
+    try:
+        with open('/proc/uptime') as f:
+            secs = int(float(f.read().split()[0]))
+        stats['uptime_days']    = secs // 86400
+        stats['uptime_hours']   = (secs % 86400) // 3600
+        stats['uptime_minutes'] = (secs % 3600) // 60
+        stats['uptime_seconds'] = secs
+    except Exception:
+        stats.update({'uptime_days': 0, 'uptime_hours': 0, 'uptime_minutes': 0, 'uptime_seconds': 0})
+
+    try:
+        with open('/proc/loadavg') as f:
+            parts = f.read().split()
+        stats['load_1'], stats['load_5'], stats['load_15'] = parts[0], parts[1], parts[2]
+    except Exception:
+        stats.update({'load_1': '—', 'load_5': '—', 'load_15': '—'})
+
+    try:
+        disk = shutil.disk_usage('/')
+        stats['disk_total_gb']  = round(disk.total  / 1024**3, 1)
+        stats['disk_used_gb']   = round(disk.used   / 1024**3, 1)
+        stats['disk_free_gb']   = round(disk.free   / 1024**3, 1)
+        stats['disk_percent']   = round(disk.used / disk.total * 100, 1)
+    except Exception:
+        stats.update({'disk_total_gb': 0, 'disk_used_gb': 0, 'disk_free_gb': 0, 'disk_percent': 0})
+
+    return stats
+
+
+def _leer_logs(n=200, nivel='ALL'):
+    """Lee las últimas N líneas del log de la aplicación."""
+    log_path = os.path.join(app.config.get('LOG_DIR', 'logs'), 'app.log')
+    lineas = []
+    try:
+        with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
+            todas = f.readlines()
+        for raw in todas[-n:]:
+            raw = raw.rstrip()
+            if not raw:
+                continue
+            lvl = 'INFO'
+            for l in ('ERROR', 'WARNING', 'CRITICAL', 'DEBUG'):
+                if f' - {l} - ' in raw:
+                    lvl = l
+                    break
+            lineas.append({'text': raw, 'level': lvl})
+        lineas.reverse()   # más recientes primero
+        if nivel != 'ALL':
+            lineas = [l for l in lineas if l['level'] == nivel]
+    except Exception as e:
+        lineas = [{'text': f'No se pudo leer el log: {e}', 'level': 'ERROR'}]
+    return lineas
+
+
+def _stats_db():
+    """Estadísticas de la base de datos de programas."""
+    try:
+        programas = financing_dashboard.load_all_financing_programs()
+        hoy = datetime.now().date()
+        abiertos = cerrados = proximos = 0
+        for p in programas:
+            conv = p.get('convocatoria') or {}
+            estado = (conv.get('estado') or '').lower()
+            fc_raw = conv.get('fecha_cierre')
+            if fc_raw and fc_raw not in ('null', None):
+                try:
+                    from datetime import date
+                    fc = datetime.fromisoformat(str(fc_raw).split('T')[0]).date()
+                    if fc >= hoy:
+                        abiertos += 1
+                    else:
+                        cerrados += 1
+                    continue
+                except Exception:
+                    pass
+            if 'cerrada' in estado:
+                cerrados += 1
+            elif 'abierta' in estado or 'cierre' in estado:
+                abiertos += 1
+            else:
+                proximos += 1
+        return {'total': len(programas), 'abiertos': abiertos,
+                'cerrados': cerrados, 'proximos': proximos}
+    except Exception as e:
+        return {'total': 0, 'abiertos': 0, 'cerrados': 0, 'proximos': 0, 'error': str(e)}
+
+
+@app.route('/admin/panel-servidor')
+@login_required
+def panel_servidor():
+    return render_template('admin_panel.html')
+
+
+@app.route('/api/admin/panel-stats')
+@login_required
+def panel_stats_api():
+    nivel = request.args.get('nivel', 'ALL')
+    n_logs = int(request.args.get('n', 200))
+    return jsonify({
+        'sistema':  _leer_sistema(),
+        'db':       _stats_db(),
+        'logs':     _leer_logs(n_logs, nivel),
+        'timestamp': datetime.now().strftime('%H:%M:%S'),
+    })
+
+
+# ============================================================================
 # RUTAS DE SALUD Y MONITORIZACIÓN
 # ============================================================================
 

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}Panel del Servidor — FADE{% endblock %}
+
+{% block extra_css %}
+<style>
+.panel-kpi {
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+.panel-kpi .kpi-icon {
+    font-size: 2.4rem;
+    opacity: 0.25;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.panel-kpi .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.85; }
+.panel-kpi .kpi-value { font-size: 1.9rem; font-weight: 700; line-height: 1.2; }
+.panel-kpi .kpi-sub   { font-size: 0.78rem; opacity: 0.8; margin-top: 2px; }
+.kpi-mem   { background: linear-gradient(135deg, #0078bf, #005a91); }
+.kpi-disk  { background: linear-gradient(135deg, #38a169, #276749); }
+.kpi-cpu   { background: linear-gradient(135deg, #e07c00, #b56200); }
+.kpi-up    { background: linear-gradient(135deg, #5552a3, #3e3b7a); }
+
+.bar-wrap { background: rgba(255,255,255,0.2); border-radius: 4px; height: 6px; margin-top: 6px; }
+.bar-fill { height: 100%; border-radius: 4px; background: rgba(255,255,255,0.8); transition: width .4s; }
+
+/* Log viewer */
+#log-container {
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    background: #0d1117;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 520px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+.log-line { padding: 1px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.log-ERROR    { color: #ff7b72; }
+.log-CRITICAL { color: #ff7b72; font-weight: bold; }
+.log-WARNING  { color: #e3b341; }
+.log-DEBUG    { color: #8b949e; }
+.log-INFO     { color: #c9d1d9; }
+
+.refresh-indicator { font-size: 0.7rem; color: var(--color-neutral-500); }
+.stat-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--color-neutral-100); font-size: 0.85rem; }
+.stat-row:last-child { border: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="text-primary mb-0">
+                <i class="fas fa-server me-2"></i>Panel del Servidor
+            </h2>
+            <p class="text-muted mb-0 small">Estado del sistema y registros de la aplicación</p>
+        </div>
+        <div class="col-auto d-flex align-items-center gap-3">
+            <span class="refresh-indicator" id="last-refresh">Cargando…</span>
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="auto-refresh" checked>
+                <label class="form-check-label small" for="auto-refresh">Auto-refresh</label>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" id="btn-refresh">
+                <i class="fas fa-sync-alt me-1"></i>Actualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="row g-3 mb-4" id="kpi-row">
+        <div class="col-6 col-md-3">
+            <div class="panel-kpi kpi-mem">
+                <i class="fas fa-memory kpi-icon"></i>
+                <div class="kpi-label">Memoria RAM</div>
+                <div class="kpi-value" id="kpi-mem-used">—</div>
+                <div class="kpi-sub" id="kpi-mem-sub">de — GB</div>
+                <div class="bar-wrap"><div class="bar-fill" id="bar-mem" style="width:0%"></div></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="panel-kpi kpi-disk">
+                <i class="fas fa-hdd kpi-icon"></i>
+                <div class="kpi-label">Disco</div>
+                <div class="kpi-value" id="kpi-disk-used">—</div>
+                <div class="kpi-sub" id="kpi-disk-sub">de — GB</div>
+                <div class="bar-wrap"><div class="bar-fill" id="bar-disk" style="width:0%"></div></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="panel-kpi kpi-cpu">
+                <i class="fas fa-microchip kpi-icon"></i>
+                <div class="kpi-label">Carga CPU</div>
+                <div class="kpi-value" id="kpi-cpu">—</div>
+                <div class="kpi-sub" id="kpi-cpu-sub">5 min / 15 min</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="panel-kpi kpi-up">
+                <i class="fas fa-clock kpi-icon"></i>
+                <div class="kpi-label">Uptime servidor</div>
+                <div class="kpi-value" id="kpi-uptime">—</div>
+                <div class="kpi-sub" id="kpi-uptime-sub">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DB stats + info -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-database me-2 text-primary"></i>Base de Datos de Programas</h6>
+                </div>
+                <div class="card-body" id="db-stats">
+                    <div class="stat-row"><span>Total programas</span><strong id="db-total">—</strong></div>
+                    <div class="stat-row"><span>Con convocatoria abierta</span><strong class="text-success" id="db-abiertos">—</strong></div>
+                    <div class="stat-row"><span>Próximas / Sin fecha</span><strong class="text-warning" id="db-proximos">—</strong></div>
+                    <div class="stat-row"><span>Cerradas</span><strong class="text-secondary" id="db-cerrados">—</strong></div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('financiacion_dashboard') }}" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-th-large me-1"></i>Ir al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Información del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="stat-row"><span>Entorno</span><strong>Producción (Docker)</strong></div>
+                    <div class="stat-row"><span>Servidor web</span><strong>Gunicorn + Flask</strong></div>
+                    <div class="stat-row"><span>Host</span><strong>178.105.160.148</strong></div>
+                    <div class="stat-row"><span>Python</span><strong id="py-version">—</strong></div>
+                    <div class="stat-row"><span>Última actualización</span><strong id="last-update-ts">—</strong></div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('vigilancia_bdns') }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="fas fa-bell me-1"></i>Ir a Vigilancia BDNS
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tools me-2 text-primary"></i>Acciones rápidas</h6>
+                </div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <a href="{{ url_for('gestionar_convocatorias') }}" class="btn btn-outline-primary btn-sm text-start">
+                        <i class="fas fa-plus-circle me-2"></i>Añadir nueva convocatoria
+                    </a>
+                    <a href="{{ url_for('editar_convocatorias') }}" class="btn btn-outline-secondary btn-sm text-start">
+                        <i class="fas fa-edit me-2"></i>Editar convocatorias
+                    </a>
+                    <a href="{{ url_for('vigilancia_bdns') }}" class="btn btn-outline-secondary btn-sm text-start">
+                        <i class="fas fa-search me-2"></i>Buscar en BDNS
+                    </a>
+                    <a href="{{ url_for('analizar_compatibilidad') }}" class="btn btn-outline-secondary btn-sm text-start">
+                        <i class="fas fa-check-circle me-2"></i>Analizar compatibilidad
+                    </a>
+                    <hr class="my-1">
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm text-start">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log viewer -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Registros de la aplicación</h6>
+            <div class="d-flex gap-2 align-items-center">
+                <label class="small mb-0 text-muted">Filtrar:</label>
+                <select class="form-select form-select-sm" id="log-nivel" style="width:auto;">
+                    <option value="ALL">Todos</option>
+                    <option value="ERROR">ERROR</option>
+                    <option value="WARNING">WARNING</option>
+                    <option value="INFO">INFO</option>
+                    <option value="DEBUG">DEBUG</option>
+                </select>
+                <select class="form-select form-select-sm" id="log-n" style="width:auto;">
+                    <option value="100">100 líneas</option>
+                    <option value="200" selected>200 líneas</option>
+                    <option value="500">500 líneas</option>
+                </select>
+                <button class="btn btn-sm btn-outline-light" id="btn-scroll-top" title="Ir al inicio">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+        <div id="log-container">
+            <div class="text-center text-muted py-4">Cargando registros…</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const API_URL = '/api/admin/panel-stats';
+let autoRefreshTimer = null;
+
+function fmtMB(mb) {
+    if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB';
+    return mb + ' MB';
+}
+
+function renderStats(data) {
+    const s = data.sistema;
+    const db = data.db;
+
+    // Memoria
+    document.getElementById('kpi-mem-used').textContent = fmtMB(s.mem_used_mb);
+    document.getElementById('kpi-mem-sub').textContent  = `de ${fmtMB(s.mem_total_mb)} · ${s.mem_percent}%`;
+    document.getElementById('bar-mem').style.width      = s.mem_percent + '%';
+
+    // Disco
+    document.getElementById('kpi-disk-used').textContent = s.disk_used_gb + ' GB';
+    document.getElementById('kpi-disk-sub').textContent  = `de ${s.disk_total_gb} GB · ${s.disk_percent}%`;
+    document.getElementById('bar-disk').style.width      = s.disk_percent + '%';
+
+    // CPU
+    document.getElementById('kpi-cpu').textContent     = s.load_1;
+    document.getElementById('kpi-cpu-sub').textContent = `${s.load_5} · ${s.load_15}`;
+
+    // Uptime
+    const u = s;
+    let uptimeStr = '';
+    if (u.uptime_days > 0)   uptimeStr += u.uptime_days + 'd ';
+    if (u.uptime_hours > 0)  uptimeStr += u.uptime_hours + 'h ';
+    uptimeStr += u.uptime_minutes + 'm';
+    document.getElementById('kpi-uptime').textContent     = uptimeStr.trim() || '< 1m';
+    document.getElementById('kpi-uptime-sub').textContent = 'desde el último reinicio';
+
+    // DB
+    document.getElementById('db-total').textContent    = db.total;
+    document.getElementById('db-abiertos').textContent = db.abiertos;
+    document.getElementById('db-proximos').textContent = db.proximos;
+    document.getElementById('db-cerrados').textContent = db.cerrados;
+
+    // Última actualización
+    document.getElementById('last-update-ts').textContent = data.timestamp;
+    document.getElementById('last-refresh').textContent   = 'Actualizado a las ' + data.timestamp;
+}
+
+function renderLogs(logs) {
+    const container = document.getElementById('log-container');
+    if (!logs || logs.length === 0) {
+        container.innerHTML = '<div class="text-center py-4" style="color:#8b949e;">Sin registros para mostrar</div>';
+        return;
+    }
+    container.innerHTML = logs.map(l => {
+        const cls = 'log-' + l.level;
+        const text = l.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return `<div class="log-line ${cls}">${text}</div>`;
+    }).join('');
+}
+
+async function refresh() {
+    const nivel = document.getElementById('log-nivel').value;
+    const n     = document.getElementById('log-n').value;
+    try {
+        const res  = await fetch(`${API_URL}?nivel=${nivel}&n=${n}`);
+        const data = await res.json();
+        renderStats(data);
+        renderLogs(data.logs);
+    } catch(e) {
+        document.getElementById('last-refresh').textContent = 'Error al cargar: ' + e.message;
+    }
+}
+
+function startAutoRefresh() {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(refresh, 15000);  // cada 15 s
+}
+
+document.getElementById('btn-refresh').addEventListener('click', refresh);
+document.getElementById('auto-refresh').addEventListener('change', function() {
+    if (this.checked) startAutoRefresh(); else clearInterval(autoRefreshTimer);
+});
+document.getElementById('log-nivel').addEventListener('change', refresh);
+document.getElementById('log-n').addEventListener('change', refresh);
+document.getElementById('btn-scroll-top').addEventListener('click', () => {
+    document.getElementById('log-container').scrollTop = 0;
+});
+
+// Cargar versión Python
+document.getElementById('py-version').textContent =
+    '{{ "Python " + (range(3)|list|string) }}' || '3.x';
+
+// Arrancar
+refresh();
+startAutoRefresh();
+</script>
+{% endblock %}
