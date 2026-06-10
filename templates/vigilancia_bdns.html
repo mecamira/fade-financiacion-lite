@@ -369,6 +369,13 @@ async function vbBuscar(page = 0) {
   const size  = document.getElementById('vb-size').value;
   vbLastVpd = document.getElementById('vb-vpd').value;
 
+  // La API BDNS exige fechas en DD/MM/YYYY; el <input type="date"> da YYYY-MM-DD
+  function vbFecha(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
   try {
     let data;
 
@@ -376,9 +383,9 @@ async function vbBuscar(page = 0) {
       // Búsqueda combinada: cámaras de comercio asturianas + entidades locales
       const qs = new URLSearchParams({ page, pageSize: size });
       if (texto) qs.set('descripcion', texto);
-      if (bdns)  qs.set('numConv', bdns);
-      if (desde) qs.set('fechaDesde', desde);
-      if (hasta) qs.set('fechaHasta', hasta);
+      if (bdns)  qs.set('numeroConvocatoria', bdns);
+      if (desde) qs.set('fechaDesde', vbFecha(desde));
+      if (hasta) qs.set('fechaHasta', vbFecha(hasta));
       const res = await fetch(`/api/bdns-asturias-extended?${qs}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       data = await res.json();
@@ -386,9 +393,10 @@ async function vbBuscar(page = 0) {
       // Búsqueda estándar con filtro de Asturias
       const params = { vpd: vbLastVpd, page, pageSize: size, order: 'fechaRecepcion', direccion: 'desc', nivel2: 'PRINCIPADO DE ASTURIAS' };
       if (texto) params.descripcion = texto;
-      if (bdns)  params.numConv = bdns;
-      if (desde) params.fechaDesde = desde;
-      if (hasta) params.fechaHasta = hasta;
+      // El endpoint de búsqueda filtra por 'numeroConvocatoria' (numConv solo funciona en el detalle)
+      if (bdns)  params.numeroConvocatoria = bdns;
+      if (desde) params.fechaDesde = vbFecha(desde);
+      if (hasta) params.fechaHasta = vbFecha(hasta);
       data = await vbProxy('convocatorias/busqueda', params);
     }
 

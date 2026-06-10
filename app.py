@@ -761,7 +761,7 @@ def bdns_asturias_extended():
         'pageSize':   100,
         'fechaDesde': fecha_desde,
     }
-    for arg in ('fechaHasta', 'descripcion', 'numConv'):
+    for arg in ('fechaHasta', 'descripcion', 'numeroConvocatoria'):
         val = request.args.get(arg)
         if val:
             base[arg] = to_bdns_date(val) if arg == 'fechaHasta' else val
