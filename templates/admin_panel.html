@@ -173,6 +173,10 @@
                     <a href="{{ url_for('analizar_compatibilidad') }}" class="btn btn-outline-secondary btn-sm text-start">
                         <i class="fas fa-check-circle me-2"></i>Analizar compatibilidad
                     </a>
+                    <button type="button" id="btn-monitor-concesiones" class="btn btn-outline-dark btn-sm text-start">
+                        <i class="fas fa-gavel me-2"></i>Comprobar concesiones BDNS ahora
+                    </button>
+                    <div id="monitor-concesiones-result" class="small text-muted" style="display:none;"></div>
                     <hr class="my-1">
                     <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger btn-sm text-start">
                         <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión admin
@@ -300,6 +304,37 @@ document.getElementById('log-nivel').addEventListener('change', refresh);
 document.getElementById('log-n').addEventListener('change', refresh);
 document.getElementById('btn-scroll-top').addEventListener('click', () => {
     document.getElementById('log-container').scrollTop = 0;
+});
+
+// Monitor de concesiones BDNS (manual)
+document.getElementById('btn-monitor-concesiones').addEventListener('click', async function() {
+    const resultEl = document.getElementById('monitor-concesiones-result');
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Consultando BDNS…';
+    resultEl.style.display = 'none';
+    try {
+        const res  = await fetch('/api/admin/ejecutar-monitor-concesiones', { method: 'POST' });
+        const data = await res.json();
+        resultEl.style.display = 'block';
+        if (data.success) {
+            resultEl.className = 'small ' + (data.resueltas.length ? 'text-success fw-semibold' : 'text-muted');
+            resultEl.textContent = data.mensaje;
+            if (data.resueltas.length) {
+                resultEl.textContent += ': ' + data.resueltas.map(r => r.nombre).join(', ');
+            }
+        } else {
+            resultEl.className = 'small text-danger';
+            resultEl.textContent = 'Error: ' + data.error;
+        }
+    } catch(e) {
+        resultEl.style.display = 'block';
+        resultEl.className = 'small text-danger';
+        resultEl.textContent = 'Error: ' + e.message;
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-gavel me-2"></i>Comprobar concesiones BDNS ahora';
+        refresh();
+    }
 });
 
 // Cargar versión Python

@@ -1336,7 +1336,11 @@
                 
                 // Estado de la convocatoria (badge)
                 const badge = card.querySelector('.badge');
-                if (programa.convocatoria && programa.convocatoria.estado) {
+                if (programa.resuelta) {
+                    badge.innerHTML = '<i class="fas fa-gavel me-1"></i>Resuelta';
+                    badge.classList.add('bg-dark');
+                    badge.title = 'Concesiones publicadas en BDNS';
+                } else if (programa.convocatoria && programa.convocatoria.estado) {
                     badge.textContent = programa.convocatoria.estado;
 
                     if (programa.convocatoria.estado.includes('Cierre próximo')) {
@@ -1795,6 +1799,9 @@
             }
 
             function estadoBadge(p) {
+                if (p.resuelta) {
+                    return '<span class="badge bg-dark" style="font-size:0.7rem;" title="Concesiones publicadas en BDNS"><i class="fas fa-gavel me-1"></i>Resuelta</span>';
+                }
                 const estado = (p.convocatoria?.estado || 'Sin estado');
                 const e = estado.toLowerCase();
                 let cls = 'bg-secondary';

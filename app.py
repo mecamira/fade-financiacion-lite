@@ -950,6 +950,26 @@ def panel_servidor():
     return render_template('admin_panel.html')
 
 
+@app.route('/api/admin/ejecutar-monitor-concesiones', methods=['POST'])
+@login_required
+def ejecutar_monitor_concesiones():
+    """Lanza manualmente una pasada del monitor de concesiones BDNS."""
+    try:
+        from utils.concesiones_monitor import ejecutar_monitor
+        resueltas = ejecutar_monitor()
+        return jsonify({
+            'success': True,
+            'resueltas': [{'nombre': r['nombre'], 'codigo_bdns': r['codigo_bdns'],
+                           'total_concesiones': r['total_concesiones']} for r in resueltas],
+            'mensaje': (f"{len(resueltas)} convocatoria(s) resuelta(s) detectada(s)"
+                        if resueltas else "Ninguna convocatoria nueva resuelta"),
+        })
+    except Exception as e:
+        logger.error(f"Error en monitor de concesiones: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/admin/panel-stats')
 @login_required
 def panel_stats_api():
