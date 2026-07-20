@@ -41,8 +41,9 @@ services:
     environment:
       - SE_NODE_MAX_SESSIONS=5
       - SE_NODE_SESSION_TIMEOUT=300
-    ports:
-      - "4444:4444"
+    # SEGURIDAD: no publicar el puerto 4444 al exterior. La app Flask accede
+    # a Selenium por la red interna de Docker (http://selenium:4444). Tenerlo
+    # público permitió un RCE (cryptominero) en julio de 2026.
     networks:
       - fade-network
     healthcheck:
