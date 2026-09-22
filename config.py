@@ -21,6 +21,7 @@ class Config:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     
     # Autenticación admin
+    ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME') or 'admin'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'changeme'
     
     # Selenium (para scraping BDNS)
@@ -59,6 +60,7 @@ class ProductionConfig(Config):
         # Validar variables críticas
         assert os.environ.get('SECRET_KEY'), 'SECRET_KEY no está configurada'
         assert os.environ.get('GEMINI_API_KEY'), 'GEMINI_API_KEY no está configurada'
+        assert os.environ.get('ADMIN_USERNAME'), 'ADMIN_USERNAME no está configurada'
         assert os.environ.get('ADMIN_PASSWORD'), 'ADMIN_PASSWORD no está configurada'
 
 

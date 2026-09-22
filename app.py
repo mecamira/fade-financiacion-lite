@@ -11,7 +11,9 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from functools import wraps
 import os
 import json
+import hmac
 from datetime import datetime
+from urllib.parse import urlparse, urljoin
 import logging
 import traceback
 
@@ -99,23 +101,42 @@ def login_required(f):
 # RUTAS DE AUTENTICACIÓN
 # ============================================================================
 
+def _is_safe_redirect(url):
+    """Valida que la URL de redirección sea relativa al mismo host."""
+    ref = urlparse(request.host_url)
+    test = urlparse(urljoin(request.host_url, url))
+    return test.scheme in ('http', 'https') and ref.netloc == test.netloc
+
+
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     """Login para administradores"""
     if request.method == 'POST':
-        password = request.form.get('password')
-        
-        if password == app.config['ADMIN_PASSWORD']:
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+
+        valid_user = hmac.compare_digest(
+            username.encode('utf-8'),
+            app.config['ADMIN_USERNAME'].encode('utf-8')
+        )
+        valid_pass = hmac.compare_digest(
+            password.encode('utf-8'),
+            app.config['ADMIN_PASSWORD'].encode('utf-8')
+        )
+
+        if valid_user and valid_pass:
             session['admin_logged_in'] = True
             session.permanent = True
             logger.info("Admin login exitoso")
-            
+
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('gestionar_convocatorias'))
+            if next_page and _is_safe_redirect(next_page):
+                return redirect(next_page)
+            return redirect(url_for('gestionar_convocatorias'))
         else:
-            logger.warning("Intento de login fallido")
-            return render_template('admin_login.html', error="Contraseña incorrecta")
-    
+            logger.warning("Intento de login fallido para usuario: %s", username)
+            return render_template('admin_login.html', error="Usuario o contraseña incorrectos")
+
     return render_template('admin_login.html')
 
 
