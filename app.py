@@ -29,6 +29,12 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Endurecer la cookie de sesión (SESSION_COOKIE_SECURE queda pendiente hasta
+# activar HTTPS: con Secure=True el navegador dejaría de enviar la cookie
+# sobre HTTP y nadie podría iniciar sesión)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # ============================================================================
 # FILTROS PERSONALIZADOS DE JINJA2
 # ============================================================================
@@ -101,22 +107,44 @@ def login_required(f):
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
-    """Login para administradores"""
+    """Login para administradores (usuario + contraseña hasheada, con rate limiting)"""
+    from utils import admin_auth
+
+    ip = request.headers.get('X-Real-IP') or request.remote_addr or 'desconocida'
+
     if request.method == 'POST':
-        password = request.form.get('password')
-        
-        if password == app.config['ADMIN_PASSWORD']:
+        # Bloqueo temporal tras demasiados intentos fallidos
+        restante = admin_auth.comprobar_bloqueo(ip)
+        if restante > 0:
+            minutos = max(1, restante // 60)
+            logger.warning(f"Login bloqueado por rate limit — IP: {ip}")
+            return render_template(
+                'admin_login.html',
+                error=f"Demasiados intentos fallidos. Inténtalo de nuevo en {minutos} minuto(s)."
+            )
+
+        username = (request.form.get('username') or '').strip()
+        password = request.form.get('password') or ''
+
+        nombre = admin_auth.verify_credentials(username, password)
+        if nombre:
+            admin_auth.limpiar_intentos(ip)
+            session.clear()
             session['admin_logged_in'] = True
+            session['admin_username'] = nombre
             session.permanent = True
-            logger.info("Admin login exitoso")
-            
+            logger.info(f"Admin login exitoso — usuario: {username} — IP: {ip}")
+
             next_page = request.args.get('next')
             return redirect(next_page or url_for('gestionar_convocatorias'))
         else:
-            logger.warning("Intento de login fallido")
-            return render_template('admin_login.html', error="Contraseña incorrecta")
-    
-    return render_template('admin_login.html')
+            admin_auth.registrar_intento_fallido(ip)
+            logger.warning(f"Intento de login fallido — usuario: {username!r} — IP: {ip}")
+            return render_template('admin_login.html', error="Usuario o contraseña incorrectos",
+                                   sin_usuarios=not admin_auth.hay_usuarios_configurados())
+
+    return render_template('admin_login.html',
+                           sin_usuarios=not admin_auth.hay_usuarios_configurados())
 
 
 @app.route('/admin/logout')

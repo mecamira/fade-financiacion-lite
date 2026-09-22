@@ -221,10 +221,33 @@
             </div>
             {% endif %}
 
+            {% if sin_usuarios %}
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-tools"></i>
+                <strong>Sin usuarios configurados.</strong> Ejecuta en el servidor:
+                <code class="d-block mt-1">docker compose exec flask-app python scripts/crear_admin_user.py</code>
+            </div>
+            {% endif %}
+
             <form method="POST" action="{{ url_for('admin_login') }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user"></i> Usuario
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control form-control-lg"
+                        id="username"
+                        name="username"
+                        placeholder="Tu nombre de usuario"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    >
+                </div>
                 <div class="mb-4">
                     <label for="password" class="form-label">
-                        <i class="fas fa-key"></i> Contraseña de Administrador
+                        <i class="fas fa-key"></i> Contraseña
                     </label>
                     <input
                         type="password"
@@ -232,8 +255,8 @@
                         id="password"
                         name="password"
                         placeholder="Introduce tu contraseña"
+                        autocomplete="current-password"
                         required
-                        autofocus
                     >
                 </div>
 

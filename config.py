@@ -20,8 +20,10 @@ class Config:
     # Google Gemini AI
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     
-    # Autenticación admin
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'changeme'
+    # Autenticación admin: usuarios individuales con contraseña hasheada,
+    # gestionados con scripts/crear_admin_user.py (ver utils/admin_auth.py).
+    # ADMIN_PASSWORD ya no se usa para autenticar; se mantiene solo por
+    # compatibilidad con despliegues antiguos que aún la definan en .env.
     
     # Selenium (para scraping BDNS)
     SELENIUM_REMOTE_URL = os.environ.get('SELENIUM_REMOTE_URL') or 'http://selenium:4444/wd/hub'
@@ -59,7 +61,6 @@ class ProductionConfig(Config):
         # Validar variables críticas
         assert os.environ.get('SECRET_KEY'), 'SECRET_KEY no está configurada'
         assert os.environ.get('GEMINI_API_KEY'), 'GEMINI_API_KEY no está configurada'
-        assert os.environ.get('ADMIN_PASSWORD'), 'ADMIN_PASSWORD no está configurada'
 
 
 # Diccionario de configuraciones
