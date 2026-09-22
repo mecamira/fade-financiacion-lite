@@ -43,8 +43,10 @@ class CompatibilityAnalyzer:
         
         # Configurar cliente de Gemini
         genai.configure(api_key=self.api_key)
-        # Usar el modelo Gemini 3.5 Flash (GA)
-        self.model_name = "models/gemini-3.5-flash"
+        # Usar Gemini 2.5 Flash (modelo estable/GA, cuota gratuita mucho más
+        # amplia que las versiones 3.x recién publicadas, que arrancan con
+        # solo 20 peticiones/día en el tier gratuito)
+        self.model_name = "models/gemini-2.5-flash"
         self.model = genai.GenerativeModel(self.model_name)
         print(f"Usando el modelo: {self.model_name}")
         
