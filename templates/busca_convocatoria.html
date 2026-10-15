@@ -37,7 +37,18 @@
     .bc-motivos .aviso { color: #975a16; }
     .bc-motivos .aviso i { color: #d69e2e; }
     .bc-afinidad { font-size: 0.72rem; font-weight: 600; letter-spacing: .03em; }
-    details.bc-plegable > summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
+    .bc-chip {
+        display: inline-block; max-width: 100%; white-space: normal; text-align: left;
+        padding: 2px 8px; font-size: 0.75rem; line-height: 1.35;
+        border: 1px solid var(--color-neutral-300, #cbd5e0); border-radius: 6px;
+        color: var(--color-neutral-800, #2d3748); background: #fff;
+    }
+    .bc-tabs .nav-link {
+        font-weight: 600; margin: 0 .5rem .5rem 0;
+        border: 1px solid var(--color-neutral-300, #cbd5e0); color: var(--color-neutral-800, #2d3748); background: #fff;
+    }
+    .bc-tabs .nav-link:hover { border-color: var(--color-primary-500, #0078bf); }
+    .bc-tabs .nav-link.active { background: var(--color-primary-500, #0078bf); border-color: var(--color-primary-500, #0078bf); color: #fff; }
 </style>
 {% endblock %}
 
@@ -66,11 +77,13 @@
             {% if r.resumen %}<p class="small mb-2" style="color: var(--color-neutral-700, #4a5568);">{{ r.resumen | truncate(230) }}</p>{% endif %}
 
             <div class="d-flex flex-wrap gap-1 mb-2">
-                {% if r.tipo_ayuda %}<span class="badge badge-outline-neutral border text-dark fw-normal">{{ r.tipo_ayuda }}</span>{% endif %}
-                {% if r.ambito %}<span class="badge badge-outline-neutral border text-dark fw-normal">{{ r.ambito }}</span>{% endif %}
-                {% if r.presupuesto %}<span class="badge badge-outline-neutral border text-dark fw-normal">Presupuesto: {{ r.presupuesto | format_importe }}</span>{% endif %}
-                {% if r.intensidad and r.intensidad != 'nan' %}<span class="badge badge-outline-neutral border text-dark fw-normal">Intensidad: {{ r.intensidad }}</span>{% endif %}
+                {% if r.tipo_ayuda %}<span class="bc-chip">{{ r.tipo_ayuda }}</span>{% endif %}
+                {% if r.ambito %}<span class="bc-chip">{{ r.ambito }}</span>{% endif %}
+                {% if r.presupuesto %}<span class="bc-chip">Presupuesto: {{ r.presupuesto | format_importe }}</span>{% endif %}
             </div>
+            {% if r.intensidad and r.intensidad != 'nan' %}
+            <div class="small text-muted mb-2"><i class="fas fa-percentage me-1"></i>Intensidad: {{ r.intensidad | truncate(150) }}</div>
+            {% endif %}
 
             <ul class="bc-motivos mb-3">
                 {% for m in r.motivos %}<li class="ok"><i class="fas fa-check-circle me-1"></i>{{ m }}</li>{% endfor %}
@@ -201,34 +214,43 @@
         {% if not n_rec and not n_rev %}
         <div class="card text-center p-4 mb-4">
             <i class="fas fa-search fa-2x text-muted mb-2"></i>
-            <p class="mb-2">Prueba a <strong>quitar el sector o el tipo de proyecto</strong>, o a mirar abajo las <strong>convocatorias cerradas</strong>, que suelen repetirse cada año.</p>
+            <p class="mb-2">Prueba a <strong>quitar el sector o el tipo de proyecto</strong>, o a mirar las pestañas de abajo (<strong>convocatorias cerradas</strong>, que suelen repetirse cada año, u otros tipos de proyecto).</p>
             <div><a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-sm">Ver todas las convocatorias</a></div>
         </div>
         {% endif %}
 
-        {% if n_rec %}
-        <h4 class="mb-3"><i class="fas fa-check-circle text-success me-2"></i>Encajan con tu perfil <span class="badge bg-success">{{ n_rec }}</span></h4>
-        <div class="row">{% for r in resultado.recomendadas %}{{ tarjeta(r) }}{% endfor %}</div>
-        {% endif %}
+        {% set grupos = [
+            {'id': 'rec', 'titulo': 'Encajan con tu perfil', 'icono': 'fa-check-circle', 'lista': resultado.recomendadas,
+             'nota': ''},
+            {'id': 'rev', 'titulo': 'Revisa las bases', 'icono': 'fa-search-plus', 'lista': resultado.revisar,
+             'nota': 'Tu figura no aparece expresamente, no indican a quién van dirigidas o son de un municipio concreto.'},
+            {'id': 'otro', 'titulo': 'Otro tipo de proyecto', 'icono': 'fa-random', 'lista': resultado.otro_proyecto,
+             'nota': 'Abiertas y dirigidas a tu perfil, pero pensadas para un tipo de proyecto distinto del que has marcado.'},
+            {'id': 'cer', 'titulo': 'Cerradas', 'icono': 'fa-history', 'lista': resultado.cerradas,
+             'nota': 'Plazo cerrado. Muchas se repiten cada año: vigila la próxima edición.'},
+        ] %}
+        {% set visibles = grupos | selectattr('lista') | list %}
 
-        {% if n_rev %}
-        <h4 class="mb-1 mt-3"><i class="fas fa-search-plus text-warning me-2"></i>Pueden encajar: revisa las bases <span class="badge bg-warning text-dark">{{ n_rev }}</span></h4>
-        <p class="small text-muted">Tu figura no aparece expresamente, no indican a quién van dirigidas o son de un municipio concreto.</p>
-        <div class="row">{% for r in resultado.revisar %}{{ tarjeta(r) }}{% endfor %}</div>
-        {% endif %}
-
-        {% if resultado.otro_proyecto %}
-        <details class="bc-plegable mt-3">
-            <summary>Otras convocatorias para tu perfil, con otro tipo de proyecto ({{ resultado.otro_proyecto | length }})</summary>
-            <div class="row mt-2">{% for r in resultado.otro_proyecto %}{{ tarjeta(r) }}{% endfor %}</div>
-        </details>
-        {% endif %}
-
-        {% if resultado.cerradas %}
-        <details class="bc-plegable mt-2">
-            <summary>Cerradas: pueden volver en la próxima edición ({{ resultado.cerradas | length }})</summary>
-            <div class="row mt-2">{% for r in resultado.cerradas %}{{ tarjeta(r) }}{% endfor %}</div>
-        </details>
+        {% if visibles %}
+        <ul class="nav nav-pills bc-tabs mb-3" id="bc-tabs" role="tablist">
+            {% for g in visibles %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ g.id }}" data-bs-toggle="pill" data-bs-target="#pane-{{ g.id }}"
+                        type="button" role="tab" aria-controls="pane-{{ g.id }}" aria-selected="{{ 'true' if loop.first else 'false' }}">
+                    <i class="fas {{ g.icono }} me-1"></i>{{ g.titulo }} <span class="badge bg-light text-dark ms-1">{{ g.lista | length }}</span>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="tab-content">
+            {% for g in visibles %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="pane-{{ g.id }}" role="tabpanel" aria-labelledby="tab-{{ g.id }}" tabindex="0">
+                {% if g.nota %}<p class="small text-muted">{{ g.nota }}</p>{% endif %}
+                <div class="row">{% for r in g.lista %}{{ tarjeta(r) }}{% endfor %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <noscript><style>.tab-content > .tab-pane { display: block !important; opacity: 1 !important; }</style></noscript>
         {% endif %}
 
         <p class="small text-muted mt-4 mb-0">
