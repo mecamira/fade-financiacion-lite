@@ -981,16 +981,52 @@ def panel_servidor():
 @app.route('/api/admin/ejecutar-monitor-concesiones', methods=['POST'])
 @login_required
 def ejecutar_monitor_concesiones():
-    """Lanza manualmente una pasada del monitor de concesiones BDNS."""
+    """
+    Lanza manualmente una pasada del monitor de concesiones BDNS.
+
+    La pasada se ejecuta en segundo plano: con ~57 convocatorias y 2 s de
+    pausa entre llamadas dura más de 2 minutos, más de lo que Gunicorn
+    (timeout 120 s) deja vivir a una petición. Se responde enseguida con lo
+    que se va a hacer; el resultado queda en el panel de registros y, si hay
+    convocatorias resueltas, llega por Telegram.
+    """
     try:
-        from utils.concesiones_monitor import ejecutar_monitor
-        resueltas = ejecutar_monitor()
+        import threading
+        from utils import concesiones_monitor as monitor
+
+        body = request.get_json(silent=True) or {}
+        forzar = bool(body.get('forzar'))
+
+        plan = monitor.planificar(forzar)
+        if 'error' in plan:
+            return jsonify({'success': False, 'error': plan['error']}), 500
+
+        horas = monitor.INTERVALO_MIN_HORAS
+        if plan['ocupado']:
+            mensaje = "Ya hay una comprobación en curso. Mira el panel de registros para ver cuándo termina."
+        elif plan['a_comprobar'] == 0:
+            ultima = plan['ultima_comprobacion']
+            cuando = ultima.strftime('%d/%m a las %H:%M') + ' UTC' if ultima else 'nunca'
+            mensaje = (f"Nada que comprobar ahora: las {plan['omitidas']} convocatorias sin resolver "
+                       f"ya se comprobaron hace menos de {horas} h (última comprobación: {cuando}). "
+                       f"La comprobación automática diaria se ejecuta a las 08:00 UTC. "
+                       f"Marca «Ignorar el límite» para forzar una comprobación completa.")
+        else:
+            segundos = plan['a_comprobar'] * (monitor.PAUSA_ENTRE_LLAMADAS + 0.3)
+            mensaje = (f"Comprobación iniciada en segundo plano: {plan['a_comprobar']} convocatorias "
+                       f"(unos {int(segundos)} s). "
+                       + (f"{plan['omitidas']} omitidas por haberse comprobado hace menos de {horas} h. "
+                          if plan['omitidas'] else "")
+                       + "El resultado aparecerá en el panel de registros y, si hay novedades, por Telegram.")
+            threading.Thread(target=monitor.ejecutar_monitor, kwargs={'forzar': forzar},
+                             daemon=True).start()
+
         return jsonify({
             'success': True,
-            'resueltas': [{'nombre': r['nombre'], 'codigo_bdns': r['codigo_bdns'],
-                           'total_concesiones': r['total_concesiones']} for r in resueltas],
-            'mensaje': (f"{len(resueltas)} convocatoria(s) resuelta(s) detectada(s)"
-                        if resueltas else "Ninguna convocatoria nueva resuelta"),
+            'iniciada': plan['a_comprobar'] > 0 and not plan['ocupado'],
+            'a_comprobar': plan['a_comprobar'],
+            'omitidas': plan['omitidas'],
+            'mensaje': mensaje,
         })
     except Exception as e:
         logger.error(f"Error en monitor de concesiones: {e}")
