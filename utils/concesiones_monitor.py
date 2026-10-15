@@ -170,6 +170,15 @@ def consultar_concesiones(codigo_bdns, vpd='GE'):
 # NOTIFICACIONES TELEGRAM
 # ============================================================================
 
+def _md(texto):
+    """Escapa los caracteres con significado en Markdown de Telegram (un '_' o '*'
+    sueltos en el nombre de una convocatoria hacen que Telegram rechace el mensaje)."""
+    s = str(texto)
+    for ch in ('\\', '_', '*', '[', '`'):
+        s = s.replace(ch, '\\' + ch)
+    return s
+
+
 def _enviar_telegram(texto):
     """Envía un mensaje por Telegram. False si no está configurado o falla."""
     token = os.environ.get('TELEGRAM_BOT_TOKEN')
@@ -195,7 +204,7 @@ def notificar_telegram(resueltas):
     lineas = ["🔔 *Convocatorias resueltas detectadas*", ""]
     for r in resueltas:
         importe_total = sum(c.get('importe') or 0 for c in r['concesiones'])
-        lineas.append(f"✅ *{r['nombre']}*")
+        lineas.append(f"✅ *{_md(r['nombre'])}*")
         lineas.append(f"   BDNS {r['codigo_bdns']} · {r['total_concesiones']} concesiones"
                       + (f" · {importe_total:,.0f} €".replace(',', '.') if importe_total else ""))
         lineas.append("")
@@ -217,6 +226,43 @@ def notificar_fallo(comprobadas, errores):
     )
     if ok:
         logger.info("Aviso de fallo enviado por Telegram")
+    return ok
+
+
+def resumen_semanal():
+    """
+    Resumen corto semanal por Telegram. Sirve también de "latido": si el monitor
+    dejara de ejecutarse, este mensaje lo avisa en lugar de callar.
+    """
+    data, programas = _cargar(_json_path())
+    if programas is None:
+        return False
+
+    ahora = datetime.now()
+    vigiladas = [p for p in programas if _normalizar_bdns(p.get('codigo_bdns')) and not p.get('resuelta')]
+    resueltas = [p for p in programas if p.get('resuelta')]
+    esta_semana = [p for p in resueltas
+                   if (_parse_fecha(p.get('fecha_resolucion_detectada')) or datetime.min) >= ahora - timedelta(days=7)]
+    sellos = [_parse_fecha(p.get('ultima_comprobacion_concesiones')) for p in vigiladas]
+    ultima = max((s for s in sellos if s), default=None)
+
+    lineas = ["📊 *Resumen semanal — monitor de concesiones*", ""]
+    if ultima is None or ahora - ultima > timedelta(hours=48):
+        desde = ultima.strftime('%d/%m %H:%M') + ' UTC' if ultima else 'nunca'
+        lineas += [f"⚠️ *Ojo:* el monitor no ha comprobado nada desde {desde}. Revisa el cron del servidor.", ""]
+    lineas += [
+        f"• Convocatorias vigiladas: {len(vigiladas)}",
+        f"• Resueltas esta semana: {len(esta_semana)}",
+        f"• Resueltas en total: {len(resueltas)}",
+    ]
+    if ultima:
+        lineas.append(f"• Última comprobación: {ultima.strftime('%d/%m %H:%M')} UTC")
+    for p in esta_semana:
+        lineas.append(f"   ✅ {_md(p.get('nombre_coloquial') or p.get('nombre') or p.get('codigo_bdns'))}")
+
+    ok = _enviar_telegram('\n'.join(lineas))
+    if ok:
+        logger.info("Resumen semanal enviado por Telegram")
     return ok
 
 
@@ -383,6 +429,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Monitor de concesiones BDNS')
     parser.add_argument('--forzar', action='store_true',
                         help=f'ignora el límite de {INTERVALO_MIN_HORAS} h y comprueba todas las convocatorias sin resolver')
+    parser.add_argument('--resumen', action='store_true',
+                        help='envía el resumen semanal por Telegram en lugar de hacer una pasada')
     args = parser.parse_args()
-    ejecutar_monitor(forzar=args.forzar)
+    if args.resumen:
+        resumen_semanal()
+    else:
+        ejecutar_monitor(forzar=args.forzar)
     sys.exit(0)
