@@ -12,6 +12,19 @@ class Config:
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
+
+    # Cookie de sesión solo por HTTPS. Activar (SESSION_COOKIE_SECURE=1 en .env)
+    # únicamente cuando el sitio ya se sirva por HTTPS: si no, el navegador no
+    # envía la cookie y nadie puede iniciar sesión.
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '0') == '1'
+
+    # Acceso de socios desde la zona privada de fade.es (ver utils/acceso_socios.py).
+    # SOCIOS_JWT_SECRET: clave compartida con la web de fade.es.
+    # SOCIOS_ACCESO_OBLIGATORIO=1 exige sesión de socio (o de admin) en todas las
+    # páginas; mientras sea 0 la herramienta sigue abierta como hasta ahora.
+    SOCIOS_JWT_SECRET = os.environ.get('SOCIOS_JWT_SECRET', '')
+    SOCIOS_ACCESO_OBLIGATORIO = os.environ.get('SOCIOS_ACCESO_OBLIGATORIO', '0') == '1'
+    SOCIOS_LOGIN_URL = os.environ.get('SOCIOS_LOGIN_URL') or 'https://fade.es/login/'
     
     # Base de datos (JSON file)
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))

@@ -29,9 +29,14 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Endurecer la cookie de sesión (SESSION_COOKIE_SECURE queda pendiente hasta
-# activar HTTPS: con Secure=True el navegador dejaría de enviar la cookie
-# sobre HTTP y nadie podría iniciar sesión)
+# La app va detrás de nginx en el mismo servidor: tomar la IP y el esquema
+# (http/https) de sus cabeceras. Solo es seguro porque el puerto 8000 se publica
+# únicamente en 127.0.0.1 (docker-compose.yml) y nadie más puede falsearlas.
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+# Endurecer la cookie de sesión (SESSION_COOKIE_SECURE se activa desde .env
+# cuando el sitio ya va por HTTPS; ver config.py)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -152,6 +157,54 @@ def admin_logout():
     """Cerrar sesión de administrador"""
     session.pop('admin_logged_in', None)
     logger.info("Admin logout")
+    return redirect(url_for('dashboard'))
+
+
+# ============================================================================
+# ACCESO DE SOCIOS (enlace firmado desde la zona privada de fade.es)
+# ============================================================================
+
+# Rutas accesibles sin sesión de socio aunque el acceso sea obligatorio
+RUTAS_SIN_SESION_SOCIO = {'acceso_socios', 'admin_login', 'admin_logout', 'health_check', 'static'}
+
+
+@app.before_request
+def exigir_sesion_socio():
+    """Con SOCIOS_ACCESO_OBLIGATORIO=1, solo entran socios (vía /acceso) y admins"""
+    if not app.config['SOCIOS_ACCESO_OBLIGATORIO']:
+        return None
+    if request.endpoint in RUTAS_SIN_SESION_SOCIO:
+        return None
+    if session.get('socio_id') or session.get('admin_logged_in'):
+        return None
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Sesión caducada. Accede desde la zona privada de fade.es.'}), 401
+    return redirect(app.config['SOCIOS_LOGIN_URL'])
+
+
+@app.route('/acceso')
+def acceso_socios():
+    """Entrada desde la zona privada de fade.es con un token firmado (JWT)"""
+    import tempfile
+    from utils import acceso_socios as acceso
+
+    ip = request.headers.get('X-Real-IP') or request.remote_addr or 'desconocida'
+    try:
+        socio_id = acceso.validar_token(
+            request.args.get('token', ''),
+            app.config['SOCIOS_JWT_SECRET'],
+            # Registro de tokens usados: basta con que dure lo que un token (2 min),
+            # y /tmp del contenedor siempre es escribible y común a los workers
+            tempfile.gettempdir(),
+        )
+    except acceso.TokenInvalido as e:
+        logger.warning(f"Acceso de socio rechazado — {e} — IP: {ip}")
+        return redirect(app.config['SOCIOS_LOGIN_URL'])
+
+    session.clear()
+    session['socio_id'] = socio_id
+    session.permanent = True
+    logger.info(f"Acceso de socio — id: {socio_id} — IP: {ip}")
     return redirect(url_for('dashboard'))
 
 
