@@ -711,6 +711,28 @@ def eliminar_programa(programa_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/api/programa/<programa_id>/datos-manuales', methods=['PUT'])
+def guardar_datos_manuales(programa_id):
+    """Ampliaciones de crédito y resoluciones registradas a mano (solo administración)"""
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'error': 'Sesión de administración caducada. Vuelve a entrar.'}), 401
+    datos = request.get_json(silent=True) or {}
+    try:
+        programa = financing_dashboard.guardar_datos_manuales(
+            programa_id, datos.get('ampliaciones_credito'), datos.get('resoluciones_manuales'),
+            session.get('admin_username') or 'admin')
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Error al guardar datos manuales de {programa_id}: {e}")
+        return jsonify({'success': False, 'error': 'Error interno al guardar'}), 500
+    if programa is None:
+        return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404
+    logger.info(f"Datos manuales de {programa_id} actualizados por {session.get('admin_username')}")
+    return jsonify({'success': True, 'ampliaciones_credito': programa['ampliaciones_credito'],
+                    'resoluciones_manuales': programa['resoluciones_manuales']})
+
+
 # ============================================================================
 # MÓDULO 3: ANÁLISIS DE COMPATIBILIDAD
 # ============================================================================

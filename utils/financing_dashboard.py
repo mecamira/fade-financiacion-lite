@@ -719,6 +719,106 @@ def get_programa_by_id(programa_id):
     """Obtiene un programa por su ID (alias para compatibilidad)"""
     return get_financing_program_by_id(programa_id)
 
+# Campos que no edita el formulario de convocatorias y que deben sobrevivir a un guardado
+CAMPOS_PROTEGIDOS = ('ultima_comprobacion_concesiones', 'resuelta', 'fecha_resolucion_detectada',
+                     'concesiones', 'total_concesiones',
+                     'ampliaciones_credito', 'resoluciones_manuales')
+
+TIPOS_RESOLUCION = ('provisional', 'definitiva', 'otra')
+
+
+def _numero(valor, entero=False):
+    """Número >= 0 desde texto o número (acepta coma decimal). None si vacío; ValueError si no vale."""
+    if valor is None or str(valor).strip() == '':
+        return None
+    texto = str(valor).strip()
+    if ',' in texto:
+        texto = texto.replace('.', '').replace(',', '.')
+    try:
+        n = float(texto)
+    except ValueError:
+        raise ValueError(f"'{valor}' no es un número válido")
+    if n < 0 or n != n:
+        raise ValueError('Los importes no pueden ser negativos')
+    return int(n) if entero else round(n, 2)
+
+
+def _fecha_iso(valor):
+    try:
+        return datetime.strptime(str(valor or '')[:10], '%Y-%m-%d').strftime('%Y-%m-%d')
+    except ValueError:
+        raise ValueError('Fecha no válida (se espera AAAA-MM-DD)')
+
+
+def _enlace(valor):
+    v = (valor or '').strip()
+    if v and not v.lower().startswith(('http://', 'https://')):
+        raise ValueError('El enlace debe empezar por http:// o https://')
+    return v[:500]
+
+
+def _normalizar_ampliacion(r):
+    importe = _numero(r.get('importe'))
+    if not importe:
+        raise ValueError('Cada ampliación necesita un importe mayor que 0')
+    return {'id': str(r.get('id') or ''), 'fecha': _fecha_iso(r.get('fecha')), 'importe': importe,
+            'nota': (r.get('nota') or '').strip()[:500], 'enlace': _enlace(r.get('enlace'))}
+
+
+def _normalizar_resolucion(r):
+    tipo = (r.get('tipo') or 'definitiva').strip().lower()
+    if tipo not in TIPOS_RESOLUCION:
+        raise ValueError('Tipo de resolución no válido')
+    return {'id': str(r.get('id') or ''), 'tipo': tipo, 'fecha': _fecha_iso(r.get('fecha')),
+            'importe_concedido': _numero(r.get('importe_concedido')),
+            'num_beneficiarios': _numero(r.get('num_beneficiarios'), entero=True),
+            'nota': (r.get('nota') or '').strip()[:1000], 'enlace': _enlace(r.get('enlace'))}
+
+
+def _sellar(nuevos, previos, usuario):
+    """Conserva quién/cuándo registró cada fila sin cambios; sella las nuevas o modificadas."""
+    import uuid
+    antes = {x.get('id'): x for x in previos or []}
+    ahora = datetime.now().isoformat(timespec='seconds')
+    salida = []
+    for n in nuevos:
+        if not n['id'] or n['id'] not in antes:
+            n['id'] = uuid.uuid4().hex[:10]
+        previo = antes.get(n['id'])
+        base = {k: v for k, v in (previo or {}).items() if k not in ('registrado_por', 'registrado_el')}
+        if previo and base == n:
+            n['registrado_por'], n['registrado_el'] = previo.get('registrado_por'), previo.get('registrado_el')
+        else:
+            n['registrado_por'], n['registrado_el'] = usuario, ahora
+        salida.append(n)
+    return salida
+
+
+def guardar_datos_manuales(programa_id, ampliaciones, resoluciones, usuario):
+    """
+    Guarda SOLO las ampliaciones de crédito y las resoluciones registradas a mano
+    (el resto del programa no se toca). Lanza ValueError si algún dato no es válido.
+    Devuelve el programa actualizado o None si no existe.
+    """
+    ampl = sorted((_normalizar_ampliacion(r) for r in ampliaciones or []), key=lambda x: x['fecha'])
+    reso = sorted((_normalizar_resolucion(r) for r in resoluciones or []), key=lambda x: x['fecha'])
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    for p in data['programas']:
+        if p.get('id') == programa_id:
+            p['ampliaciones_credito'] = _sellar(ampl, p.get('ampliaciones_credito'), usuario)
+            p['resoluciones_manuales'] = _sellar(reso, p.get('resoluciones_manuales'), usuario)
+            data['ultima_actualizacion'] = datetime.now().isoformat()
+            tmp = json_path + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            os.replace(tmp, json_path)
+            return p
+    return None
+
+
 def actualizar_programa(programa_id, datos_actualizados):
     """
     Actualiza un programa existente en el archivo JSON
@@ -745,6 +845,11 @@ def actualizar_programa(programa_id, datos_actualizados):
             if programa.get('id') == programa_id:
                 # Mantener el ID original
                 datos_actualizados['id'] = programa_id
+                # El editor solo conoce sus campos: lo que gestionan el monitor de
+                # concesiones y el registro manual no puede perderse al guardar
+                for campo in CAMPOS_PROTEGIDOS:
+                    if campo in programa and campo not in datos_actualizados:
+                        datos_actualizados[campo] = programa[campo]
                 # Reemplazar el programa
                 data['programas'][i] = datos_actualizados
                 programa_encontrado = True

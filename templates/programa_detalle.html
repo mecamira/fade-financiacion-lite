@@ -3,6 +3,12 @@
 {% block title %}{{ programa.nombre_coloquial or programa.nombre }} - Dashboard de Financiación{% endblock %}
 
 {% block content %}
+{% set es_admin = session.get('admin_logged_in') %}
+{% set ampliaciones = programa.ampliaciones_credito or [] %}
+{% set resoluciones = programa.resoluciones_manuales or [] %}
+{% set ampl_total = ampliaciones | map(attribute='importe') | sum %}
+{% set pres_base = programa.financiacion.presupuesto_total if programa.financiacion else none %}
+{% macro fch(f) %}{% if f %}{{ f[8:10] }}/{{ f[5:7] }}/{{ f[0:4] }}{% endif %}{% endmacro %}
 <div class="container py-4">
     <!-- Botón Volver -->
     <div class="mb-3">
@@ -14,7 +20,12 @@
     <!-- Encabezado del programa -->
     <div class="card mb-4 border-0 shadow">
         <div class="card-header card-header-gradient py-4">
-            <h2 class="mb-0">{{ programa.nombre_coloquial or programa.nombre }}</h2>
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <h2 class="mb-0">{{ programa.nombre_coloquial or programa.nombre }}</h2>
+                <button type="button" id="btn-export-pdf" class="btn btn-light flex-shrink-0" title="Descargar esta convocatoria en PDF">
+                    <i class="fas fa-file-pdf text-danger me-1"></i><span class="d-none d-sm-inline">Exportar a PDF</span>
+                </button>
+            </div>
             {% if programa.nombre_oficial %}
                 <p class="mb-0 mt-2 small opacity-75"><em>{{ programa.nombre_oficial }}</em></p>
             {% endif %}
@@ -373,6 +384,100 @@
     </div>
     {% endif %}
 
+    <!-- Ampliaciones de crédito (registro manual) -->
+    {% if ampliaciones or es_admin %}
+    <div class="card mb-4" id="card-ampliaciones">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-coins me-2"></i>Ampliaciones de crédito presupuestario</h5>
+            {% if es_admin %}
+            <button type="button" class="btn btn-sm btn-primary" id="btn-add-ampl"><i class="fas fa-plus me-1"></i>Añadir</button>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if ampliaciones %}
+            <div class="row text-center g-3 mb-3">
+                <div class="col-sm-4"><div class="text-muted small">Dotación inicial</div>
+                    <div class="fw-bold fs-5">{{ pres_base | format_importe }}</div></div>
+                <div class="col-sm-4"><div class="text-muted small">Ampliaciones</div>
+                    <div class="fw-bold fs-5 text-success">+ {{ ampl_total | format_importe }}</div></div>
+                <div class="col-sm-4"><div class="text-muted small">Dotación actual</div>
+                    <div class="fw-bold fs-5">{{ ((pres_base + ampl_total) if (pres_base is number) else ampl_total) | format_importe }}</div></div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle mb-0">
+                    <thead class="table-light"><tr>
+                        <th>Fecha</th><th class="text-end">Importe</th><th>Observaciones</th><th></th>{% if es_admin %}<th></th>{% endif %}
+                    </tr></thead>
+                    <tbody>
+                    {% for a in ampliaciones %}
+                        <tr>
+                            <td class="text-nowrap">{{ fch(a.fecha) }}</td>
+                            <td class="text-end fw-semibold text-nowrap">+ {{ a.importe | format_importe }}</td>
+                            <td><small>{{ a.nota or '—' }}</small>
+                                {% if es_admin and a.registrado_por %}<small class="d-block text-muted">Registrado por {{ a.registrado_por }}{% if a.registrado_el %} · {{ fch(a.registrado_el) }}{% endif %}</small>{% endif %}</td>
+                            <td>{% if a.enlace %}<a href="{{ a.enlace }}" target="_blank" rel="noopener" title="Ver documento"><i class="fas fa-external-link-alt"></i></a>{% endif %}</td>
+                            {% if es_admin %}
+                            <td class="text-end text-nowrap">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-accion="editar-ampl" data-id="{{ a.id }}" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-accion="borrar-ampl" data-id="{{ a.id }}" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Sin ampliaciones registradas. Cuando el organismo amplíe el crédito de la convocatoria, se anotará aquí.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Resoluciones (registro manual) -->
+    {% if resoluciones or es_admin %}
+    <div class="card mb-4" id="card-resoluciones">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-file-signature me-2"></i>Resoluciones</h5>
+            {% if es_admin %}
+            <button type="button" class="btn btn-sm btn-primary" id="btn-add-reso"><i class="fas fa-plus me-1"></i>Añadir</button>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if resoluciones %}
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle mb-0">
+                    <thead class="table-light"><tr>
+                        <th>Tipo</th><th>Fecha</th><th class="text-end">Importe concedido</th><th class="text-center">Beneficiarios</th><th>Observaciones</th><th></th>{% if es_admin %}<th></th>{% endif %}
+                    </tr></thead>
+                    <tbody>
+                    {% for x in resoluciones %}
+                        <tr>
+                            <td><span class="badge {{ 'bg-success' if x.tipo == 'definitiva' else ('bg-info text-dark' if x.tipo == 'provisional' else 'bg-secondary') }}">{{ x.tipo | capitalize }}</span></td>
+                            <td class="text-nowrap">{{ fch(x.fecha) }}</td>
+                            <td class="text-end fw-semibold text-nowrap">{{ x.importe_concedido | format_importe if x.importe_concedido is not none else '—' }}</td>
+                            <td class="text-center">{{ x.num_beneficiarios if x.num_beneficiarios is not none else '—' }}</td>
+                            <td><small>{{ x.nota or '—' }}</small>
+                                {% if es_admin and x.registrado_por %}<small class="d-block text-muted">Registrado por {{ x.registrado_por }}{% if x.registrado_el %} · {{ fch(x.registrado_el) }}{% endif %}</small>{% endif %}</td>
+                            <td>{% if x.enlace %}<a href="{{ x.enlace }}" target="_blank" rel="noopener" title="Ver resolución"><i class="fas fa-external-link-alt"></i></a>{% endif %}</td>
+                            {% if es_admin %}
+                            <td class="text-end text-nowrap">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-accion="editar-reso" data-id="{{ x.id }}" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-accion="borrar-reso" data-id="{{ x.id }}" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Sin resoluciones registradas. Aquí se anota la información de las resoluciones (provisional o definitiva) cuando se publica.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Concesiones (convocatoria resuelta) -->
     {% if programa.resuelta and programa.concesiones %}
     <div class="card mb-4 border-dark">
@@ -381,7 +486,7 @@
             <span class="badge bg-light text-dark">{{ programa.total_concesiones or programa.concesiones|length }} concesiones</span>
         </div>
         {% set total_adjudicado = programa.concesiones | map(attribute='importe') | select | sum %}
-        {% set presupuesto_conv = programa.financiacion.presupuesto_total if programa.financiacion else none %}
+        {% set presupuesto_conv = (pres_base + ampl_total) if (pres_base is number) else pres_base %}
         {% if total_adjudicado %}
         <div class="px-3 py-3 border-bottom bg-light">
             <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
@@ -389,7 +494,7 @@
                     <span class="text-muted small">Total adjudicado:</span>
                     <span class="fw-bold fs-5 ms-1">{{ total_adjudicado | format_importe }}</span>
                     {% if presupuesto_conv %}
-                    <span class="text-muted">de {{ presupuesto_conv | format_importe }} presupuestados</span>
+                    <span class="text-muted">de {{ presupuesto_conv | format_importe }} presupuestados{% if ampl_total %} (con ampliaciones){% endif %}</span>
                     {% endif %}
                 </div>
                 {% if presupuesto_conv and presupuesto_conv > 0 %}
@@ -557,4 +662,68 @@
         </a>
     </div>
 </div>
+
+{% if es_admin %}
+<!-- Modal: ampliación de crédito -->
+<div class="modal fade" id="modalAmpl" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="ampl-titulo">Nueva ampliación de crédito</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ampl-id">
+      <div class="row g-3">
+        <div class="col-sm-6"><label class="form-label" for="ampl-fecha">Fecha de la ampliación *</label>
+          <input type="date" class="form-control" id="ampl-fecha"></div>
+        <div class="col-sm-6"><label class="form-label" for="ampl-importe">Importe ampliado (€) *</label>
+          <input type="text" inputmode="decimal" class="form-control" id="ampl-importe" placeholder="p. ej. 500.000"></div>
+        <div class="col-12"><label class="form-label" for="ampl-nota">Observaciones</label>
+          <textarea class="form-control" id="ampl-nota" rows="2" maxlength="500" placeholder="Opcional: motivo, partida, etc."></textarea></div>
+        <div class="col-12"><label class="form-label" for="ampl-enlace">Enlace al documento (BOPA, BOE…)</label>
+          <input type="url" class="form-control" id="ampl-enlace" placeholder="https://"></div>
+      </div>
+      <div class="alert alert-danger mt-3 mb-0 d-none" id="ampl-error"></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btn-guardar-ampl">Guardar</button></div>
+  </div></div>
+</div>
+
+<!-- Modal: resolución -->
+<div class="modal fade" id="modalReso" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="reso-titulo">Nueva resolución</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="reso-id">
+      <div class="row g-3">
+        <div class="col-sm-6"><label class="form-label" for="reso-tipo">Tipo</label>
+          <select class="form-select" id="reso-tipo"><option value="provisional">Provisional</option>
+            <option value="definitiva" selected>Definitiva</option><option value="otra">Otra</option></select></div>
+        <div class="col-sm-6"><label class="form-label" for="reso-fecha">Fecha de la resolución *</label>
+          <input type="date" class="form-control" id="reso-fecha"></div>
+        <div class="col-sm-6"><label class="form-label" for="reso-importe">Importe total concedido (€)</label>
+          <input type="text" inputmode="decimal" class="form-control" id="reso-importe" placeholder="p. ej. 1.250.000"></div>
+        <div class="col-sm-6"><label class="form-label" for="reso-benef">Nº de beneficiarios</label>
+          <input type="number" min="0" step="1" class="form-control" id="reso-benef"></div>
+        <div class="col-12"><label class="form-label" for="reso-nota">Observaciones</label>
+          <textarea class="form-control" id="reso-nota" rows="3" maxlength="1000" placeholder="Opcional: criterios, nota de corte, lista de espera…"></textarea></div>
+        <div class="col-12"><label class="form-label" for="reso-enlace">Enlace a la resolución</label>
+          <input type="url" class="form-control" id="reso-enlace" placeholder="https://"></div>
+      </div>
+      <div class="alert alert-danger mt-3 mb-0 d-none" id="reso-error"></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btn-guardar-reso">Guardar</button></div>
+  </div></div>
+</div>
+{% endif %}
+
+<div id="ficha-ctx" data-id="{{ programa.id }}" data-admin="{{ 1 if es_admin else 0 }}" hidden></div>
+<script type="application/json" id="datos-programa">{{ programa | tojson }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="{{ url_for('static', filename='js/programa_ficha.js') }}"></script>
 {% endblock %}
