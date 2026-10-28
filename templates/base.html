@@ -98,6 +98,11 @@
                                 <i class="fas fa-compass"></i> Busca tu convocatoria
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('guia_usuario') }}" target="_blank" rel="noopener" title="Guía de uso de la herramienta (se abre en otra pestaña)">
+                                <i class="fas fa-question-circle"></i> Guía
+                            </a>
+                        </li>
                         {% if session.get('admin_logged_in') %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {% if request.endpoint in ['gestionar_convocatorias', 'editar_convocatorias', 'analizar_compatibilidad'] %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

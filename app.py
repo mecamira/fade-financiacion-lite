@@ -7,7 +7,7 @@ Solo incluye: Dashboard Público, Gestión Convocatorias, Análisis Compatibilid
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from functools import wraps
 import os
 import json
@@ -206,6 +206,15 @@ def acceso_socios():
     session.permanent = True
     logger.info(f"Acceso de socio — id: {socio_id} — IP: {ip}")
     return redirect(url_for('dashboard'))
+
+
+@app.route('/guia')
+def guia_usuario():
+    """Guía de usuario interactiva (HTML autocontenido; se regenera con docs/presentacion).
+    Pasa por la puerta de socios; admite #N para abrir en una diapositiva concreta."""
+    respuesta = send_from_directory(os.path.join(app.root_path, 'guia'), 'guia.html',
+                                    mimetype='text/html', max_age=3600)
+    return respuesta
 
 
 # ============================================================================
