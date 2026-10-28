@@ -57,7 +57,7 @@ def main():
     for c in ('fecha_apertura', 'fecha_cierre'):
         n = sum(1 for p in programas if relleno((p.get('convocatoria') or {}).get(c)))
         print(f'  {c:30s} {pct(n, total)}')
-    print(f"  {'ambito':28s} {pct(sum(1 for p in programas if relleno(p.get('ambito'))), total)}")
+    print(f"  {'ambito':30s} {pct(sum(1 for p in programas if relleno(p.get('ambito'))), total)}")
 
     print('\n== Financiación ==')
     for c in CAMPOS_FINANCIACION:
