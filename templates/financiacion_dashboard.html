@@ -812,6 +812,8 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -1083,9 +1085,9 @@
             exportToExcel(programasCargados);
         });
         
-        // Exportar a PDF (pendiente de implementación)
+        // Exportar a PDF (la lista que se está viendo, con los filtros aplicados)
         document.getElementById('export-pdf').addEventListener('click', function() {
-            alert('Funcionalidad de exportación a PDF en desarrollo');
+            exportToPDF(programasCargados);
         });
         
         // Manejar comparación de programas
@@ -1960,6 +1962,55 @@
             XLSX.writeFile(wb, "programas_financiacion.xlsx");
         }
         
+        // Exportar a PDF: mismas columnas que el Excel, en una tabla apaisada
+        function exportToPDF(programas) {
+            if (!programas || programas.length === 0) {
+                alert('No hay programas para exportar');
+                return;
+            }
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert('No se pudo cargar el generador de PDF. Comprueba tu conexión e inténtalo de nuevo.');
+                return;
+            }
+            const doc = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const hoy = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            const recorta = (t, n) => (t && t.length > n) ? t.slice(0, n - 1).trim() + '…' : (t || '');
+
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(0, 94, 163);
+            doc.text('Programas de financiación · FADE', 14, 16);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 100, 110);
+            doc.text(`${programas.length} programa${programas.length === 1 ? '' : 's'} · generado el ${hoy}`, 14, 22);
+
+            const filas = programas.map(p => [
+                p.nombre_coloquial || p.nombre || '',
+                p.organismo || '',
+                p.tipo_ayuda || '',
+                p.convocatoria?.estado || '',
+                p.convocatoria?.fecha_cierre || '',
+                recorta((p.beneficiarios || []).join(', '), 80),
+                formatImporte(p.financiacion?.presupuesto_total || p.financiacion?.importe_maximo),
+                recorta(p.financiacion?.intensidad || '', 110)
+            ]);
+
+            doc.autoTable({
+                startY: 27,
+                head: [['Nombre', 'Organismo', 'Tipo de ayuda', 'Estado', 'Fecha cierre', 'Beneficiarios', 'Presupuesto total', 'Intensidad']],
+                body: filas,
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak', valign: 'top' },
+                headStyles: { fillColor: [0, 94, 163], textColor: 255 },
+                alternateRowStyles: { fillColor: [244, 247, 250] },
+                columnStyles: { 0: { cellWidth: 50, fontStyle: 'bold' }, 3: { cellWidth: 20 }, 4: { cellWidth: 22 }, 6: { cellWidth: 28, halign: 'right' } },
+                margin: { left: 14, right: 14, bottom: 14 },
+                didDrawPage: () => {
+                    const w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight();
+                    doc.setFontSize(8); doc.setTextColor(120);
+                    doc.text('Información orientativa: confirma siempre requisitos y plazos en las bases oficiales.', 14, h - 6);
+                    doc.text(`Página ${doc.internal.getNumberOfPages()}`, w - 14, h - 6, { align: 'right' });
+                }
+            });
+            doc.save('programas_financiacion.pdf');
+        }
+
         // Exportar comparación
         function exportComparison() {
             // Obtener tabla de comparación

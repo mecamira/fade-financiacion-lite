@@ -36,7 +36,17 @@ button{font-family:inherit;cursor:pointer}
 .portada .sup{margin-top:90px;font-size:24px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#BFE3F8}
 .portada h1{margin:18px 0 22px;font-size:104px;line-height:1.02;font-weight:800;letter-spacing:-.02em}
 .portada .sub{font-size:44px;font-weight:600;color:#fff;margin-bottom:14px}
-.portada .det{font-size:32px;color:#CFE9F9;max-width:1100px;line-height:1.35}
+.portada .det{font-size:32px;color:#CFE9F9;max-width:820px;line-height:1.35}
+.como{position:absolute;right:110px;bottom:90px;width:760px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);border-radius:26px;padding:34px 40px 36px;backdrop-filter:blur(2px)}
+.como-t{font-size:28px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:22px}
+.como-f{display:flex;gap:24px;align-items:center;font-size:27px;line-height:1.35;color:#fff;margin-bottom:18px}
+.como .teclas{flex:0 0 auto;display:flex;gap:8px;min-width:150px}
+.como kbd{font:inherit;font-weight:800;background:#fff;color:var(--az-prof);border-radius:10px;padding:2px 16px;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.como kbd.k-btn{border-radius:50%;padding:2px 18px}
+.como-o{white-space:nowrap;font-size:21px;color:#CFE9F9;margin:6px 0 24px}
+.como-o kbd{font-size:20px;padding:0 10px;margin-left:6px}
+.empezar{font:inherit;font-size:30px;font-weight:800;background:#fff;color:var(--az-prof);border:0;border-radius:999px;padding:14px 38px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.empezar:hover{background:#E8F4FC}
 .portada .pie{position:absolute;left:130px;bottom:70px;font-size:22px;color:#9FD0EE}
 
 /* ---------- diapositivas de texto ---------- */
@@ -200,7 +210,12 @@ function dibujarPortada(s){
     <div class="in"><div class="logo-grande"><img alt="FADE" src="${DATOS.logo}"></div>
     <div class="sup">${esc(s.sup || '')}</div><h1>${esc(s.titulo)}</h1>
     <div class="sub">${esc(s.subtitulo || '')}</div><div class="det">${esc(s.detalle || '')}</div></div>
-    <div style="position:absolute;left:130px;bottom:96px;font-size:22px;color:#9FD0EE">${esc(s.pie || '')}</div></section>`;
+    <div style="position:absolute;left:130px;bottom:96px;font-size:22px;color:#9FD0EE">${esc(s.pie || '')}</div>
+    <div class="como"><div class="como-t">Cómo moverte por la guía</div>
+      <div class="como-f"><span class="teclas"><kbd>←</kbd><kbd>→</kbd></span><span>Con las <b>flechas del teclado</b>: <b>→</b> avanza (paso a paso, y luego de diapositiva) y <b>←</b> retrocede.</span></div>
+      <div class="como-f"><span class="teclas"><kbd class="k-btn">‹</kbd><kbd class="k-btn">›</kbd></span><span>O con los <b>botones</b> de la esquina inferior derecha, o <b>tocando</b> cada paso de la lista.</span></div>
+      <div class="como-o"><kbd>G</kbd> índice · <kbd>A</kbd> todos los pasos · <kbd>N</kbd> guion · <kbd>F</kbd> pantalla</div>
+      <button class="empezar" id="b-empezar">Empezar <span>→</span></button></div></section>`;
 }
 function dibujarTexto(s){
   const items = s.items.map(it => `<div class="tarjeta-t">
@@ -233,7 +248,7 @@ function dibujarCaptura(s){
   return `<section class="slide captura layout-${retrato ? 'portrait' : 'wide'}">${cabecera(s)}
     <div class="cuerpo"><div class="col-img"><div class="navegador"><div class="barra"><i></i><i></i><i></i><span>Programas de Financiación · FADE</span></div>
       <div class="visor" style="width:${VW}px;height:${VH}px" data-vw="${VW}" data-vh="${VH}">${marcos}</div></div></div>
-      <div class="panel">${lead}<div class="pista" id="pista"><kbd>→</kbd> para ver el primer paso</div><ol class="pasos">${pasos}</ol></div></div></section>`;
+      <div class="panel">${lead}<ol class="pasos">${pasos}</ol></div></div></section>`;
 }
 const DIBUJA = { portada: dibujarPortada, texto: dibujarTexto, cierre: dibujarCierre, captura: dibujarCaptura };
 
@@ -339,6 +354,7 @@ function montar(){
   if (s.tipo === 'captura'){
     sec.querySelectorAll('.paso-i').forEach(li => li.addEventListener('click', () => { if (+li.dataset.k !== st.p){ st.p = +li.dataset.k; refrescar(); } }));
   }
+  const be = sec.querySelector('#b-empezar'); if (be) be.addEventListener('click', () => siguiente());
   ESC.querySelector(':scope > .pie').style.display = s.tipo === 'portada' ? 'none' : 'flex';
   refrescar();
 }
@@ -393,7 +409,7 @@ function alternarPantalla(){
 
 /* ---------- controles ---------- */
 const pie = el('div', 'pie', `
-  <div class="atajos"><kbd>←</kbd> <kbd>→</kbd> pasos · <kbd>N</kbd> guion · <kbd>A</kbd> ver todos los pasos · <kbd>G</kbd> índice · <kbd>F</kbd> pantalla completa</div>
+  <div></div>
   <div class="ctl">
     <button class="btn txt" id="b-todos" title="Mostrar todos los pasos (A)">Ver todos</button>
     <button class="btn txt" id="b-notas" title="Guion del ponente (N)">Guion</button>
