@@ -28,3 +28,4 @@ python-dateutil==2.8.2
 
 # Seguridad
 cryptography==41.0.7
+PyJWT==2.8.0  # Acceso de socios desde fade.es (utils/acceso_socios.py)

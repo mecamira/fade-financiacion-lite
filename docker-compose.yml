@@ -22,8 +22,11 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
       - ./uploads:/app/uploads
+    # Solo en 127.0.0.1: el tráfico externo entra por nginx (HTTPS). Docker se
+    # salta el firewall UFW, así que "8000:8000" dejaría la app expuesta en
+    # http://IP:8000 sin HTTPS y permitiría falsear las cabeceras del proxy.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       - selenium
     networks:

@@ -29,9 +29,14 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Endurecer la cookie de sesión (SESSION_COOKIE_SECURE queda pendiente hasta
-# activar HTTPS: con Secure=True el navegador dejaría de enviar la cookie
-# sobre HTTP y nadie podría iniciar sesión)
+# La app va detrás de nginx en el mismo servidor: tomar la IP y el esquema
+# (http/https) de sus cabeceras. Solo es seguro porque el puerto 8000 se publica
+# únicamente en 127.0.0.1 (docker-compose.yml) y nadie más puede falsearlas.
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+# Endurecer la cookie de sesión (SESSION_COOKIE_SECURE se activa desde .env
+# cuando el sitio ya va por HTTPS; ver config.py)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -156,6 +161,54 @@ def admin_logout():
 
 
 # ============================================================================
+# ACCESO DE SOCIOS (enlace firmado desde la zona privada de fade.es)
+# ============================================================================
+
+# Rutas accesibles sin sesión de socio aunque el acceso sea obligatorio
+RUTAS_SIN_SESION_SOCIO = {'acceso_socios', 'admin_login', 'admin_logout', 'health_check', 'static'}
+
+
+@app.before_request
+def exigir_sesion_socio():
+    """Con SOCIOS_ACCESO_OBLIGATORIO=1, solo entran socios (vía /acceso) y admins"""
+    if not app.config['SOCIOS_ACCESO_OBLIGATORIO']:
+        return None
+    if request.endpoint in RUTAS_SIN_SESION_SOCIO:
+        return None
+    if session.get('socio_id') or session.get('admin_logged_in'):
+        return None
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Sesión caducada. Accede desde la zona privada de fade.es.'}), 401
+    return redirect(app.config['SOCIOS_LOGIN_URL'])
+
+
+@app.route('/acceso')
+def acceso_socios():
+    """Entrada desde la zona privada de fade.es con un token firmado (JWT)"""
+    import tempfile
+    from utils import acceso_socios as acceso
+
+    ip = request.headers.get('X-Real-IP') or request.remote_addr or 'desconocida'
+    try:
+        socio_id = acceso.validar_token(
+            request.args.get('token', ''),
+            app.config['SOCIOS_JWT_SECRET'],
+            # Registro de tokens usados: basta con que dure lo que un token (2 min),
+            # y /tmp del contenedor siempre es escribible y común a los workers
+            tempfile.gettempdir(),
+        )
+    except acceso.TokenInvalido as e:
+        logger.warning(f"Acceso de socio rechazado — {e} — IP: {ip}")
+        return redirect(app.config['SOCIOS_LOGIN_URL'])
+
+    session.clear()
+    session['socio_id'] = socio_id
+    session.permanent = True
+    logger.info(f"Acceso de socio — id: {socio_id} — IP: {ip}")
+    return redirect(url_for('dashboard'))
+
+
+# ============================================================================
 # MÓDULO 1: DASHBOARD PÚBLICO DE PROGRAMAS
 # ============================================================================
 
@@ -189,31 +242,41 @@ def dashboard():
 @app.route('/financiacion/busca-tu-convocatoria')
 def busca_convocatoria():
     """
-    Recomendador orientativo: la persona indica su figura, sector, tipo de
-    proyecto y ubicación, y se le muestran las convocatorias que encajan.
-    Es una página pública y el resultado se calcula en el servidor con reglas
-    deterministas (utils/recomendador.py), sin IA ni servicios externos.
+    Recomendador orientativo: la persona indica su figura, sector, qué quiere
+    financiar, ubicación, cuándo lo necesita y el presupuesto de su proyecto, y se
+    le muestran las convocatorias que encajan (con una ayuda orientativa cuando
+    se puede calcular).
+    El resultado se calcula en el servidor con reglas deterministas
+    (utils/recomendador.py), sin IA ni servicios externos.
     El formulario envía por GET para que cada búsqueda tenga una URL compartible.
     """
     from utils import recomendador
 
     contexto = {
         'perfiles': recomendador.PERFILES, 'ubicaciones': recomendador.UBICACIONES,
-        'sectores_opts': [], 'proyectos_opts': [],
-        'sel': {'entidad': '', 'sectores': [], 'proyectos': [], 'ubicacion': 'asturias'},
+        'gastos_opts': recomendador.GASTOS, 'plazos': recomendador.PLAZOS,
+        'presupuestos': recomendador.PRESUPUESTOS, 'sectores_opts': [],
+        'sel': {'entidad': '', 'sectores': [], 'gastos': [], 'ubicacion': 'asturias',
+                'plazo': 'todas', 'presupuesto': ''},
         'buscado': 'buscar' in request.args, 'resultado': None, 'perfil': None, 'error': None,
     }
     try:
         programas = financing_dashboard.load_all_financing_programs()
-        sectores_opts, proyectos_opts = recomendador.opciones_formulario(programas)
+        sectores_opts = recomendador.opciones_formulario(programas)
         sel = contexto['sel']
         sel['entidad'] = request.args.get('entidad', '')
         sel['sectores'] = recomendador.filtrar_validos(request.args.getlist('sector'), sectores_opts)
-        sel['proyectos'] = recomendador.filtrar_validos(request.args.getlist('proyecto'), proyectos_opts)
+        sel['gastos'] = [g for g in request.args.getlist('gasto') if g in recomendador.GASTO_POR_ID]
         sel['ubicacion'] = request.args.get('ubicacion', 'asturias')
         if sel['ubicacion'] not in recomendador.UBICACIONES:
             sel['ubicacion'] = 'asturias'
-        contexto.update(sectores_opts=sectores_opts, proyectos_opts=proyectos_opts)
+        sel['plazo'] = request.args.get('plazo', 'todas')
+        if sel['plazo'] not in recomendador.PLAZOS:
+            sel['plazo'] = 'todas'
+        sel['presupuesto'] = request.args.get('presupuesto', '')
+        if sel['presupuesto'] not in recomendador.PRESUPUESTO_POR_ID:
+            sel['presupuesto'] = ''
+        contexto['sectores_opts'] = sectores_opts
 
         if contexto['buscado']:
             if sel['entidad'] not in recomendador.PERFIL_POR_ID:
@@ -221,12 +284,13 @@ def busca_convocatoria():
             else:
                 contexto['perfil'] = recomendador.PERFIL_POR_ID[sel['entidad']]
                 resultado = recomendador.recomendar(
-                    programas, sel['entidad'], sel['sectores'], sel['proyectos'],
-                    sel['ubicacion'], incluir_cerradas=True)
+                    programas, sel['entidad'], sel['sectores'], sel['gastos'], sel['ubicacion'],
+                    sel['plazo'], sel['presupuesto'] or None)
                 contexto['resultado'] = resultado
                 logger.info(
                     f"Recomendador: figura={sel['entidad']} sectores={len(sel['sectores'])} "
-                    f"proyectos={len(sel['proyectos'])} ubicacion={sel['ubicacion']} -> "
+                    f"gastos={','.join(sel['gastos']) or '-'} ubicacion={sel['ubicacion']} "
+                    f"plazo={sel['plazo']} presupuesto={sel['presupuesto'] or '-'} -> "
                     f"{len(resultado['recomendadas'])} recomendadas, {len(resultado['revisar'])} a revisar")
     except Exception as e:
         logger.error(f"Error en el recomendador: {e}")
