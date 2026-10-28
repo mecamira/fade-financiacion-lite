@@ -43,6 +43,11 @@
         border: 1px solid var(--color-neutral-300, #cbd5e0); border-radius: 6px;
         color: var(--color-neutral-800, #2d3748); background: #fff;
     }
+    .bc-ayuda {
+        padding: 8px 10px; border-radius: 8px; font-size: 0.85rem;
+        background: var(--color-success-50, #f0fff4); border: 1px solid var(--color-success-200, #c6f6d5); color: #22543d;
+    }
+    .bc-ayuda .small { color: #2f855a; font-size: 0.74rem; }
     .bc-tabs .nav-link {
         font-weight: 600; margin: 0 .5rem .5rem 0;
         border: 1px solid var(--color-neutral-300, #cbd5e0); color: var(--color-neutral-800, #2d3748); background: #fff;
@@ -79,8 +84,15 @@
             <div class="d-flex flex-wrap gap-1 mb-2">
                 {% if r.tipo_ayuda %}<span class="bc-chip">{{ r.tipo_ayuda }}</span>{% endif %}
                 {% if r.ambito %}<span class="bc-chip">{{ r.ambito }}</span>{% endif %}
-                {% if r.presupuesto %}<span class="bc-chip">Presupuesto: {{ r.presupuesto | format_importe }}</span>{% endif %}
+                {% if r.ayuda_max %}<span class="bc-chip" title="Lo máximo que puede recibir cada solicitante">Ayuda máx. por solicitante: {{ r.ayuda_max | format_importe }}</span>{% endif %}
+                {% if r.dotacion %}<span class="bc-chip" title="Dinero total de la convocatoria, a repartir entre todos los solicitantes">Dotación total: {{ r.dotacion | format_importe }}</span>{% endif %}
             </div>
+            {% if r.ayuda_estimada %}
+            <div class="bc-ayuda mb-2">
+                <i class="fas fa-coins me-1"></i>Ayuda orientativa para tu presupuesto: <strong>{{ r.ayuda_estimada.texto }}</strong>
+                <div class="small">{{ r.ayuda_estimada.detalle }}. Cálculo aproximado: la cuantía real depende de las bases y de los gastos que se aprueben.</div>
+            </div>
+            {% endif %}
             {% if r.intensidad and r.intensidad != 'nan' %}
             <div class="small text-muted mb-2"><i class="fas fa-percentage me-1"></i>Intensidad: {{ r.intensidad | truncate(150) }}</div>
             {% endif %}
@@ -146,24 +158,40 @@
             </div>
         </div>
 
-        <!-- 3. Proyecto -->
+        <!-- 3. Qué quiere financiar -->
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="d-flex align-items-center mb-1"><span class="bc-step-num">3</span>¿Qué quieres hacer? <small class="text-muted fw-normal ms-2">opcional, puedes marcar varios</small></h5>
-                <p class="small text-muted mb-2">El tipo de proyecto para el que buscas financiación.</p>
+                <h5 class="d-flex align-items-center mb-1"><span class="bc-step-num">3</span>¿Qué quieres financiar? <small class="text-muted fw-normal ms-2">opcional, puedes marcar varios</small></h5>
+                <p class="small text-muted mb-2">En qué vas a gastar el dinero. Sube primero las convocatorias que cubren esos gastos.</p>
                 <div class="d-flex flex-wrap gap-2">
-                    {% for t in proyectos_opts %}
-                    <input type="checkbox" class="btn-check" name="proyecto" id="proyecto-{{ loop.index }}" value="{{ t }}" autocomplete="off" {% if t in sel.proyectos %}checked{% endif %}>
-                    <label class="btn btn-outline-primary btn-sm rounded-pill" for="proyecto-{{ loop.index }}">{{ t }}</label>
+                    {% for g in gastos_opts %}
+                    <input type="checkbox" class="btn-check" name="gasto" id="gasto-{{ g.id }}" value="{{ g.id }}" autocomplete="off" {% if g.id in sel.gastos %}checked{% endif %}>
+                    <label class="btn btn-outline-primary btn-sm rounded-pill" for="gasto-{{ g.id }}"><i class="fas {{ g.icono }} me-1"></i>{{ g.label }}</label>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- 4. Ubicación y opciones -->
+        <!-- 4. Presupuesto -->
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="d-flex align-items-center mb-3"><span class="bc-step-num">4</span>¿Dónde?</h5>
+                <h5 class="d-flex align-items-center mb-1"><span class="bc-step-num">4</span>¿Cuál es el presupuesto de tu proyecto? <small class="text-muted fw-normal ms-2">opcional</small></h5>
+                <p class="small text-muted mb-2">Lo que te vas a gastar en total. Con él descartamos las que exigen un proyecto mayor y te damos una ayuda orientativa cuando se puede calcular.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <input type="radio" class="btn-check" name="presupuesto" id="presupuesto-ninguno" value="" autocomplete="off" {% if not sel.presupuesto %}checked{% endif %}>
+                    <label class="btn btn-outline-secondary btn-sm rounded-pill" for="presupuesto-ninguno">Aún no lo sé</label>
+                    {% for r in presupuestos %}
+                    <input type="radio" class="btn-check" name="presupuesto" id="presupuesto-{{ r.id }}" value="{{ r.id }}" autocomplete="off" {% if sel.presupuesto == r.id %}checked{% endif %}>
+                    <label class="btn btn-outline-primary btn-sm rounded-pill" for="presupuesto-{{ r.id }}">{{ r.label }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Ubicación -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="d-flex align-items-center mb-3"><span class="bc-step-num">5</span>¿Dónde?</h5>
                 <div class="row g-3 align-items-center">
                     <div class="col-md-8">
                         <select class="form-select" name="ubicacion" aria-label="Ubicación">
@@ -173,6 +201,19 @@
                         </select>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 6. Plazo -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="d-flex align-items-center mb-3"><span class="bc-step-num">6</span>¿Cuándo lo necesitas?</h5>
+                {% for clave, texto in plazos.items() %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="plazo" id="plazo-{{ clave }}" value="{{ clave }}" {% if sel.plazo == clave %}checked{% endif %}>
+                    <label class="form-check-label" for="plazo-{{ clave }}">{{ texto }}</label>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
@@ -190,22 +231,27 @@
         <div class="alert alert-primary" role="status">
             <strong>{{ perfil.label }}</strong>
             {% if sel.sectores %} · {{ sel.sectores | join(', ') }}{% endif %}
-            {% if sel.proyectos %} · {{ sel.proyectos | join(', ') }}{% endif %}
+            {% for g in gastos_opts if g.id in sel.gastos %}{{ ' · ' if loop.first else ', ' }}{{ g.label }}{% endfor %}
+            {% for r in presupuestos if r.id == sel.presupuesto %} · Proyecto: {{ r.label | lower }}{% endfor %}
             <div class="mt-1">
                 {% if n_rec or n_rev %}
                     {{ n_rec }} convocatoria{{ '' if n_rec == 1 else 's' }} encaja{{ '' if n_rec == 1 else 'n' }} con tu perfil{% if n_rev %} y {{ n_rev }} más {{ 'puede encajar' if n_rev == 1 else 'pueden encajar' }} (revisa las bases){% endif %}.
                 {% else %}
-                    No hemos encontrado convocatorias abiertas que encajen con estos datos.
+                    No hemos encontrado convocatorias {{ 'abiertas ' if sel.plazo != 'todas' }}que encajen con estos datos.
                 {% endif %}
             </div>
             {% set d = resultado.descartadas %}
-            {% if d.beneficiario or d.sector or d.ubicacion %}
+            {% set n_desc = d.values() | sum %}
+            {% if n_desc %}
             <div class="small text-muted mt-1">
-                Hemos descartado {{ d.beneficiario + d.sector + d.ubicacion }} de {{ resultado.total }}:
+                Hemos descartado {{ n_desc }} de {{ resultado.total }}:
                 {% set partes = [] %}
                 {% if d.beneficiario %}{% set _ = partes.append(d.beneficiario ~ ' no van dirigidas a tu figura') %}{% endif %}
                 {% if d.sector %}{% set _ = partes.append(d.sector ~ ' son de otro sector') %}{% endif %}
                 {% if d.ubicacion %}{% set _ = partes.append(d.ubicacion ~ ' son solo para Asturias') %}{% endif %}
+                {% if d.presupuesto %}{% set _ = partes.append(d.presupuesto ~ ' exigen un presupuesto mínimo mayor que el de tu proyecto') %}{% endif %}
+                {% if d.plazo %}{% set _ = partes.append(d.plazo ~ ' aún no han abierto') %}{% endif %}
+                {% if d.cerradas %}{% set _ = partes.append(d.cerradas ~ ' están cerradas') %}{% endif %}
                 {{ partes | join(', ') }}.
             </div>
             {% endif %}
@@ -214,7 +260,7 @@
         {% if not n_rec and not n_rev %}
         <div class="card text-center p-4 mb-4">
             <i class="fas fa-search fa-2x text-muted mb-2"></i>
-            <p class="mb-2">Prueba a <strong>quitar el sector o el tipo de proyecto</strong>, o a mirar las pestañas de abajo (<strong>convocatorias cerradas</strong>, que suelen repetirse cada año, u otros tipos de proyecto).</p>
+            <p class="mb-2">Prueba a <strong>quitar el sector o lo que quieres financiar</strong>{% if sel.plazo != 'todas' %}, o elige <strong>«Estoy planificando»</strong> para ver también las convocatorias cerradas, que suelen repetirse cada año{% else %}, o mira las pestañas de abajo{% endif %}.</p>
             <div><a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-sm">Ver todas las convocatorias</a></div>
         </div>
         {% endif %}
@@ -224,8 +270,8 @@
              'nota': ''},
             {'id': 'rev', 'titulo': 'Revisa las bases', 'icono': 'fa-search-plus', 'lista': resultado.revisar,
              'nota': 'Tu figura no aparece expresamente, no indican a quién van dirigidas o son de un municipio concreto.'},
-            {'id': 'otro', 'titulo': 'Otro tipo de proyecto', 'icono': 'fa-random', 'lista': resultado.otro_proyecto,
-             'nota': 'Abiertas y dirigidas a tu perfil, pero pensadas para un tipo de proyecto distinto del que has marcado.'},
+            {'id': 'otro', 'titulo': 'Financian otros gastos', 'icono': 'fa-random', 'lista': resultado.otro_gasto,
+             'nota': 'Dirigidas a tu perfil, pero no detectamos que cubran lo que quieres financiar. Revisa sus gastos subvencionables.'},
             {'id': 'cer', 'titulo': 'Cerradas', 'icono': 'fa-history', 'lista': resultado.cerradas,
              'nota': 'Plazo cerrado. Muchas se repiten cada año: vigila la próxima edición.'},
         ] %}

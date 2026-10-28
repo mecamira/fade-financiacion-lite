@@ -242,31 +242,41 @@ def dashboard():
 @app.route('/financiacion/busca-tu-convocatoria')
 def busca_convocatoria():
     """
-    Recomendador orientativo: la persona indica su figura, sector, tipo de
-    proyecto y ubicación, y se le muestran las convocatorias que encajan.
-    Es una página pública y el resultado se calcula en el servidor con reglas
-    deterministas (utils/recomendador.py), sin IA ni servicios externos.
+    Recomendador orientativo: la persona indica su figura, sector, qué quiere
+    financiar, ubicación, cuándo lo necesita y el presupuesto de su proyecto, y se
+    le muestran las convocatorias que encajan (con una ayuda orientativa cuando
+    se puede calcular).
+    El resultado se calcula en el servidor con reglas deterministas
+    (utils/recomendador.py), sin IA ni servicios externos.
     El formulario envía por GET para que cada búsqueda tenga una URL compartible.
     """
     from utils import recomendador
 
     contexto = {
         'perfiles': recomendador.PERFILES, 'ubicaciones': recomendador.UBICACIONES,
-        'sectores_opts': [], 'proyectos_opts': [],
-        'sel': {'entidad': '', 'sectores': [], 'proyectos': [], 'ubicacion': 'asturias'},
+        'gastos_opts': recomendador.GASTOS, 'plazos': recomendador.PLAZOS,
+        'presupuestos': recomendador.PRESUPUESTOS, 'sectores_opts': [],
+        'sel': {'entidad': '', 'sectores': [], 'gastos': [], 'ubicacion': 'asturias',
+                'plazo': 'todas', 'presupuesto': ''},
         'buscado': 'buscar' in request.args, 'resultado': None, 'perfil': None, 'error': None,
     }
     try:
         programas = financing_dashboard.load_all_financing_programs()
-        sectores_opts, proyectos_opts = recomendador.opciones_formulario(programas)
+        sectores_opts = recomendador.opciones_formulario(programas)
         sel = contexto['sel']
         sel['entidad'] = request.args.get('entidad', '')
         sel['sectores'] = recomendador.filtrar_validos(request.args.getlist('sector'), sectores_opts)
-        sel['proyectos'] = recomendador.filtrar_validos(request.args.getlist('proyecto'), proyectos_opts)
+        sel['gastos'] = [g for g in request.args.getlist('gasto') if g in recomendador.GASTO_POR_ID]
         sel['ubicacion'] = request.args.get('ubicacion', 'asturias')
         if sel['ubicacion'] not in recomendador.UBICACIONES:
             sel['ubicacion'] = 'asturias'
-        contexto.update(sectores_opts=sectores_opts, proyectos_opts=proyectos_opts)
+        sel['plazo'] = request.args.get('plazo', 'todas')
+        if sel['plazo'] not in recomendador.PLAZOS:
+            sel['plazo'] = 'todas'
+        sel['presupuesto'] = request.args.get('presupuesto', '')
+        if sel['presupuesto'] not in recomendador.PRESUPUESTO_POR_ID:
+            sel['presupuesto'] = ''
+        contexto['sectores_opts'] = sectores_opts
 
         if contexto['buscado']:
             if sel['entidad'] not in recomendador.PERFIL_POR_ID:
@@ -274,12 +284,13 @@ def busca_convocatoria():
             else:
                 contexto['perfil'] = recomendador.PERFIL_POR_ID[sel['entidad']]
                 resultado = recomendador.recomendar(
-                    programas, sel['entidad'], sel['sectores'], sel['proyectos'],
-                    sel['ubicacion'], incluir_cerradas=True)
+                    programas, sel['entidad'], sel['sectores'], sel['gastos'], sel['ubicacion'],
+                    sel['plazo'], sel['presupuesto'] or None)
                 contexto['resultado'] = resultado
                 logger.info(
                     f"Recomendador: figura={sel['entidad']} sectores={len(sel['sectores'])} "
-                    f"proyectos={len(sel['proyectos'])} ubicacion={sel['ubicacion']} -> "
+                    f"gastos={','.join(sel['gastos']) or '-'} ubicacion={sel['ubicacion']} "
+                    f"plazo={sel['plazo']} presupuesto={sel['presupuesto'] or '-'} -> "
                     f"{len(resultado['recomendadas'])} recomendadas, {len(resultado['revisar'])} a revisar")
     except Exception as e:
         logger.error(f"Error en el recomendador: {e}")

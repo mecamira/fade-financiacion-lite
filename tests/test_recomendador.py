@@ -86,28 +86,111 @@ class TestSectorYProyecto(unittest.TestCase):
         progs = [prog('agro', sectores=['Agricultura/Ganadería/Silvicultura/Pesca'])]
         self.assertEqual(ids(rec.recomendar(progs, 'pyme', hoy=HOY)['recomendadas']), ['agro'])
 
-    def test_proyecto_distinto_va_al_grupo_otro_proyecto(self):
+
+
+class TestGastos(unittest.TestCase):
+    def test_detecta_gastos_por_texto_y_por_tipo_de_proyecto(self):
+        p = prog('a', proyectos=['Digitalización'],
+                 gastos_subvencionables=['Adquisición de maquinaria y bienes de equipo', 'Costes salariales del personal'])
+        self.assertEqual(rec.gastos_de_programa(p), {'maquinaria', 'personal', 'software'})
+
+    def test_lo_excluido_no_cuenta(self):
+        p = prog('a', gastos_subvencionables=['Otros gastos del proyecto (excluyendo terrenos y obras)'])
+        self.assertNotIn('obras', rec.gastos_de_programa(p))
+
+    def test_palabras_parecidas_no_confunden(self):
+        # «tic» no debe saltar dentro de «práctica» ni «estadística»
+        p = prog('a', gastos_subvencionables=['Prácticas y estadística'])
+        self.assertNotIn('software', rec.gastos_de_programa(p))
+
+    def test_gasto_distinto_va_al_grupo_otro_gasto(self):
         progs = [prog('dig', proyectos=['Digitalización']), prog('sost', proyectos=['Sostenibilidad'])]
-        r = rec.recomendar(progs, 'pyme', proyectos=['Digitalización'], hoy=HOY)
+        r = rec.recomendar(progs, 'pyme', gastos=['software'], hoy=HOY)
         self.assertEqual(ids(r['recomendadas']), ['dig'])
-        self.assertEqual(ids(r['otro_proyecto']), ['sost'])
+        self.assertEqual(ids(r['otro_gasto']), ['sost'])
+
+    def test_sin_datos_de_gastos_se_muestra_con_aviso(self):
+        r = rec.recomendar([prog('a', proyectos=['General'])], 'pyme', gastos=['software'], hoy=HOY)
+        self.assertEqual(ids(r['recomendadas']), ['a'])
+        self.assertTrue(any('gastos' in a for a in r['recomendadas'][0]['avisos']))
 
     def test_mas_coincidencias_puntuan_mas(self):
         progs = [prog('uno', proyectos=['Digitalización']),
                  prog('dos', proyectos=['Digitalización', 'I+D+i'])]
-        r = rec.recomendar(progs, 'pyme', proyectos=['Digitalización', 'I+D+i'], hoy=HOY)
+        r = rec.recomendar(progs, 'pyme', gastos=['software', 'idi'], hoy=HOY)
         self.assertEqual(ids(r['recomendadas']), ['dos', 'uno'])
+
+    def test_ids_de_gasto_desconocidos_se_ignoran(self):
+        r = rec.recomendar([prog('a', proyectos=['Digitalización'])], 'pyme', gastos=['inventado'], hoy=HOY)
+        self.assertEqual(ids(r['recomendadas']), ['a'])
+
+
+class TestPresupuesto(unittest.TestCase):
+    def test_proyecto_menor_que_el_minimo_se_descarta(self):
+        p = prog('a', financiacion={'presupuesto_minimo': 50000})
+        r = rec.recomendar([p], 'pyme', presupuesto='10-50k', hoy=HOY)
+        self.assertEqual(r['descartadas']['presupuesto'], 0)  # 50.000 entra en el rango
+        r = rec.recomendar([p], 'pyme', presupuesto='hasta10k', hoy=HOY)
+        self.assertEqual(r['descartadas']['presupuesto'], 1)
+
+    def test_minimo_dentro_del_rango_avisa(self):
+        p = prog('a', financiacion={'presupuesto_minimo': '20000'})
+        r = rec.recomendar([p], 'pyme', presupuesto='10-50k', hoy=HOY)
+        self.assertTrue(any('mínimo de 20.000 €' in a for a in r['recomendadas'][0]['avisos']))
+
+    def test_sin_presupuesto_no_filtra_ni_estima(self):
+        p = prog('a', financiacion={'presupuesto_minimo': 500000, 'intensidad': '50%'})
+        r = rec.recomendar([p], 'pyme', hoy=HOY)
+        self.assertEqual(ids(r['recomendadas']), ['a'])
+        self.assertIsNone(r['recomendadas'][0]['ayuda_estimada'])
+
+    def test_ayuda_orientativa_con_tope(self):
+        p = prog('a', financiacion={'intensidad': 'Hasta el 50 % de los gastos', 'importe_maximo_subvencionable': 75000})
+        e = rec.recomendar([p], 'pyme', presupuesto='50-200k', hoy=HOY)['recomendadas'][0]['ayuda_estimada']
+        self.assertEqual(e['texto'], 'entre 25.000 € y 75.000 €')
+        self.assertIn('máximo de 75.000 €', e['detalle'])
+
+    def test_ayuda_orientativa_rango_abierto(self):
+        p = prog('a', financiacion={'intensidad': '70%'})
+        r = rec.recomendar([p], 'pyme', presupuesto='hasta10k', hoy=HOY)
+        self.assertEqual(r['recomendadas'][0]['ayuda_estimada']['texto'], 'hasta 7.000 €')
+        r = rec.recomendar([p], 'pyme', presupuesto='mas1m', hoy=HOY)
+        self.assertEqual(r['recomendadas'][0]['ayuda_estimada']['texto'], 'desde 700.000 €')
+
+    def test_ayuda_orientativa_respeta_presupuesto_maximo_y_minimo(self):
+        p = prog('a', financiacion={'intensidad': '50%', 'presupuesto_minimo': 20000, 'presupuesto_maximo': 40000})
+        r = rec.recomendar([p], 'pyme', presupuesto='10-50k', hoy=HOY)
+        self.assertEqual(r['recomendadas'][0]['ayuda_estimada']['texto'], 'entre 10.000 € y 20.000 €')
+
+    def test_varias_intensidades_no_se_estiman(self):
+        p = prog('a', financiacion={'intensidad': 'Pequeñas empresas: hasta 35%. Medianas: hasta 25%.'})
+        r = rec.recomendar([p], 'pyme', presupuesto='10-50k', hoy=HOY)
+        self.assertIsNone(r['recomendadas'][0]['ayuda_estimada'])
+
+    def test_importes_en_el_resultado(self):
+        p = prog('a', financiacion={'presupuesto_total': 1250000, 'importe_maximo_subvencionable': 'nan'})
+        res = rec.recomendar([p], 'pyme', hoy=HOY)['recomendadas'][0]
+        self.assertEqual(res['dotacion'], 1250000)
+        self.assertIsNone(res['ayuda_max'])
 
 
 class TestEstadoYUbicacion(unittest.TestCase):
-    def test_cerradas_ocultas_por_defecto_y_en_su_grupo_si_se_piden(self):
+    def test_cerradas_ocultas_por_defecto_y_en_su_grupo_si_se_planifica(self):
         progs = [prog('abierta'), prog('cerrada', cierre='2026-05-01')]
         r = rec.recomendar(progs, 'pyme', hoy=HOY)
         self.assertEqual(ids(r['recomendadas']), ['abierta'])
         self.assertEqual(r['descartadas']['cerradas'], 1)
-        r = rec.recomendar(progs, 'pyme', incluir_cerradas=True, hoy=HOY)
+        r = rec.recomendar(progs, 'pyme', plazo='todas', hoy=HOY)
         self.assertEqual(ids(r['cerradas']), ['cerrada'])
         self.assertEqual(ids(r['recomendadas']), ['abierta'])
+
+    def test_plazo_ya_excluye_las_proximas(self):
+        progs = [prog('abierta'), prog('proxima', apertura='2026-11-01', cierre='2026-12-01')]
+        r = rec.recomendar(progs, 'pyme', plazo='ya', hoy=HOY)
+        self.assertEqual(ids(r['recomendadas']), ['abierta'])
+        self.assertEqual(r['descartadas']['plazo'], 1)
+        r = rec.recomendar(progs, 'pyme', plazo='pronto', hoy=HOY)
+        self.assertEqual(len(r['recomendadas']), 2)
 
     def test_el_dia_de_cierre_sigue_abierta(self):
         r = rec.recomendar([prog('hoy', cierre='2026-10-15')], 'pyme', hoy=HOY)
@@ -161,7 +244,11 @@ class TestRobustez(unittest.TestCase):
             {'id': 'w', 'convocatoria': None, 'financiacion': None, 'ambito': None},
             {'id': 'v', 'beneficiarios': [None, '', 'PYME'], 'convocatoria': {'fecha_cierre': '2026-12-31 00:00:00'}},
         ]
-        r = rec.recomendar(raros, 'pyme', sectores=['Turismo'], proyectos=['x'], hoy=HOY, incluir_cerradas=True)
+        for p in raros[1:]:
+            p['gastos_subvencionables'] = [None, 5, 'Maquinaria']
+            p['financiacion'] = {'intensidad': 'nan', 'presupuesto_minimo': 'basura', 'importe_maximo_subvencionable': True}
+        r = rec.recomendar(raros, 'pyme', sectores=['Turismo'], gastos=['x', 'maquinaria'], plazo='todas',
+                           presupuesto='10-50k', hoy=HOY)
         self.assertEqual(r['total'], len(raros))
 
     def test_valores_de_formulario_desconocidos_se_ignoran(self):
@@ -177,11 +264,9 @@ class TestRobustez(unittest.TestCase):
         self.assertEqual(rec.filtrar_validos(['<script>alert(1)</script>'], opciones), [])
 
     def test_opciones_sin_comodines_ni_duplicados(self):
-        progs = [prog('a', sectores=['General/Multisectorial', 'Turismo/Hostelería'], proyectos=['General', 'I+D+i']),
-                 prog('b', sectores=['turismo/hostelería'], proyectos=['I+D+i'])]
-        sectores, proyectos = rec.opciones_formulario(progs)
-        self.assertEqual(sectores, ['Turismo/Hostelería'])
-        self.assertEqual(proyectos, ['I+D+i'])
+        progs = [prog('a', sectores=['General/Multisectorial', 'Turismo/Hostelería']),
+                 prog('b', sectores=['turismo/hostelería'])]
+        self.assertEqual(rec.opciones_formulario(progs), ['Turismo/Hostelería'])
 
 
 DATOS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -198,18 +283,20 @@ class TestConDatosReales(unittest.TestCase):
             cls.programas = json.load(f)['programas']
 
     def test_todas_las_combinaciones_funcionan(self):
-        sectores, proyectos = rec.opciones_formulario(self.programas)
-        self.assertTrue(sectores and proyectos)
+        sectores = rec.opciones_formulario(self.programas)
+        self.assertTrue(sectores)
+        presupuestos = [None] + list(rec.PRESUPUESTO_POR_ID)
         n = 0
         for figura in rec.PERFIL_POR_ID:
             for ubic in rec.UBICACIONES:
-                for cerradas in (False, True):
+                for plazo in rec.PLAZOS:
                     for S in [[]] + [[s] for s in sectores]:
-                        for R in [[]] + [[x] for x in proyectos]:
-                            r = rec.recomendar(self.programas, figura, S, R, ubic, cerradas, hoy=HOY)
+                        for G in [[]] + [[g] for g in rec.GASTO_POR_ID]:
+                            presupuesto = presupuestos[n % len(presupuestos)]
+                            r = rec.recomendar(self.programas, figura, S, G, ubic, plazo, presupuesto, hoy=HOY)
                             self.assertEqual(r['total'], len(self.programas))
                             # cada convocatoria acaba en un grupo o descartada, nunca en dos sitios
-                            vistas = sum(len(r[g]) for g in ('recomendadas', 'revisar', 'otro_proyecto', 'cerradas'))
+                            vistas = sum(len(r[g]) for g in rec.GRUPOS)
                             self.assertEqual(vistas + sum(r['descartadas'].values()), len(self.programas))
                             n += 1
         print(f'\n   {n} combinaciones probadas sobre {len(self.programas)} convocatorias reales')
