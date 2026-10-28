@@ -213,7 +213,7 @@ def guia_usuario():
     """Guía de usuario interactiva (HTML autocontenido; se regenera con docs/presentacion).
     Pasa por la puerta de socios; admite #N para abrir en una diapositiva concreta."""
     respuesta = send_from_directory(os.path.join(app.root_path, 'guia'), 'guia.html',
-                                    mimetype='text/html', max_age=3600)
+                                    mimetype='text/html', max_age=0)  # revalida siempre (ETag): un cambio llega a todos
     return respuesta
 
 
