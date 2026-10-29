@@ -106,6 +106,56 @@ def login_required(f):
     return decorated_function
 
 
+def destino_seguro(destino):
+    """Devuelve la ruta interna a la que redirigir tras el login, o None si apunta fuera de este sitio"""
+    from urllib.parse import urlparse
+    if not destino:
+        return None
+    u = urlparse(destino)
+    if u.scheme not in ('', 'http', 'https') or (u.netloc and u.netloc != request.host):
+        return None
+    ruta = u.path or '/'
+    if not ruta.startswith('/') or ruta.startswith('//'):
+        return None
+    return ruta + (('?' + u.query) if u.query else '')
+
+
+def admin_api_required(f):
+    """Como login_required, pero para APIs: responde 401 en JSON en vez de redirigir al login"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return jsonify({'success': False, 'error': 'Se requiere sesión de administración'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# ============================================================================
+# CABECERAS DE SEGURIDAD
+# ============================================================================
+
+# Todo el front se sirve desde nuestro propio dominio (librerías en static/vendor).
+# 'unsafe-inline' hace falta porque las plantillas llevan scripts y estilos en línea.
+CSP = ("default-src 'self'; "
+       "script-src 'self' 'unsafe-inline'; "
+       "style-src 'self' 'unsafe-inline'; "
+       "img-src 'self' data: blob:; "
+       "font-src 'self' data:; "
+       "connect-src 'self'; worker-src 'self' blob:; "
+       "object-src 'none'; base-uri 'self'; form-action 'self'; "
+       "frame-ancestors 'none'")
+
+
+@app.after_request
+def cabeceras_seguridad(resp):
+    resp.headers.setdefault('Content-Security-Policy', CSP)
+    resp.headers.setdefault('X-Frame-Options', 'DENY')
+    resp.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    resp.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    resp.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()')
+    return resp
+
+
 # ============================================================================
 # RUTAS DE AUTENTICACIÓN
 # ============================================================================
@@ -140,8 +190,7 @@ def admin_login():
             session.permanent = True
             logger.info(f"Admin login exitoso — usuario: {username} — IP: {ip}")
 
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('gestionar_convocatorias'))
+            return redirect(destino_seguro(request.args.get('next')) or url_for('gestionar_convocatorias'))
         else:
             admin_auth.registrar_intento_fallido(ip)
             logger.warning(f"Intento de login fallido — usuario: {username!r} — IP: {ip}")
@@ -738,6 +787,7 @@ def guardar_datos_manuales(programa_id):
 # ============================================================================
 
 @app.route('/financiacion/analizar-compatibilidad')
+@login_required
 def analizar_compatibilidad():
     """Vista para análisis de compatibilidad proyecto-convocatoria"""
     try:
@@ -760,6 +810,7 @@ def analizar_compatibilidad():
 
 
 @app.route('/api/analizar-compatibilidad', methods=['POST'])
+@admin_api_required
 def analizar_compatibilidad_api():
     """API para análisis de compatibilidad con Gemini AI"""
     try:
@@ -810,12 +861,14 @@ def analizar_compatibilidad_api():
 # ============================================================================
 
 @app.route('/financiacion/vigilancia-bdns')
+@login_required
 def vigilancia_bdns():
     """Visor de convocatorias en tiempo real desde la BDNS"""
     return render_template('vigilancia_bdns.html')
 
 
 @app.route('/api/bdns-proxy')
+@admin_api_required
 def bdns_proxy():
     """Proxy hacia infosubvenciones.es para evitar CORS en el navegador"""
     import requests as req_lib
@@ -856,6 +909,7 @@ def bdns_debug_fields():
 
 
 @app.route('/api/bdns-asturias-extended')
+@admin_api_required
 def bdns_asturias_extended():
     """
     Vigilancia BDNS — cámaras de comercio asturianas + entidades locales de Asturias.

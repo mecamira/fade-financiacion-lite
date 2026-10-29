@@ -467,8 +467,8 @@
 </div>
 
 <!-- Tagify CSS y JS para tags input -->
-<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<link href="{{ url_for('static', filename='vendor/tagify/tagify.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='vendor/tagify/tagify.min.js') }}"></script>
 
 <!-- Opciones predefinidas -->
 <script src="{{ url_for('static', filename='js/opciones_predefinidas.js') }}"></script>

@@ -267,8 +267,8 @@
 </div>
 
 <!-- JSON editor -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.0/jsoneditor.min.css" rel="stylesheet" type="text/css">
+<script src="{{ url_for('static', filename='vendor/jsoneditor/jsoneditor.min.js') }}"></script>
+<link href="{{ url_for('static', filename='vendor/jsoneditor/jsoneditor.min.css') }}" rel="stylesheet" type="text/css">
 
 <!-- Estilos personalizados para aumentar altura del editor JSON -->
 <style>
