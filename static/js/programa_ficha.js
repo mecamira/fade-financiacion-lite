@@ -68,20 +68,27 @@
             y = doc.lastAutoTable.finalY + 4;
         };
 
-        // --- cabecera
+        // --- cabecera (nada se recorta: título, nombre oficial y organismo van completos)
         const nombre = P.nombre_coloquial || P.nombre || 'Convocatoria';
+        const organismo = arr(P.organismo).join(', ');
         fuente(17, true, [255, 255, 255]);
         const lTitulo = doc.splitTextToSize(nombre, AN);
-        const organismo = arr(P.organismo).join(', ');
-        const alto = 14 + lTitulo.length * 7.2 + (P.nombre_oficial ? 6 : 0) + (organismo ? 8 : 0);
+        fuente(9, false, [214, 235, 250]);
+        const lOficial = P.nombre_oficial ? doc.splitTextToSize(P.nombre_oficial, AN) : [];
+        fuente(11, true, [255, 255, 255]);
+        const lOrg = organismo ? doc.splitTextToSize(organismo, AN) : [];
+        const alto = 10 + lTitulo.length * 7.2 + (lOficial.length ? 1 + lOficial.length * 4.2 : 0)
+            + (lOrg.length ? 2 + lOrg.length * 5 : 0) + 4;
         doc.setFillColor(...AZUL); doc.rect(0, 0, W, alto, 'F');
-        y = 15; lTitulo.forEach(l => { doc.text(l, M, y); y += 7.2; });
-        if (P.nombre_oficial) {
-            fuente(9, false, [214, 235, 250]);
-            let of = doc.splitTextToSize(P.nombre_oficial, AN);
-            doc.text(of.length > 1 ? of[0].replace(/\s*\S*$/, '') + '…' : of[0], M, y - 0.5); y += 6;
+        y = 16;
+        fuente(17, true, [255, 255, 255]); lTitulo.forEach(l => { doc.text(l, M, y); y += 7.2; });
+        y -= 2;
+        if (lOficial.length) {
+            fuente(9, false, [214, 235, 250]); lOficial.forEach(l => { doc.text(l, M, y); y += 4.2; });
         }
-        if (organismo) { fuente(11, true, [255, 255, 255]); doc.text(doc.splitTextToSize(organismo, AN)[0], M, y); }
+        if (lOrg.length) {
+            y += 2; fuente(11, true, [255, 255, 255]); lOrg.forEach(l => { doc.text(l, M, y); y += 5; });
+        }
         y = alto + 8;
 
         // --- resumen y descripción
