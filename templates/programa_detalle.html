@@ -486,7 +486,7 @@
             <span class="badge bg-light text-dark">{{ programa.total_concesiones or programa.concesiones|length }} concesiones</span>
         </div>
         {% set total_adjudicado = programa.concesiones | map(attribute='importe') | select | sum %}
-        {% set presupuesto_conv = (pres_base + ampl_total) if (pres_base is number) else pres_base %}
+        {% set presupuesto_conv = (pres_base + ampl_total) if (pres_base is number) else none %}
         {% if total_adjudicado %}
         <div class="px-3 py-3 border-bottom bg-light">
             <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">

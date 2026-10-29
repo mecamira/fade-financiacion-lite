@@ -283,6 +283,28 @@ def buscar_en_programa(programa, search_term):
     
     return False
 
+CAMPOS_IMPORTE = ('presupuesto_total', 'importe_maximo', 'presupuesto_minimo', 'presupuesto_maximo',
+                  'importe_minimo_subvencionable', 'importe_maximo_subvencionable')
+
+
+def _importe_a_numero(valor):
+    """'240000', '1.250.000' o '150.000,50' -> número. Cualquier otra cosa se deja como está."""
+    if not isinstance(valor, str):
+        return valor
+    t = valor.strip().replace('€', '').replace(' ', '')
+    if not t:
+        return valor
+    try:
+        if ',' in t:
+            t = t.replace('.', '').replace(',', '.')
+        elif t.count('.') > 1 or (t.count('.') == 1 and len(t.split('.')[1]) == 3):
+            t = t.replace('.', '')          # 1.250.000 / 150.000 -> miles
+        n = float(t)
+    except ValueError:
+        return valor
+    return int(n) if n == int(n) else n
+
+
 def load_all_financing_programs():
     """Carga todos los programas de financiación desde el archivo JSON"""
     try:
@@ -308,6 +330,12 @@ def load_all_financing_programs():
         
         # Procesar fechas para cada programa
         for programa in programas:
+            # Los importes escritos a mano pueden venir como texto: comparar y operar exige números
+            fin = programa.get('financiacion')
+            if isinstance(fin, dict):
+                for campo in CAMPOS_IMPORTE:
+                    if campo in fin:
+                        fin[campo] = _importe_a_numero(fin[campo])
             # Procesar estado de convocatoria
             if 'convocatoria' in programa:
                 # Si no hay fechas, establecer estado basado en el campo 'estado'
