@@ -443,7 +443,10 @@ def load_financing_programs(organismo=None, tipo_ayuda=None, ambito=None, benefi
                         (isinstance(p.get('fondos_europeos'), list) and fondos_filter in p['fondos_europeos']) or
                         p.get('origen_fondos') == fondos_filter]
         
-        if estado:
+        if estado and estado.lower() == 'resuelta':
+            # "Resuelta" no es un estado por fechas: es la marca que pone el monitor de concesiones
+            programas = [p for p in programas if p.get('resuelta')]
+        elif estado:
             programas = [p for p in programas if 'convocatoria' in p and p['convocatoria'].get('estado') and estado.lower() in p['convocatoria']['estado'].lower()]
         
         if presupuesto_min is not None:
@@ -635,7 +638,8 @@ def get_financing_filter_options():
             'sectores': ordenar_con_otros_al_final(list(sectores)),
             'tipos_proyecto': ordenar_con_otros_al_final(list(tipos_proyecto)),
             'origenes_fondos': ordenar_con_otros_al_final(list(origenes_fondos)),
-            'estados': sorted(list(estados))
+            # 'Resuelta' va aparte de los estados por fechas (una resuelta también figura como cerrada)
+            'estados': sorted(list(estados)) + ['Resuelta']
         }
     except Exception as e:
         print(f"Error al obtener opciones de filtro: {e}")
