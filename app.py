@@ -220,6 +220,10 @@ RUTAS_SIN_SESION_SOCIO = {'acceso_socios', 'admin_login', 'admin_logout', 'healt
 @app.before_request
 def exigir_sesion_socio():
     """Con SOCIOS_ACCESO_OBLIGATORIO=1, solo entran socios (vía /acceso) y admins"""
+    # Intermark enlaza al dashboard con el token (?token=): se acepta igual que en /acceso,
+    # y se redirige al dashboard limpio para que el token no se quede en la barra de direcciones
+    if request.endpoint == 'dashboard' and request.method == 'GET' and request.args.get('token'):
+        return acceso_socios()
     if not app.config['SOCIOS_ACCESO_OBLIGATORIO']:
         return None
     if request.endpoint in RUTAS_SIN_SESION_SOCIO:
