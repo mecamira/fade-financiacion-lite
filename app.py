@@ -153,6 +153,10 @@ def cabeceras_seguridad(resp):
     resp.headers.setdefault('X-Content-Type-Options', 'nosniff')
     resp.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
     resp.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()')
+    # Páginas y datos dinámicos (detrás de la sesión de socio): que ningún navegador ni proxy los guarde.
+    # Los estáticos y /guia ya traen su propia política de caché.
+    if 'Cache-Control' not in resp.headers and resp.mimetype in ('text/html', 'application/json'):
+        resp.headers['Cache-Control'] = 'no-store'
     return resp
 
 
