@@ -4,6 +4,17 @@
 
 {% block content %}
 <div class="container-fluid py-4">
+    {% if duplicados %}
+    <div class="alert alert-warning">
+        <strong><i class="fas fa-exclamation-triangle me-2"></i>Convocatorias duplicadas ({{ duplicados|length }})</strong>
+        <ul class="mb-1 mt-2">
+            {% for g in duplicados %}
+            <li>BDNS {{ g.bdns }}: {% for p in g.programas %}«{{ p.nombre }}»{% if not loop.last %} y {% endif %}{% endfor %}</li>
+            {% endfor %}
+        </ul>
+        <small>Busca el código BDNS en el listado de abajo y elimina la que sobre.</small>
+    </div>
+    {% endif %}
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="text-primary text-center">Gestión Manual de Convocatorias</h1>

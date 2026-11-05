@@ -6,6 +6,8 @@ import os
 import json
 from datetime import datetime
 
+from utils.bloqueo_json import bloqueo_json
+
 # Mapeos para simplificar los filtros
 ORGANISMO_GRUPOS = {
     'CDTI': ['CDTI', 'CDTI E.P.E', 'CDTI Innovación', 'CDTI (con fondos FEMPA)', 'CDTI (en colaboración con AEI)'],
@@ -684,7 +686,38 @@ def get_financing_filter_options():
             'estados': []
         }
 
-def agregar_programa(datos_programa):
+class ProgramaDuplicado(Exception):
+    """Ya existe otra convocatoria con el mismo código BDNS."""
+
+    def __init__(self, codigo, existente):
+        self.codigo = codigo
+        self.existente = existente
+        nombre = existente.get('nombre_coloquial') or existente.get('nombre') or existente.get('id')
+        super().__init__(
+            f"Ya existe una convocatoria con el código BDNS {codigo}: «{nombre}». "
+            f"No se ha guardado para evitar duplicados. Si quieres modificarla, edítala desde "
+            f"Editar convocatorias.")
+
+
+def _comprobar_bdns_libre(programas, datos, excluir_id=None, permitir_duplicado=False):
+    """
+    Lanza ProgramaDuplicado si el código BDNS de `datos` ya lo tiene otra convocatoria.
+    Con permitir_duplicado (la persona lo ha confirmado: p. ej. una misma BDNS con dos
+    programas distintos) se guarda y se marca para que el aviso diario no insista.
+    """
+    from utils.concesiones_monitor import _normalizar_bdns
+    codigo = _normalizar_bdns(datos.get('codigo_bdns'))
+    if not codigo:
+        return
+    for p in programas:
+        if p.get('id') != excluir_id and _normalizar_bdns(p.get('codigo_bdns')) == codigo:
+            if permitir_duplicado:
+                datos['duplicado_confirmado'] = True
+                return
+            raise ProgramaDuplicado(codigo, p)
+
+
+def agregar_programa(datos_programa, permitir_duplicado=False):
     """
     Añade un nuevo programa al archivo JSON de programas de financiación
     
@@ -699,40 +732,45 @@ def agregar_programa(datos_programa):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
         
-        # Cargar programas existentes
-        with open(json_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        with bloqueo_json(json_path):
+            # Cargar programas existentes
+            with open(json_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
         
-        # Generar ID único basado en el nombre (nombre_coloquial tiene prioridad)
-        nombre = datos_programa.get('nombre_coloquial') or datos_programa.get('nombre') or 'programa'
-        programa_id = nombre.lower().replace(' ', '-').replace('/', '-').replace('(', '').replace(')', '')
-        programa_id = programa_id[:50]  # Limitar longitud
+            _comprobar_bdns_libre(data['programas'], datos_programa, permitir_duplicado=permitir_duplicado)
+
+            # Generar ID único basado en el nombre (nombre_coloquial tiene prioridad)
+            nombre = datos_programa.get('nombre_coloquial') or datos_programa.get('nombre') or 'programa'
+            programa_id = nombre.lower().replace(' ', '-').replace('/', '-').replace('(', '').replace(')', '')
+            programa_id = programa_id[:50]  # Limitar longitud
         
-        # Asegurarse de que el ID es único
-        ids_existentes = [p.get('id') for p in data['programas']]
-        id_original = programa_id
-        contador = 1
-        while programa_id in ids_existentes:
-            programa_id = f"{id_original}-{contador}"
-            contador += 1
+            # Asegurarse de que el ID es único
+            ids_existentes = [p.get('id') for p in data['programas']]
+            id_original = programa_id
+            contador = 1
+            while programa_id in ids_existentes:
+                programa_id = f"{id_original}-{contador}"
+                contador += 1
         
-        # Añadir ID al programa
-        datos_programa['id'] = programa_id
+            # Añadir ID al programa
+            datos_programa['id'] = programa_id
         
-        # Añadir el programa a la lista
-        data['programas'].append(datos_programa)
+            # Añadir el programa a la lista
+            data['programas'].append(datos_programa)
         
-        # Actualizar fecha de última actualización
-        data['ultima_actualizacion'] = datetime.now().isoformat()
-        data['total_programas'] = len(data['programas'])
+            # Actualizar fecha de última actualización
+            data['ultima_actualizacion'] = datetime.now().isoformat()
+            data['total_programas'] = len(data['programas'])
         
-        # Guardar el archivo JSON actualizado
-        with open(json_path, 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
+            # Guardar el archivo JSON actualizado
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
         
-        print(f"Programa añadido exitosamente con ID: {programa_id}")
-        return programa_id
+            print(f"Programa añadido exitosamente con ID: {programa_id}")
+            return programa_id
         
+    except ProgramaDuplicado:
+        raise
     except Exception as e:
         print(f"Error al agregar programa: {e}")
         import traceback
@@ -754,7 +792,7 @@ def get_programa_by_id(programa_id):
 # Campos que no edita el formulario de convocatorias y que deben sobrevivir a un guardado
 CAMPOS_PROTEGIDOS = ('ultima_comprobacion_concesiones', 'resuelta', 'fecha_resolucion_detectada',
                      'concesiones', 'total_concesiones',
-                     'ampliaciones_credito', 'resoluciones_manuales')
+                     'ampliaciones_credito', 'resoluciones_manuales', 'duplicado_confirmado')
 
 TIPOS_RESOLUCION = ('provisional', 'definitiva', 'otra')
 
@@ -836,22 +874,23 @@ def guardar_datos_manuales(programa_id, ampliaciones, resoluciones, usuario):
     reso = sorted((_normalizar_resolucion(r) for r in resoluciones or []), key=lambda x: x['fecha'])
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
-    with open(json_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    for p in data['programas']:
-        if p.get('id') == programa_id:
-            p['ampliaciones_credito'] = _sellar(ampl, p.get('ampliaciones_credito'), usuario)
-            p['resoluciones_manuales'] = _sellar(reso, p.get('resoluciones_manuales'), usuario)
-            data['ultima_actualizacion'] = datetime.now().isoformat()
-            tmp = json_path + '.tmp'
-            with open(tmp, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-            os.replace(tmp, json_path)
-            return p
+    with bloqueo_json(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        for p in data['programas']:
+            if p.get('id') == programa_id:
+                p['ampliaciones_credito'] = _sellar(ampl, p.get('ampliaciones_credito'), usuario)
+                p['resoluciones_manuales'] = _sellar(reso, p.get('resoluciones_manuales'), usuario)
+                data['ultima_actualizacion'] = datetime.now().isoformat()
+                tmp = json_path + '.tmp'
+                with open(tmp, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=4)
+                os.replace(tmp, json_path)
+                return p
     return None
 
 
-def actualizar_programa(programa_id, datos_actualizados):
+def actualizar_programa(programa_id, datos_actualizados, permitir_duplicado=False):
     """
     Actualiza un programa existente en el archivo JSON
     
@@ -867,40 +906,51 @@ def actualizar_programa(programa_id, datos_actualizados):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
         
-        # Cargar programas existentes
-        with open(json_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        with bloqueo_json(json_path):
+            # Cargar programas existentes
+            with open(json_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
         
-        # Buscar el programa por ID
-        programa_encontrado = False
-        for i, programa in enumerate(data['programas']):
-            if programa.get('id') == programa_id:
-                # Mantener el ID original
-                datos_actualizados['id'] = programa_id
-                # El editor solo conoce sus campos: lo que gestionan el monitor de
-                # concesiones y el registro manual no puede perderse al guardar
-                for campo in CAMPOS_PROTEGIDOS:
-                    if campo in programa and campo not in datos_actualizados:
-                        datos_actualizados[campo] = programa[campo]
-                # Reemplazar el programa
-                data['programas'][i] = datos_actualizados
-                programa_encontrado = True
-                break
+            # Solo se comprueba si el código BDNS cambia: editar otros campos de una convocatoria
+            # que ya compartía BDNS (confirmada o heredada) no debe pedir nada
+            from utils.concesiones_monitor import _normalizar_bdns
+            previo = next((p for p in data['programas'] if p.get('id') == programa_id), {})
+            if _normalizar_bdns(datos_actualizados.get('codigo_bdns')) != _normalizar_bdns(previo.get('codigo_bdns')):
+                _comprobar_bdns_libre(data['programas'], datos_actualizados, excluir_id=programa_id,
+                                      permitir_duplicado=permitir_duplicado)
+
+            # Buscar el programa por ID
+            programa_encontrado = False
+            for i, programa in enumerate(data['programas']):
+                if programa.get('id') == programa_id:
+                    # Mantener el ID original
+                    datos_actualizados['id'] = programa_id
+                    # El editor solo conoce sus campos: lo que gestionan el monitor de
+                    # concesiones y el registro manual no puede perderse al guardar
+                    for campo in CAMPOS_PROTEGIDOS:
+                        if campo in programa and campo not in datos_actualizados:
+                            datos_actualizados[campo] = programa[campo]
+                    # Reemplazar el programa
+                    data['programas'][i] = datos_actualizados
+                    programa_encontrado = True
+                    break
         
-        if not programa_encontrado:
-            print(f"Programa con ID {programa_id} no encontrado")
-            return False
+            if not programa_encontrado:
+                print(f"Programa con ID {programa_id} no encontrado")
+                return False
         
-        # Actualizar fecha de última actualización
-        data['ultima_actualizacion'] = datetime.now().isoformat()
+            # Actualizar fecha de última actualización
+            data['ultima_actualizacion'] = datetime.now().isoformat()
         
-        # Guardar el archivo JSON actualizado
-        with open(json_path, 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
+            # Guardar el archivo JSON actualizado
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
         
-        print(f"Programa {programa_id} actualizado exitosamente")
-        return True
+            print(f"Programa {programa_id} actualizado exitosamente")
+            return True
         
+    except ProgramaDuplicado:
+        raise
     except Exception as e:
         print(f"Error al actualizar programa: {e}")
         import traceback
@@ -922,28 +972,29 @@ def eliminar_programa(programa_id):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
         
-        # Cargar programas existentes
-        with open(json_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        with bloqueo_json(json_path):
+            # Cargar programas existentes
+            with open(json_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
         
-        # Buscar y eliminar el programa por ID
-        programas_originales = len(data['programas'])
-        data['programas'] = [p for p in data['programas'] if p.get('id') != programa_id]
+            # Buscar y eliminar el programa por ID
+            programas_originales = len(data['programas'])
+            data['programas'] = [p for p in data['programas'] if p.get('id') != programa_id]
         
-        if len(data['programas']) == programas_originales:
-            print(f"Programa con ID {programa_id} no encontrado")
-            return False
+            if len(data['programas']) == programas_originales:
+                print(f"Programa con ID {programa_id} no encontrado")
+                return False
         
-        # Actualizar metadatos
-        data['ultima_actualizacion'] = datetime.now().isoformat()
-        data['total_programas'] = len(data['programas'])
+            # Actualizar metadatos
+            data['ultima_actualizacion'] = datetime.now().isoformat()
+            data['total_programas'] = len(data['programas'])
         
-        # Guardar el archivo JSON actualizado
-        with open(json_path, 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
+            # Guardar el archivo JSON actualizado
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
         
-        print(f"Programa {programa_id} eliminado exitosamente")
-        return True
+            print(f"Programa {programa_id} eliminado exitosamente")
+            return True
         
     except Exception as e:
         print(f"Error al eliminar programa: {e}")

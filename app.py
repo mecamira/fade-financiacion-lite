@@ -448,7 +448,9 @@ def editar_convocatorias():
     try:
         # Obtener opciones para filtros
         filter_options = financing_dashboard.get_financing_filter_options()
-        return render_template('financiacion_editar.html', filter_options=filter_options)
+        from utils import duplicados
+        return render_template('financiacion_editar.html', filter_options=filter_options,
+                               duplicados=duplicados.cargar_duplicados())
     except Exception as e:
         logger.error(f"Error en edición convocatorias: {str(e)}")
         return jsonify({'error': 'Error al cargar edición'}), 500
@@ -670,7 +672,12 @@ def guardar_programa():
             return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Guardar en base de datos
-        programa_id = financing_dashboard.agregar_programa(data)
+        forzar = bool(data.pop('forzar_duplicado', False))
+        try:
+            programa_id = financing_dashboard.agregar_programa(data, permitir_duplicado=forzar)
+        except financing_dashboard.ProgramaDuplicado as e:
+            logger.warning(f"Alta rechazada por BDNS duplicado: {e}")
+            return jsonify({'success': False, 'error': str(e), 'duplicado_id': e.existente.get('id')}), 409
 
         if not programa_id:
             logger.error("agregar_programa devolvió None — revisa los logs del proceso")
@@ -726,7 +733,12 @@ def actualizar_programa(programa_id):
             return jsonify({'success': False, 'error': 'Falta el campo: tipo_ayuda'}), 400
         
         # Actualizar en base de datos
-        success = financing_dashboard.actualizar_programa(programa_id, data)
+        forzar = bool(data.pop('forzar_duplicado', False))
+        try:
+            success = financing_dashboard.actualizar_programa(programa_id, data, permitir_duplicado=forzar)
+        except financing_dashboard.ProgramaDuplicado as e:
+            logger.warning(f"Edición rechazada por BDNS duplicado: {e}")
+            return jsonify({'success': False, 'error': str(e), 'duplicado_id': e.existente.get('id')}), 409
         
         if not success:
             return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404

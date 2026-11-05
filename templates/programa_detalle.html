@@ -718,7 +718,7 @@
 </div>
 {% endif %}
 
-<div id="ficha-ctx" data-id="{{ programa.id }}" data-admin="{{ 1 if es_admin else 0 }}" hidden></div>
+<div id="ficha-ctx" data-logo="{{ url_for('static', filename='images/fade_logo_marca_blanco.png') }}" data-id="{{ programa.id }}" data-admin="{{ 1 if es_admin else 0 }}" hidden></div>
 <script type="application/json" id="datos-programa">{{ programa | tojson }}</script>
 {% endblock %}
 

@@ -1330,15 +1330,24 @@ function generatePreview(data) {
                     dataToSave.fecha_publicacion_bdns = bdnsDateValue;
                 }
 
-                const response = await fetch('/api/guardar-programa', {
+                const enviarPrograma = (cuerpo) => fetch('/api/guardar-programa', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(dataToSave)
+                    body: JSON.stringify(cuerpo)
                 });
-                
-                const data = await response.json();
+
+                let response = await enviarPrograma(dataToSave);
+                let data = await response.json();
+
+                // BDNS ya registrada: se avisa y, si la persona lo confirma, se guarda igualmente
+                if (response.status === 409 && data.duplicado_id) {
+                    if (confirm(data.error + '\n\n¿Guardar de todos modos? (solo si es otro programa de la misma convocatoria)')) {
+                        response = await enviarPrograma(Object.assign({}, dataToSave, { forzar_duplicado: true }));
+                        data = await response.json();
+                    }
+                }
                 
                 if (data.success) {
                     alert('✅ ¡Programa guardado exitosamente en la base de datos!\n\nID: ' + data.programa_id + '\n\nLa convocatoria ya está disponible en el dashboard público.');

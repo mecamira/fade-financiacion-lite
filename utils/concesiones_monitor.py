@@ -293,20 +293,22 @@ def _volcar(path, actualizados):
     """
     if not actualizados:
         return True
-    data, programas = _cargar(path)
-    if programas is None:
-        return False
-    for p in programas:
-        upd = actualizados.get(p.get('id'))
-        if upd:
-            p.update({k: v for k, v in upd.items() if k in CAMPOS_MONITOR})
-    try:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        return True
-    except Exception as e:
-        logger.error(f"No se pudo guardar {path}: {e}")
-        return False
+    from utils.bloqueo_json import bloqueo_json
+    with bloqueo_json(path):
+        data, programas = _cargar(path)
+        if programas is None:
+            return False
+        for p in programas:
+            upd = actualizados.get(p.get('id'))
+            if upd:
+                p.update({k: v for k, v in upd.items() if k in CAMPOS_MONITOR})
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            return True
+        except Exception as e:
+            logger.error(f"No se pudo guardar {path}: {e}")
+            return False
 
 
 def _clasificar(programas, forzar, ahora):

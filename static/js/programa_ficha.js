@@ -23,11 +23,22 @@
     };
 
     // ------------------------------------------------------------------ PDF
-    function exportarPDF() {
+    // El logo se descarga del propio servidor y se incrusta como imagen (si falla, el PDF sale sin él)
+    function cargarLogo(url) {
+        if (!url) return Promise.resolve(null);
+        return fetch(url).then(r => r.blob()).then(blob => new Promise(res => {
+            const lector = new FileReader();
+            lector.onload = () => res(lector.result);
+            lector.readAsDataURL(blob);
+        })).catch(() => null);
+    }
+
+    async function exportarPDF() {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             alert('No se pudo cargar el generador de PDF. Comprueba tu conexión e inténtalo de nuevo.');
             return;
         }
+        const logo = await cargarLogo(ctx.dataset.logo);
         const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
         const W = 210, H = 297, M = 16, AN = W - 2 * M;
         const AZUL = [0, 94, 163], TEXTO = [40, 50, 60], GRIS = [100, 110, 120];
@@ -72,17 +83,19 @@
         const nombre = P.nombre_coloquial || P.nombre || 'Convocatoria';
         const organismo = arr(P.organismo).join(', ');
         fuente(17, true, [255, 255, 255]);
-        const lTitulo = doc.splitTextToSize(nombre, AN);
+        const lTitulo = doc.splitTextToSize(nombre, logo ? AN - 40 : AN);   // deja sitio al logo, arriba a la derecha
         fuente(9, false, [214, 235, 250]);
         const lOficial = P.nombre_oficial ? doc.splitTextToSize(P.nombre_oficial, AN) : [];
         fuente(11, true, [255, 255, 255]);
         const lOrg = organismo ? doc.splitTextToSize(organismo, AN) : [];
-        const alto = 10 + lTitulo.length * 7.2 + (lOficial.length ? 1 + lOficial.length * 4.2 : 0)
-            + (lOrg.length ? 2 + lOrg.length * 5 : 0) + 4;
+        // El texto que sigue al título empieza por debajo del logo (arriba a la derecha) para no pisarlo
+        const yTrasTitulo = Math.max(14 + lTitulo.length * 7.2, logo ? 25 : 0);
+        const alto = yTrasTitulo + lOficial.length * 4.2 + (lOrg.length ? 2 + lOrg.length * 5 : 0) + 3;
         doc.setFillColor(...AZUL); doc.rect(0, 0, W, alto, 'F');
+        if (logo) doc.addImage(logo, 'PNG', W - M - 34, 8, 34, 34 * 140 / 446);   // logo FADE en blanco
         y = 16;
         fuente(17, true, [255, 255, 255]); lTitulo.forEach(l => { doc.text(l, M, y); y += 7.2; });
-        y -= 2;
+        y = yTrasTitulo;
         if (lOficial.length) {
             fuente(9, false, [214, 235, 250]); lOficial.forEach(l => { doc.text(l, M, y); y += 4.2; });
         }

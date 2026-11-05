@@ -315,13 +315,22 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.textContent = 'Guardando...';
 
         try {
-            const response = await fetch(id ? `/api/programa/${id}` : '/api/guardar-programa', {
+            const enviar = (cuerpo) => fetch(id ? `/api/programa/${id}` : '/api/guardar-programa', {
                 method: id ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datos)
+                body: JSON.stringify(cuerpo)
             });
 
-            const data = await response.json();
+            let response = await enviar(datos);
+            let data = await response.json();
+
+            // BDNS ya registrada: se avisa y, si la persona lo confirma, se guarda igualmente
+            if (response.status === 409 && data.duplicado_id) {
+                if (confirm(data.error + '\n\n¿Guardar de todos modos? (solo si es otro programa de la misma convocatoria)')) {
+                    response = await enviar(Object.assign({}, datos, { forzar_duplicado: true }));
+                    data = await response.json();
+                }
+            }
 
             if (data.success) {
                 alert(id ? 'Actualizado' : 'Creado');
