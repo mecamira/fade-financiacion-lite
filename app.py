@@ -156,7 +156,8 @@ def cabeceras_seguridad(resp):
     # Páginas y datos dinámicos (detrás de la sesión de socio): que ningún navegador ni proxy los guarde.
     # Los estáticos y /guia ya traen su propia política de caché.
     if 'Cache-Control' not in resp.headers and resp.mimetype in ('text/html', 'application/json'):
-        resp.headers['Cache-Control'] = 'no-store'
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, private'
+        resp.headers['Pragma'] = 'no-cache'
     return resp
 
 
