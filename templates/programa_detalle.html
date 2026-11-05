@@ -2,6 +2,14 @@
 
 {% block title %}{{ programa.nombre_coloquial or programa.nombre }} - Dashboard de Financiación{% endblock %}
 
+{% block extra_css %}
+<style>
+    .desc-recortada { max-height: 11em; overflow: hidden; position: relative; }
+    .desc-recortada::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3em;
+                             background: linear-gradient(to bottom, rgba(255,255,255,0), #fff); }
+</style>
+{% endblock %}
+
 {% block content %}
 {% set es_admin = session.get('admin_logged_in') %}
 {% set ampliaciones = programa.ampliaciones_credito or [] %}
@@ -48,11 +56,20 @@
                     <div class="section-divider"></div>
 
                     <div class="card-section">
+                        {% set desc = programa.descripcion_detallada or '' %}
                         <h6 class="d-flex align-items-center gap-2 mb-3">
                             <i class="fas fa-align-left text-primary"></i>
-                            Descripción Detallada
+                            {% if programa.descripcion_es_objeto %}
+                                Objeto de la convocatoria
+                                <span class="badge bg-light text-primary border" title="Texto tomado del documento oficial de la convocatoria">texto oficial</span>
+                            {% else %}
+                                Descripción
+                            {% endif %}
                         </h6>
-                        <p style="line-height: 1.6;">{{ programa.descripcion_detallada }}</p>
+                        <div id="desc-texto" class="{{ 'desc-recortada' if desc|length > 900 }}" style="line-height: 1.6; white-space: pre-line;">{{ desc }}</div>
+                        {% if desc|length > 900 %}
+                        <button type="button" id="desc-mas" class="btn btn-link btn-sm px-0">Ver más</button>
+                        {% endif %}
                     </div>
 
                     {% if programa.comentarios %}

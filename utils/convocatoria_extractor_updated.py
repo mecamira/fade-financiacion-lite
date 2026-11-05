@@ -85,8 +85,9 @@ class ConvocatoriaExtractor:
           }},
           "requisitos": ["Lista", "de", "requisitos", "principales"],
           "gastos_subvencionables": ["Lista", "de", "gastos", "subvencionables"],
-          "resumen_breve": "Resumen breve y conciso de la convocatoria",
-          "descripcion_detallada": "Descripción más detallada (2-3 frases)",
+          "resumen_breve": "Resumen en lenguaje llano (1-2 frases): qué se financia, para quién y, si consta, cuánto",
+          "descripcion_detallada": "Objeto de la convocatoria copiado casi literalmente del texto (si existe); si no, descripción de 2-3 frases",
+          "descripcion_es_objeto": true o false (true solo si descripcion_detallada es el objeto copiado del documento),
           "enlaces": {{
             "url_bdns": "URL página BDNS (null si no disponible)",
             "convocatoria": "URL PDF convocatoria (null si no disponible)",
@@ -304,10 +305,15 @@ class ConvocatoriaExtractor:
             - Captura porcentajes y descripciones específicas de financiación (cuánto % del proyecto se financia)
 
         11. Para el resumen_breve:
-            - Una frase concisa (máximo 200 caracteres)
+            - 1 o 2 frases en lenguaje llano (máximo 250 caracteres): qué se financia, para quién y, si consta, cuánto dinero hay o qué porcentaje cubre
+            - NO copies aquí el objeto de la convocatoria ni repitas la descripcion_detallada: el resumen debe entenderse de un vistazo
 
-        12. Para la descripcion_detallada:
-            - 2-3 frases con detalles relevantes (máximo 500 caracteres)
+        12. Para la descripcion_detallada y descripcion_es_objeto:
+            - Busca en el texto el OBJETO de la convocatoria: suele ser el artículo o apartado titulado "Objeto" (por ejemplo "Artículo 1. Objeto", "Primero. Objeto y finalidad" u "Objeto de la convocatoria")
+            - Si existe, copia su contenido de forma casi literal (sin reinterpretar, resumir ni añadir nada que no esté en el texto), SIN el título del apartado ni su numeración, y pon descripcion_es_objeto en true
+            - Si es muy largo, copia los párrafos principales completos hasta un máximo de 1500 caracteres, terminando en una frase completa
+            - Si el texto NO tiene un objeto identificable, escribe una descripción de 2-3 frases con detalles relevantes (máximo 500 caracteres) y pon descripcion_es_objeto en false
+            - Nunca uses texto de otras partes (requisitos, plazos, criterios...) como si fuera el objeto
 
         13. Para el campo "comentarios":
             - Este campo debe estar siempre VACÍO ("") inicialmente
@@ -734,6 +740,43 @@ class ConvocatoriaExtractor:
             # Si hay algún error, no modificar el estado
             print(f"Error al verificar estado de convocatoria: {e}")
     
+    MAX_OBJETO = 1500          # caracteres de objeto que se guardan
+    MAX_DESCRIPCION = 500      # y de descripción generada
+
+    def _ajustar_descripcion(self, data: Dict[str, Any]) -> None:
+        """
+        Deja la descripción lista para mostrarse: quita el encabezado del apartado ("Artículo 1. Objeto"),
+        normaliza espacios y respeta el tope de longitud cortando en una frase completa.
+        """
+        es_objeto = data.get('descripcion_es_objeto')
+        if isinstance(es_objeto, str):
+            es_objeto = es_objeto.strip().lower() == 'true'
+        texto = data.get('descripcion_detallada')
+        if not isinstance(texto, str) or not texto.strip() or texto.strip().lower() == 'null':
+            data['descripcion_detallada'] = None
+            data['descripcion_es_objeto'] = False
+            return
+
+        texto = re.sub(r'[ \t]+', ' ', texto.replace('\r', '')).strip()
+        texto = re.sub(r'\n{3,}', '\n\n', texto)
+        if es_objeto:
+            # "Artículo 1. Objeto.", "Primero.- Objeto y finalidad:", "Objeto de la convocatoria." al empezar
+            texto = re.sub(
+                r'^\s*(?:art[ií]culo\s+\d+[ºª°]?\s*[.\-–:]*\s*|(?:primero|segundo|1|1\.1)\s*[.\-–:)]+\s*)?'
+                r'objeto(?:\s+(?:y\s+finalidad|de\s+la\s+convocatoria|de\s+las\s+ayudas|y\s+[áa]mbito[^.:\n]*))?(?:[ \t]*[.:\-–]+\s*|[ \t]*\n\s*)',
+                '', texto, count=1, flags=re.IGNORECASE).lstrip()
+
+        limite = self.MAX_OBJETO if es_objeto else self.MAX_DESCRIPCION
+        if len(texto) > limite:
+            corte = texto[:limite]
+            fin = max(corte.rfind('. '), corte.rfind('.\n'))
+            if fin >= limite * 0.4:
+                texto = corte[:fin + 1]
+            else:
+                texto = corte.rsplit(' ', 1)[0].rstrip(' ,;:') + '…'
+        data['descripcion_detallada'] = texto
+        data['descripcion_es_objeto'] = bool(es_objeto)
+
     def _validate_structure(self, data: Dict[str, Any]) -> None:
         """
         Valida que el diccionario tiene la estructura mínima necesaria
@@ -743,7 +786,7 @@ class ConvocatoriaExtractor:
         required_fields = [
             'id', 'nombre_coloquial', 'nombre_oficial', 'organismo', 'tipo_ayuda', 'ambito', 'beneficiarios',
             'sectores', 'tipo_proyecto', 'fondos_europeos', 'convocatoria', 'financiacion',
-            'requisitos', 'gastos_subvencionables', 'resumen_breve', 'descripcion_detallada', 'enlaces', 'comentarios'
+            'requisitos', 'gastos_subvencionables', 'resumen_breve', 'descripcion_detallada', 'descripcion_es_objeto', 'enlaces', 'comentarios'
         ]
 
         for field in required_fields:
@@ -753,8 +796,12 @@ class ConvocatoriaExtractor:
                     data[field] = []
                 elif field == 'comentarios':
                     data[field] = ""
+                elif field == 'descripcion_es_objeto':
+                    data[field] = False
                 else:
                     data[field] = None
+
+        self._ajustar_descripcion(data)
 
         # Compatibilidad hacia atrás: si existe 'nombre' pero no 'nombre_coloquial', copiar
         if 'nombre' in data and 'nombre_coloquial' not in data:

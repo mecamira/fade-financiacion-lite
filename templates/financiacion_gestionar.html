@@ -599,9 +599,9 @@ function generatePreview(data) {
                                 <div class="card-section">
                                     <h6 class="d-flex align-items-center gap-2 mb-3">
                                         <i class="fas fa-align-left text-primary"></i>
-                                        Descripción Detallada
+                                        ${data.descripcion_es_objeto ? 'Objeto de la convocatoria <span class="badge bg-light text-primary border">texto oficial</span>' : 'Descripción'}
                                     </h6>
-                                    <p style="line-height: 1.6;">${data.descripcion_detallada}</p>
+                                    <p style="line-height: 1.6; white-space: pre-line;">${data.descripcion_detallada}</p>
                                 </div>
                                 ` : ''}
                             </div>

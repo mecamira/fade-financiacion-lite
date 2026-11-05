@@ -106,7 +106,10 @@
 
         // --- resumen y descripción
         if (!vacio(P.resumen_breve)) { seccion('Resumen'); parrafo(P.resumen_breve, 10.5); }
-        if (!vacio(P.descripcion_detallada)) { seccion('Descripción detallada'); parrafo(P.descripcion_detallada); }
+        if (!vacio(P.descripcion_detallada)) {
+            seccion(P.descripcion_es_objeto ? 'Objeto de la convocatoria' : 'Descripción');
+            parrafo(P.descripcion_detallada);
+        }
         if (!vacio(P.comentarios)) { seccion('Comentarios'); parrafo(P.comentarios); }
 
         // --- datos clave
@@ -206,6 +209,15 @@
         const slug = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_')
             .replace(/^_|_$/g, '').slice(0, 60);
         doc.save(`ficha_${slug || 'convocatoria'}.pdf`);
+    }
+
+    // "Ver más / Ver menos" en descripciones largas (objetos de convocatoria)
+    const btnMas = document.getElementById('desc-mas');
+    if (btnMas) {
+        btnMas.addEventListener('click', () => {
+            const recortada = document.getElementById('desc-texto').classList.toggle('desc-recortada');
+            btnMas.textContent = recortada ? 'Ver más' : 'Ver menos';
+        });
     }
 
     const btnPdf = document.getElementById('btn-export-pdf');

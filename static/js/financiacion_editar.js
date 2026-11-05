@@ -215,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-fecha-cierre').value = p.convocatoria?.fecha_cierre || '';
             document.getElementById('edit-resumen').value = p.resumen_breve || '';
             document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
+            document.getElementById('edit-es-objeto').checked = !!p.descripcion_es_objeto;
             document.getElementById('edit-comentarios').value = p.comentarios || '';
 
             // Asegurar que los arrays sean arrays (compatibilidad con datos antiguos)
@@ -298,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tagifyInstances.fondos.removeAllTags();
 
         document.getElementById('edit-estado').value = 'Abierta';
+        document.getElementById('edit-es-objeto').checked = false;
     }
 
     // Guardar
@@ -401,6 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tipo_proyecto: tipo_proyecto,
             resumen_breve: document.getElementById('edit-resumen').value || null,
             descripcion_detallada: document.getElementById('edit-descripcion').value || null,
+            descripcion_es_objeto: document.getElementById('edit-es-objeto').checked,
             beneficiarios: beneficiarios,
             sectores: sectores,
             requisitos: requisitos,

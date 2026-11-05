@@ -179,16 +179,21 @@ Estos campos se extraen del PDF de la convocatoria usando Google Gemini 2.5 Flas
 #### `resumen_breve` (string)
 - **Fuente**: Texto del PDF
 - **Reglas**:
-  - Máximo 200 caracteres
-  - Una frase concisa
+  - 1-2 frases en lenguaje llano (máximo 250 caracteres): qué se financia, para quién y, si consta, cuánto
+  - No repite el objeto: debe entenderse de un vistazo
 - **Ejemplo**: "Ayudas para digitalización de PYMES mediante implementación de soluciones tecnológicas"
 
-#### `descripcion_detallada` (string)
-- **Fuente**: Texto del PDF
+#### `descripcion_detallada` (string) y `descripcion_es_objeto` (boolean)
+Se muestra como **«Objeto de la convocatoria»** (con la insignia «texto oficial») si `descripcion_es_objeto` es
+`true`, y como **«Descripción»** si es `false` o no existe (convocatorias anteriores).
+- **Fuente**: Texto del PDF (el objeto no viene en la API de la BDNS)
 - **Reglas**:
-  - Máximo 500 caracteres
-  - 2-3 frases con detalles relevantes
-- **Ejemplo**: "Subvenciones destinadas a empresas con menos de 250 empleados para proyectos de transformación digital. Se financian gastos de software, hardware, formación y consultoría tecnológica hasta el 70% del coste total."
+  - Si el documento tiene un apartado «Objeto», se copia casi literal, sin el título del apartado,
+    con un máximo de 1500 caracteres cortados en una frase completa, y `descripcion_es_objeto = true`
+  - Si no lo tiene: 2-3 frases generadas (máximo 500 caracteres) y `descripcion_es_objeto = false`
+  - En la ficha, los textos de más de 900 caracteres se muestran recortados con «Ver más»
+  - Se puede corregir a mano en Editar convocatorias («Descripción / Objeto» y la casilla de objeto oficial)
+- **Ejemplo (descripción generada)**: "Subvenciones destinadas a empresas con menos de 250 empleados para proyectos de transformación digital. Se financian gastos de software, hardware, formación y consultoría tecnológica hasta el 70% del coste total."
 
 ---
 
