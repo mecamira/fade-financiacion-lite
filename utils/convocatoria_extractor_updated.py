@@ -305,7 +305,8 @@ class ConvocatoriaExtractor:
             - Captura porcentajes y descripciones específicas de financiación (cuánto % del proyecto se financia)
 
         11. Para el resumen_breve:
-            - 1 o 2 frases en lenguaje llano (máximo 250 caracteres): qué se financia, para quién y, si consta, cuánto dinero hay o qué porcentaje cubre
+            - MÁXIMO 2 frases cortas y 250 caracteres, en lenguaje llano: qué se financia, para quién y, si consta, cuánto dinero hay o qué porcentaje cubre
+            - No enumeres líneas, modalidades ni requisitos: eso va en otros campos
             - NO copies aquí el objeto de la convocatoria ni repitas la descripcion_detallada: el resumen debe entenderse de un vistazo
 
         12. Para la descripcion_detallada y descripcion_es_objeto:
@@ -765,6 +766,10 @@ class ConvocatoriaExtractor:
                 r'^\s*(?:art[ií]culo\s+\d+[ºª°]?\s*[.\-–:]*\s*|(?:primero|segundo|1|1\.1)\s*[.\-–:)]+\s*)?'
                 r'objeto(?:\s+(?:y\s+finalidad|de\s+la\s+convocatoria|de\s+las\s+ayudas|y\s+[áa]mbito[^.:\n]*))?(?:[ \t]*[.:\-–]+\s*|[ \t]*\n\s*)',
                 '', texto, count=1, flags=re.IGNORECASE).lstrip()
+
+        if es_objeto:
+            # Si el objeto era el apartado "1." de un artículo, el número sobra
+            texto = re.sub(r'^\s*\d{1,2}[.)]\s+(?=[A-ZÁÉÍÓÚÑ])', '', texto, count=1)
 
         limite = self.MAX_OBJETO if es_objeto else self.MAX_DESCRIPCION
         if len(texto) > limite:
