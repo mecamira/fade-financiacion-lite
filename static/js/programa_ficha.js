@@ -226,6 +226,26 @@
     // ------------------------------------------------------------------ registro manual (admin)
     if (!ES_ADMIN) return;
 
+    // Marca interna «interesante para FADE» (no la ven los socios)
+    const btnInteres = document.getElementById('btn-interes-fade');
+    if (btnInteres) {
+        btnInteres.addEventListener('click', async () => {
+            const nuevo = btnInteres.getAttribute('aria-pressed') !== 'true';
+            try {
+                const r = await fetch(`/api/programa/${encodeURIComponent(ID)}/interes-fade`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor: nuevo })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok || !d.success) throw new Error(d.error || 'No se pudo guardar');
+                btnInteres.setAttribute('aria-pressed', String(nuevo));
+                btnInteres.querySelector('i').className = (nuevo ? 'fas' : 'far') + ' fa-star text-warning';
+            } catch (e) {
+                alert(e.message);
+            }
+        });
+    }
+
     let A = JSON.parse(JSON.stringify(arr(P.ampliaciones_credito)));
     let R = JSON.parse(JSON.stringify(arr(P.resoluciones_manuales)));
     const $ = id => document.getElementById(id);

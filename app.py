@@ -222,6 +222,13 @@ def admin_logout():
 RUTAS_SIN_SESION_SOCIO = {'acceso_socios', 'admin_login', 'admin_logout', 'health_check', 'static'}
 
 
+def _destino_valido(ruta):
+    """Solo se recuerdan páginas del buscador (nunca otras direcciones)."""
+    return bool(ruta) and ruta.startswith(('/financiacion/', '/guia')) and not ruta.startswith('//') \
+        and not ruta.startswith('/financiacion/gestionar') and not ruta.startswith('/financiacion/editar') \
+        and '\n' not in ruta and '\r' not in ruta
+
+
 @app.before_request
 def exigir_sesion_socio():
     """Con SOCIOS_ACCESO_OBLIGATORIO=1, solo entran socios (vía /acceso) y admins"""
@@ -237,7 +244,14 @@ def exigir_sesion_socio():
         return None
     if request.path.startswith('/api/'):
         return jsonify({'error': 'Sesión caducada. Accede desde la zona privada de fade.es.'}), 401
-    return redirect(app.config['SOCIOS_LOGIN_URL'])
+    respuesta = redirect(app.config['SOCIOS_LOGIN_URL'])
+    if request.method == 'GET' and _destino_valido(request.path):
+        # Enlace profundo (p. ej. la ficha de un correo): se recuerda 30 min para llevar al socio
+        # allí cuando vuelva de fade.es con su enlace firmado
+        destino = request.path + (('?' + request.query_string.decode('utf-8', 'ignore')) if request.query_string else '')
+        respuesta.set_cookie('destino_fade', destino, max_age=1800, httponly=True,
+                             secure=request.is_secure, samesite='Lax')
+    return respuesta
 
 
 @app.route('/acceso')
@@ -263,7 +277,10 @@ def acceso_socios():
     session['socio_id'] = socio_id
     session.permanent = True
     logger.info(f"Acceso de socio — id: {socio_id} — IP: {ip}")
-    return redirect(url_for('dashboard'))
+    destino = request.cookies.get('destino_fade', '')
+    respuesta = redirect(destino if _destino_valido(destino.split('?')[0]) else url_for('dashboard'))
+    respuesta.delete_cookie('destino_fade')
+    return respuesta
 
 
 @app.route('/guia')
@@ -400,6 +417,9 @@ def get_programas():
             bdns=bdns
         )
         
+        if not session.get('admin_logged_in'):
+            programas = [financing_dashboard.quitar_campos_internos(p) for p in programas]
+
         return jsonify({
             'success': True,
             'programas': programas,
@@ -423,6 +443,9 @@ def detalle_programa(programa_id):
         if not programa:
             return render_template('404.html'), 404
         
+        if not session.get('admin_logged_in'):
+            programa = financing_dashboard.quitar_campos_internos(programa)
+
         return render_template('programa_detalle.html', programa=programa)
         
     except Exception as e:
@@ -780,6 +803,23 @@ def eliminar_programa(programa_id):
     except Exception as e:
         logger.error(f"Error al eliminar programa: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/programa/<programa_id>/interes-fade', methods=['PUT'])
+@admin_api_required
+def marcar_interes_fade(programa_id):
+    """Marca o desmarca una convocatoria como interesante para FADE (marca interna, solo administración)"""
+    datos = request.get_json(silent=True) or {}
+    if not isinstance(datos.get('valor'), bool):
+        return jsonify({'success': False, 'error': 'Falta el campo «valor» (true o false)'}), 400
+    try:
+        if not financing_dashboard.marcar_interes_fade(programa_id, datos['valor']):
+            return jsonify({'success': False, 'error': 'Programa no encontrado'}), 404
+    except Exception as e:
+        logger.error(f"Error al marcar interés de {programa_id}: {e}")
+        return jsonify({'success': False, 'error': 'Error interno al guardar'}), 500
+    logger.info(f"Interés FADE de {programa_id} = {datos['valor']} — {session.get('admin_username')}")
+    return jsonify({'success': True, 'interes_fade': datos['valor']})
 
 
 @app.route('/api/programa/<programa_id>/datos-manuales', methods=['PUT'])

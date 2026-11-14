@@ -30,9 +30,20 @@
         <div class="card-header card-header-gradient py-4">
             <div class="d-flex justify-content-between align-items-start gap-3">
                 <h2 class="mb-0">{{ programa.nombre_coloquial or programa.nombre }}</h2>
-                <button type="button" id="btn-export-pdf" class="btn btn-light flex-shrink-0" title="Descargar esta convocatoria en PDF">
-                    <i class="fas fa-file-pdf text-danger me-1"></i><span class="d-none d-sm-inline">Exportar a PDF</span>
-                </button>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    {% if es_admin %}
+                    <button type="button" id="btn-interes-fade" class="btn btn-light" aria-pressed="{{ 'true' if programa.interes_fade else 'false' }}"
+                            title="Interesante para FADE (marca interna: no la ven los socios)">
+                        <i class="{{ 'fas' if programa.interes_fade else 'far' }} fa-star text-warning"></i>
+                    </button>
+                    <button type="button" id="btn-correo" class="btn btn-light" title="Preparar un correo para socios con esta convocatoria">
+                        <i class="fas fa-envelope text-primary me-1"></i><span class="d-none d-sm-inline">Correo</span>
+                    </button>
+                    {% endif %}
+                    <button type="button" id="btn-export-pdf" class="btn btn-light" title="Descargar esta convocatoria en PDF">
+                        <i class="fas fa-file-pdf text-danger me-1"></i><span class="d-none d-sm-inline">Exportar a PDF</span>
+                    </button>
+                </div>
             </div>
             {% if programa.nombre_oficial %}
                 <p class="mb-0 mt-2 small opacity-75"><em>{{ programa.nombre_oficial }}</em></p>
@@ -681,6 +692,54 @@
 </div>
 
 {% if es_admin %}
+<!-- Modal: correo para socios -->
+<div class="modal fade" id="modalCorreo" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="fas fa-envelope me-2"></i>Correo para socios</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p class="text-muted small mb-3">Los textos se rellenan solos a partir de la ficha. Edítalos si hace falta y pulsa «Copiar correo» para pegarlo en Outlook o Gmail.</p>
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small mb-1" for="corr-saludo">Saludo</label>
+              <select class="form-select form-select-sm" id="corr-saludo"><option>Buenos días:</option><option>Buenas tardes:</option></select></div>
+            <div class="col-6"><label class="form-label small mb-1" for="corr-medio">Publicado en</label>
+              <select class="form-select form-select-sm" id="corr-medio"><option value="BOE">BOE</option><option value="BOPA">BOPA</option><option value="OTRO">Otro diario oficial</option></select></div>
+            <div class="col-12"><label class="form-label small mb-1" for="corr-fecha">Fecha de publicación <span class="text-muted">(vacío = «de hoy»)</span></label>
+              <input type="date" class="form-control form-control-sm" id="corr-fecha"></div>
+            <div class="col-12"><label class="form-label small mb-1" for="corr-p1">Párrafo de publicación</label>
+              <textarea class="form-control form-control-sm" id="corr-p1" rows="4"></textarea></div>
+            <div class="col-12"><label class="form-label small mb-1" for="corr-p2">A quién se dirige y qué financia</label>
+              <textarea class="form-control form-control-sm" id="corr-p2" rows="4"></textarea>
+              <button type="button" class="btn btn-link btn-sm px-0" id="corr-restaurar">Volver a los textos automáticos</button></div>
+            <div class="col-12"><label class="form-label small mb-1" for="corr-nota">Nota adicional <span class="text-muted">(opcional)</span></label>
+              <textarea class="form-control form-control-sm" id="corr-nota" rows="2" placeholder="Por ejemplo: un plazo especialmente corto, o por qué puede interesar"></textarea></div>
+            <div class="col-12">
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="corr-tarjeta" checked><label class="form-check-label small" for="corr-tarjeta">Mostrar la tarjeta con los datos clave</label></div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="corr-pdf" checked><label class="form-check-label small" for="corr-pdf">Mencionar el PDF de resumen adjunto</label></div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="corr-alta" checked><label class="form-check-label small" for="corr-alta">Incluir el enlace para darse de alta</label></div>
+            </div>
+            <div class="col-12"><label class="form-label small mb-1" for="corr-firma">Firma</label>
+              <textarea class="form-control form-control-sm" id="corr-firma" rows="2"></textarea></div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="small text-muted mb-1">Vista previa</div>
+          <div id="corr-preview" class="border rounded p-2 bg-white"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+      <span id="corr-estado" class="small"></span>
+      <div>
+        <button type="button" class="btn btn-outline-secondary" id="corr-copiar-html">Copiar código HTML</button>
+        <button type="button" class="btn btn-primary" id="corr-copiar"><i class="fas fa-copy me-1"></i>Copiar correo</button>
+      </div>
+    </div>
+  </div></div>
+</div>
+
 <!-- Modal: ampliación de crédito -->
 <div class="modal fade" id="modalAmpl" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
@@ -743,4 +802,5 @@
 <script src="{{ url_for('static', filename='vendor/jspdf/jspdf.umd.min.js') }}"></script>
 <script src="{{ url_for('static', filename='vendor/jspdf/jspdf.plugin.autotable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/programa_ficha.js') }}"></script>
+{% if session.get('admin_logged_in') %}<script src="{{ url_for('static', filename='js/correo_ficha.js') }}"></script>{% endif %}
 {% endblock %}

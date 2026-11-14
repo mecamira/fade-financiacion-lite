@@ -203,6 +203,10 @@
                                         <button id="download-json-btn" class="btn btn-sm btn-primary ms-2">
                                             <i class="fas fa-download me-1"></i> Descargar
                                         </button>
+                                        <span id="interes-fade-wrap" class="form-check form-switch d-inline-block ms-3 align-middle" style="display: none;">
+                                            <input class="form-check-input" type="checkbox" id="interes-fade-check">
+                                            <label class="form-check-label small" for="interes-fade-check" title="Marca interna para volver a ella más adelante; los socios no la ven">Interesante para FADE</label>
+                                        </span>
                                         <button id="save-to-db-btn" class="btn btn-sm btn-success ms-2" style="display: none;">
                                             <i class="fas fa-save me-1"></i> Guardar en Base de Datos
                                         </button>
@@ -476,6 +480,8 @@ Organismo: ${jsonData.organismo || ''}`);
                 
                 // Mostrar botón de guardar
                 document.getElementById('save-to-db-btn').style.display = 'inline-block';
+                document.getElementById('interes-fade-wrap').style.display = 'inline-block';
+                document.getElementById('interes-fade-check').checked = false;
                 
                 // Generar vista previa
                 generatePreview(data.data);
@@ -505,6 +511,7 @@ Organismo: ${jsonData.organismo || ''}`);
             // Resetear datos actuales y ocultar botón de guardar
             currentProgramaData = null;
             document.getElementById('save-to-db-btn').style.display = 'none';
+            document.getElementById('interes-fade-wrap').style.display = 'none';
             
             // Resetear contenedores de resultados
             document.getElementById('preview-container').innerHTML = '<div class="text-center py-5"><p class="text-muted">Extrae la información de una convocatoria para visualizar la vista previa</p></div>';
@@ -1338,6 +1345,7 @@ function generatePreview(data) {
                     body: JSON.stringify(cuerpo)
                 });
 
+                dataToSave.interes_fade = document.getElementById('interes-fade-check').checked;
                 let response = await enviarPrograma(dataToSave);
                 let data = await response.json();
 

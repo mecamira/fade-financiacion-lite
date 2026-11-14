@@ -116,7 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                mostrarResultados(data.programas);
+                const soloInteres = document.getElementById('filter-interes').checked;
+                mostrarResultados(soloInteres ? data.programas.filter(p => p.interes_fade) : data.programas);
             }
         } catch (error) {
             alert('Error al buscar');
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const nombre = p.nombre_coloquial || p.nombre || '-';
             return `
                 <tr>
-                    <td><strong>${nombre}</strong></td>
+                    <td>${p.interes_fade ? '<i class="fas fa-star text-warning" title="Interesante para FADE"></i> ' : ''}<strong>${nombre}</strong></td>
                     <td>${p.organismo || '-'}</td>
                     <td>${p.convocatoria?.estado ? `<span class="badge bg-${getBadge(p.convocatoria.estado)}">${p.convocatoria.estado}</span>` : '-'}</td>
                     <td>${p.codigo_bdns || '-'}</td>
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-resumen').value = p.resumen_breve || '';
             document.getElementById('edit-descripcion').value = p.descripcion_detallada || '';
             document.getElementById('edit-es-objeto').checked = !!p.descripcion_es_objeto;
+            document.getElementById('edit-interes-fade').checked = !!p.interes_fade;
             document.getElementById('edit-comentarios').value = p.comentarios || '';
 
             // Asegurar que los arrays sean arrays (compatibilidad con datos antiguos)
@@ -300,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('edit-estado').value = 'Abierta';
         document.getElementById('edit-es-objeto').checked = false;
+        document.getElementById('edit-interes-fade').checked = false;
     }
 
     // Guardar
@@ -404,6 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resumen_breve: document.getElementById('edit-resumen').value || null,
             descripcion_detallada: document.getElementById('edit-descripcion').value || null,
             descripcion_es_objeto: document.getElementById('edit-es-objeto').checked,
+            interes_fade: document.getElementById('edit-interes-fade').checked,
             beneficiarios: beneficiarios,
             sectores: sectores,
             requisitos: requisitos,

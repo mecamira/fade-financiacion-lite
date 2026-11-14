@@ -792,7 +792,34 @@ def get_programa_by_id(programa_id):
 # Campos que no edita el formulario de convocatorias y que deben sobrevivir a un guardado
 CAMPOS_PROTEGIDOS = ('ultima_comprobacion_concesiones', 'resuelta', 'fecha_resolucion_detectada',
                      'concesiones', 'total_concesiones',
-                     'ampliaciones_credito', 'resoluciones_manuales', 'duplicado_confirmado')
+                     'ampliaciones_credito', 'resoluciones_manuales', 'duplicado_confirmado', 'interes_fade')
+
+# Campos de uso interno: solo los ve la administración, nunca los socios
+CAMPOS_INTERNOS = ('interes_fade',)
+
+
+def quitar_campos_internos(programa):
+    """Copia del programa sin los campos internos (para quien no sea administración)."""
+    return {k: v for k, v in programa.items() if k not in CAMPOS_INTERNOS}
+
+
+def marcar_interes_fade(programa_id, valor):
+    """Marca o desmarca una convocatoria como interesante para FADE. Devuelve False si no existe."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    json_path = os.path.join(base_dir, 'data', 'programas_financiacion.json')
+    with bloqueo_json(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        for p in data['programas']:
+            if p.get('id') == programa_id:
+                p['interes_fade'] = bool(valor)
+                data['ultima_actualizacion'] = datetime.now().isoformat()
+                tmp = json_path + '.tmp'
+                with open(tmp, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=4)
+                os.replace(tmp, json_path)
+                return True
+    return False
 
 TIPOS_RESOLUCION = ('provisional', 'definitiva', 'otra')
 

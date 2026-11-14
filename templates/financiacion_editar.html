@@ -62,6 +62,12 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-md-2 d-flex align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filter-interes">
+                        <label class="form-check-label small" for="filter-interes"><i class="fas fa-star text-warning"></i> Solo interesantes para FADE</label>
+                    </div>
+                </div>
                 <div class="col-md-2">
                     <button class="btn btn-primary w-100" id="btn-buscar">
                         <i class="fas fa-search me-1"></i>Buscar
@@ -253,6 +259,13 @@
                                             <input class="form-check-input" type="checkbox" id="edit-es-objeto">
                                             <label class="form-check-label small" for="edit-es-objeto">
                                                 Es el objeto de la convocatoria, copiado del documento oficial (se muestra como «Objeto de la convocatoria»)
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mt-3">
+                                            <input class="form-check-input" type="checkbox" id="edit-interes-fade">
+                                            <label class="form-check-label" for="edit-interes-fade">
+                                                <i class="fas fa-star text-warning"></i> Interesante para FADE
+                                                <span class="text-muted small">(marca interna para volver a ella más adelante; los socios no la ven)</span>
                                             </label>
                                         </div>
                                     </div>

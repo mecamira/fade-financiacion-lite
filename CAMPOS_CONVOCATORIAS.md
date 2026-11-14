@@ -195,6 +195,13 @@ Se muestra como **«Objeto de la convocatoria»** (con la insignia «texto ofici
   - Se puede corregir a mano en Editar convocatorias («Descripción / Objeto» y la casilla de objeto oficial)
 - **Ejemplo (descripción generada)**: "Subvenciones destinadas a empresas con menos de 250 empleados para proyectos de transformación digital. Se financian gastos de software, hardware, formación y consultoría tecnológica hasta el 70% del coste total."
 
+#### `interes_fade` (boolean, uso interno)
+- **Fuente**: la marca la persona que sube la convocatoria («Interesante para FADE») o, más tarde, desde la ficha (estrella) o el editor
+- **Reglas**:
+  - Solo la ve la administración: la API y la ficha la quitan para los socios
+  - En Editar convocatorias hay una estrella en el listado y un filtro «Solo interesantes para FADE»
+  - No la modifica la extracción ni el monitor de concesiones, y sobrevive a las ediciones del formulario
+
 ---
 
 ## 2️⃣ CAMPOS DESDE BDNS SCRAPER (3 campos)
