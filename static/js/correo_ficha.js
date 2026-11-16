@@ -34,7 +34,7 @@
     const sinAnio = d => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
 
     const urlFicha = location.origin + '/financiacion/programa/' + encodeURIComponent(P.id);
-    const urlLogo = location.origin + '/static/images/fade_logo_marca_blanco.png';
+    const urlCabecera = location.origin + '/static/images/fade_email_cabecera.png';
     const URL_ALTA = 'https://fade.es/login/';
 
     // ------------------------------------------------------------------ textos automáticos
@@ -117,6 +117,8 @@
         const f = P.financiacion || {};
         const filas = [];
         const org = arr(P.organismo).join(', ');
+        const est = estado();
+        if (est) filas.push(['Estado', est.texto, est.fg]);
         if (org) filas.push(['Organismo', org]);
         if (dotacion()) filas.push(['Dotación', dotacion()]);
         if (plazo()) filas.push(['Plazo de solicitud', plazo()]);
@@ -142,27 +144,21 @@
 
     function htmlCorreo(o) {
         const p = 'margin:0 0 14px 0;';
-        const e = estado();
         const nombre = P.nombre_coloquial || P.nombre || 'Convocatoria';
 
-        const cabecera = `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${AZUL}" style="background:${AZUL};border-radius:8px 8px 0 0;">
-  <tr>
-    <td style="padding:16px 22px;"><img src="${urlLogo}" alt="FADE" height="30" style="display:block;height:30px;border:0;"></td>
-    <td align="right" style="padding:16px 22px;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:13px;letter-spacing:.4px;">Buscador de subvenciones</td>
-  </tr>
-</table>`;
+        // Imagen con el fondo azul y el logo ya incluidos: no depende de los fondos CSS, que muchos clientes eliminan
+        const cabecera = `<img src="${urlCabecera}" alt="FADE · Buscador de subvenciones" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;background:${AZUL};color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:16px;">`;
 
-        const filas = o.tarjeta ? filasDatos().map(([k, v]) => `
+        const filas = o.tarjeta ? filasDatos().map(([k, v, color]) => `
       <tr>
         <td valign="top" style="padding:7px 12px 7px 0;color:${GRIS};font-size:13px;white-space:nowrap;width:150px;">${esc(k)}</td>
-        <td valign="top" style="padding:7px 0;color:${TEXTO};font-size:14px;font-weight:bold;">${esc(v)}</td>
+        <td valign="top" style="padding:7px 0;color:${color || TEXTO};font-size:14px;font-weight:bold;">${esc(v)}</td>
       </tr>`).join('') : '';
 
         const tarjeta = o.tarjeta ? `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 20px 0;border:1px solid #D5E3EE;border-left:4px solid ${AZUL};border-radius:6px;background:#F5FAFE;">
-  <tr><td style="padding:16px 18px;">
-    <div style="font-size:16px;font-weight:bold;color:${AZUL_OSC};margin:0 0 8px 0;">${esc(nombre)}${e ? ` &nbsp;<span style="display:inline-block;font-size:11px;font-weight:bold;padding:2px 9px;border-radius:10px;background:${e.bg};color:${e.fg};">${esc(e.texto)}</span>` : ''}</div>
+  <tr><td bgcolor="#F5FAFE" style="padding:16px 18px;background:#F5FAFE;">
+    <div style="font-size:16px;font-weight:bold;color:${AZUL_OSC};margin:0 0 8px 0;">${esc(nombre)}</div>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${filas}
     </table>
   </td></tr>
@@ -170,10 +166,11 @@
 
         const boton = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 20px 0;">
-  <tr><td bgcolor="${AZUL}" style="background:${AZUL};border-radius:6px;">
-    <a href="${esc(urlFicha)}" style="display:inline-block;padding:12px 24px;color:#FFFFFF;font-weight:bold;font-size:15px;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Ver la ficha completa en el Buscador &rarr;</a>
+  <tr><td bgcolor="${AZUL}" align="center" style="background:${AZUL};border-radius:6px;padding:13px 26px;">
+    <a href="${esc(urlFicha)}" style="color:#FFFFFF;font-weight:bold;font-size:15px;text-decoration:none;font-family:Arial,Helvetica,sans-serif;"><span style="color:#FFFFFF;text-decoration:none;">Ver la ficha completa en el Buscador &rarr;</span></a>
   </td></tr>
-</table>`;
+</table>
+<p style="margin:-10px 0 20px 0;font-size:12px;color:${GRIS};">¿No ves el botón? <a href="${esc(urlFicha)}" style="color:${AZUL};font-weight:bold;">Abre la ficha aquí</a>.</p>`;
 
         const acceso = [
             o.pdf ? 'Tienes toda la información en el PDF de resumen adjunto.' : '',
@@ -186,7 +183,7 @@
 
         return `<div style="font-family:Arial,Helvetica,sans-serif;color:${TEXTO};font-size:15px;line-height:1.55;max-width:640px;">
 ${cabecera}
-<div style="border:1px solid #D5E3EE;border-top:0;border-radius:0 0 8px 8px;padding:22px 24px;">
+<div style="border:1px solid #D5E3EE;border-top:0;padding:22px 24px;">
 <p style="${p}">${esc(o.saludo)}</p>
 ${o.p1 ? `<p style="${p}">${parrafos(o.p1)}</p>` : ''}
 ${o.p2 ? `<p style="${p}">${parrafos(o.p2)}</p>` : ''}
