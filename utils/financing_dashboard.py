@@ -791,6 +791,7 @@ def get_programa_by_id(programa_id):
 
 # Campos que no edita el formulario de convocatorias y que deben sobrevivir a un guardado
 CAMPOS_PROTEGIDOS = ('ultima_comprobacion_concesiones', 'resuelta', 'fecha_resolucion_detectada',
+                     'ultima_novedad_concesiones',
                      'concesiones', 'total_concesiones',
                      'ampliaciones_credito', 'resoluciones_manuales', 'duplicado_confirmado', 'interes_fade')
 

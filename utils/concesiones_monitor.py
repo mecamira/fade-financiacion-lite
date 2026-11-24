@@ -44,9 +44,15 @@ MAX_CONCESIONES = 500          # tope de concesiones guardadas por convocatoria
 PAGE_SIZE = 100
 LOCK_MAX_SEGUNDOS = 20 * 60    # un lock más antiguo se considera huérfano
 
+# Una convocatoria resuelta SIGUE revisándose: la BDNS publica las concesiones por tandas y
+# pueden aparecer más semanas o meses después. Cuanto más tiempo lleva sin novedades, más se
+# espacian las revisiones, pero nunca se dejan del todo. (días desde la última novedad, horas entre
+# revisiones; los intervalos van un poco por debajo de 7 y 30 días por la misma razón que arriba)
+REVISION_RESUELTAS = ((90, INTERVALO_MIN_HORAS), (365, 6.5 * 24), (None, 28 * 24))
+
 # Campos del programa que gestiona el monitor (el resto no se toca nunca)
-CAMPOS_MONITOR = ('ultima_comprobacion_concesiones', 'resuelta',
-                  'fecha_resolucion_detectada', 'concesiones', 'total_concesiones')
+CAMPOS_MONITOR = ('ultima_comprobacion_concesiones', 'resuelta', 'fecha_resolucion_detectada',
+                  'concesiones', 'total_concesiones', 'ultima_novedad_concesiones')
 
 
 def _json_path():
@@ -121,10 +127,11 @@ def _liberar_lock():
 # CONSULTA A LA API
 # ============================================================================
 
-def consultar_concesiones(codigo_bdns, vpd='GE'):
+def consultar_concesiones(codigo_bdns, vpd='GE', total_previo=None):
     """
     Consulta las concesiones de una convocatoria.
     Devuelve (total_elements, lista_concesiones) o (None, []) si hay error.
+    Si se pasa total_previo y el total no ha cambiado, devuelve (total, None) sin bajar el resto.
     """
     concesiones = []
     page = 0
@@ -145,6 +152,8 @@ def consultar_concesiones(codigo_bdns, vpd='GE'):
 
         if total is None:
             total = data.get('totalElements', 0)
+        if total_previo is not None and total == total_previo:
+            return total, None
         if total == 0:
             return 0, []
 
@@ -216,6 +225,21 @@ def notificar_telegram(resueltas):
     return ok
 
 
+def notificar_novedades(novedades):
+    """Aviso agrupado de convocatorias ya resueltas en las que la BDNS ha publicado concesiones nuevas."""
+    lineas = ["🆕 *Nuevas concesiones en convocatorias ya resueltas*", ""]
+    for n in novedades:
+        lineas.append(f"✅ *{_md(n['nombre'])}*")
+        lineas.append(f"   BDNS {n['codigo_bdns']} · +{n['total_concesiones'] - n['antes']} concesiones "
+                      f"(antes {n['antes']}, ahora {n['total_concesiones']})")
+        lineas.append("")
+    lineas.append("Ver detalle en el Dashboard de Programas.")
+    ok = _enviar_telegram('\n'.join(lineas))
+    if ok:
+        logger.info(f"Aviso de novedades enviado por Telegram ({len(novedades)} convocatorias)")
+    return ok
+
+
 def notificar_fallo(comprobadas, errores):
     """Aviso de que el monitor no está pudiendo consultar la BDNS."""
     ok = _enviar_telegram(
@@ -243,6 +267,8 @@ def resumen_semanal():
     resueltas = [p for p in programas if p.get('resuelta')]
     esta_semana = [p for p in resueltas
                    if (_parse_fecha(p.get('fecha_resolucion_detectada')) or datetime.min) >= ahora - timedelta(days=7)]
+    nuevas_concesiones = [p for p in resueltas if p not in esta_semana
+                          and (_parse_fecha(p.get('ultima_novedad_concesiones')) or datetime.min) >= ahora - timedelta(days=7)]
     sellos = [_parse_fecha(p.get('ultima_comprobacion_concesiones')) for p in vigiladas]
     ultima = max((s for s in sellos if s), default=None)
 
@@ -253,12 +279,15 @@ def resumen_semanal():
     lineas += [
         f"• Convocatorias vigiladas: {len(vigiladas)}",
         f"• Resueltas esta semana: {len(esta_semana)}",
+        f"• Resueltas con concesiones nuevas esta semana: {len(nuevas_concesiones)}",
         f"• Resueltas en total: {len(resueltas)}",
     ]
     if ultima:
         lineas.append(f"• Última comprobación: {ultima.strftime('%d/%m %H:%M')} UTC")
     for p in esta_semana:
         lineas.append(f"   ✅ {_md(p.get('nombre_coloquial') or p.get('nombre') or p.get('codigo_bdns'))}")
+    for p in nuevas_concesiones:
+        lineas.append(f"   🆕 {_md(p.get('nombre_coloquial') or p.get('nombre') or p.get('codigo_bdns'))}")
 
     ok = _enviar_telegram('\n'.join(lineas))
     if ok:
@@ -311,8 +340,22 @@ def _volcar(path, actualizados):
             return False
 
 
-def _clasificar(programas, forzar, ahora):
-    """Separa los programas a comprobar de los que se omiten, con el motivo."""
+def _horas_entre_revisiones(p, ahora):
+    """Cada cuánto se revisa una convocatoria ya resuelta, según el tiempo que lleva sin novedades."""
+    referencia = (_parse_fecha(p.get('ultima_novedad_concesiones'))
+                  or _parse_fecha(p.get('fecha_resolucion_detectada')) or ahora)
+    dias = (ahora - referencia).days
+    for hasta_dias, horas in REVISION_RESUELTAS:
+        if hasta_dias is None or dias <= hasta_dias:
+            return horas
+
+
+def _clasificar(programas, forzar, ahora, todas=False):
+    """
+    Separa los programas a comprobar de los que se omiten, con el motivo.
+    Las resueltas se revisan según su calendario (ver REVISION_RESUELTAS); con todas=True se
+    revisan todas, sin esperar (revisión completa puntual).
+    """
     limite = ahora - timedelta(hours=INTERVALO_MIN_HORAS)
     pendientes = []
     stats = {'omitidas': 0, 'resueltas_previas': 0, 'sin_bdns': 0, 'ultima_comprobacion': None}
@@ -320,20 +363,24 @@ def _clasificar(programas, forzar, ahora):
         if not _normalizar_bdns(p.get('codigo_bdns')):
             stats['sin_bdns'] += 1
             continue
-        if p.get('resuelta'):
-            stats['resueltas_previas'] += 1
-            continue
         ultima = _parse_fecha(p.get('ultima_comprobacion_concesiones'))
+        if p.get('resuelta'):
+            # 'resueltas_previas' = resueltas que hoy no toca revisar
+            if not todas and ultima and ultima > ahora - timedelta(hours=_horas_entre_revisiones(p, ahora)):
+                stats['resueltas_previas'] += 1
+                continue
+            pendientes.append(p)
+            continue
         if ultima and (stats['ultima_comprobacion'] is None or ultima > stats['ultima_comprobacion']):
             stats['ultima_comprobacion'] = ultima
-        if not forzar and ultima and ultima > limite:
+        if not forzar and not todas and ultima and ultima > limite:
             stats['omitidas'] += 1
             continue
         pendientes.append(p)
     return pendientes, stats
 
 
-def planificar(forzar=False):
+def planificar(forzar=False, todas=False):
     """
     Dice qué haría una pasada ahora mismo, sin consultar la API.
     Lo usa el botón del Panel del Servidor para informar al usuario.
@@ -341,7 +388,7 @@ def planificar(forzar=False):
     data, programas = _cargar(_json_path())
     if programas is None:
         return {'error': 'No se pudo leer la base de datos de programas'}
-    pendientes, stats = _clasificar(programas, forzar, datetime.now())
+    pendientes, stats = _clasificar(programas, forzar, datetime.now(), todas)
     stats['a_comprobar'] = len(pendientes)
     stats['ocupado'] = lock_activo()
     return stats
@@ -351,32 +398,32 @@ def planificar(forzar=False):
 # PASADA DEL MONITOR
 # ============================================================================
 
-def ejecutar_monitor(forzar=False):
+def ejecutar_monitor(forzar=False, todas=False):
     """
     Pasada completa del monitor. Devuelve un resumen:
     comprobadas, errores, omitidas, resueltas_previas, sin_bdns, resueltas (lista).
     """
     resumen = {'comprobadas': 0, 'errores': 0, 'omitidas': 0, 'resueltas_previas': 0,
-               'sin_bdns': 0, 'resueltas': [], 'ocupado': False}
+               'sin_bdns': 0, 'resueltas': [], 'novedades': [], 'ocupado': False}
 
     if not _adquirir_lock():
         logger.info("Monitor de concesiones: ya hay otra pasada en curso, se omite esta")
         resumen['ocupado'] = True
         return resumen
     try:
-        _ejecutar(forzar, resumen)
+        _ejecutar(forzar, resumen, todas)
     finally:
         _liberar_lock()
     return resumen
 
 
-def _ejecutar(forzar, resumen):
+def _ejecutar(forzar, resumen, todas=False):
     path = _json_path()
     data, programas = _cargar(path)
     if programas is None:
         return
 
-    pendientes, stats = _clasificar(programas, forzar, datetime.now())
+    pendientes, stats = _clasificar(programas, forzar, datetime.now(), todas)
     resumen.update({k: stats[k] for k in ('omitidas', 'resueltas_previas', 'sin_bdns')})
 
     actualizados = {}
@@ -386,7 +433,9 @@ def _ejecutar(forzar, resumen):
 
         codigo = _normalizar_bdns(p.get('codigo_bdns'))
         nombre = p.get('nombre_coloquial') or p.get('nombre') or codigo
-        total, concesiones = consultar_concesiones(codigo, p.get('vpd') or 'GE')
+        ya_resuelta = bool(p.get('resuelta'))
+        previo = (p.get('total_concesiones') or len(p.get('concesiones') or [])) if ya_resuelta else None
+        total, concesiones = consultar_concesiones(codigo, p.get('vpd') or 'GE', total_previo=previo)
         resumen['comprobadas'] += 1
 
         if total is None:
@@ -396,8 +445,22 @@ def _ejecutar(forzar, resumen):
 
         ahora = datetime.now().isoformat()
         upd = {'ultima_comprobacion_concesiones': ahora}
-        if total > 0:
+        if ya_resuelta:
+            # Ya resuelta: se mira si la BDNS ha publicado concesiones nuevas
+            if concesiones is not None and total > 0 and total != previo:
+                upd.update({'concesiones': concesiones, 'total_concesiones': total,
+                            'ultima_novedad_concesiones': ahora})
+                if total > previo:
+                    resumen['novedades'].append({'nombre': nombre, 'codigo_bdns': codigo,
+                                                 'antes': previo, 'total_concesiones': total})
+                    logger.info(f"NUEVAS CONCESIONES: {nombre} (BDNS {codigo}) — {previo} → {total}")
+                else:
+                    logger.warning(f"La BDNS tiene menos concesiones que antes: {nombre} (BDNS {codigo}) — {previo} → {total}")
+            elif total == 0:
+                logger.warning(f"La BDNS ya no muestra concesiones de {nombre} (BDNS {codigo}); se conservan las guardadas")
+        elif total > 0:
             upd.update({'resuelta': True, 'fecha_resolucion_detectada': ahora,
+                        'ultima_novedad_concesiones': ahora,
                         'concesiones': concesiones, 'total_concesiones': total})
             resumen['resueltas'].append({'nombre': nombre, 'codigo_bdns': codigo,
                                          'total_concesiones': total, 'concesiones': concesiones})
@@ -412,14 +475,17 @@ def _ejecutar(forzar, resumen):
     # lo volverá a detectar y se evita avisar dos veces de lo mismo.
     if resumen['resueltas'] and guardado:
         notificar_telegram(resumen['resueltas'])
+    if resumen['novedades'] and guardado:
+        notificar_novedades(resumen['novedades'])
     if resumen['comprobadas'] and resumen['errores'] * 2 >= resumen['comprobadas']:
         notificar_fallo(resumen['comprobadas'], resumen['errores'])
 
     logger.info(
         f"Monitor concesiones: {resumen['comprobadas']} comprobadas "
-        f"({resumen['errores']} con error), {len(resumen['resueltas'])} resueltas nuevas; "
+        f"({resumen['errores']} con error), {len(resumen['resueltas'])} resueltas nuevas, "
+        f"{len(resumen['novedades'])} resueltas con concesiones nuevas; "
         f"omitidas: {resumen['omitidas']} por comprobarse hace menos de {INTERVALO_MIN_HORAS} h, "
-        f"{resumen['resueltas_previas']} ya resueltas, {resumen['sin_bdns']} sin código BDNS"
+        f"{resumen['resueltas_previas']} ya resueltas sin tocarles revisión, {resumen['sin_bdns']} sin código BDNS"
     )
 
 
@@ -430,12 +496,14 @@ if __name__ == '__main__':
     )
     parser = argparse.ArgumentParser(description='Monitor de concesiones BDNS')
     parser.add_argument('--forzar', action='store_true',
-                        help=f'ignora el límite de {INTERVALO_MIN_HORAS} h y comprueba todas las convocatorias sin resolver')
+                        help=f'ignora el límite de {INTERVALO_MIN_HORAS} h y comprueba todas las convocatorias sin resolver (y las resueltas que toquen)')
+    parser.add_argument('--todas', action='store_true',
+                        help='revisión completa puntual: comprueba también las ya resueltas, sin respetar su calendario')
     parser.add_argument('--resumen', action='store_true',
                         help='envía el resumen semanal por Telegram en lugar de hacer una pasada')
     args = parser.parse_args()
     if args.resumen:
         resumen_semanal()
     else:
-        ejecutar_monitor(forzar=args.forzar)
+        ejecutar_monitor(forzar=args.forzar, todas=args.todas)
     sys.exit(0)
