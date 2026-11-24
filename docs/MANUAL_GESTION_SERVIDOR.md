@@ -3,21 +3,24 @@
 ## 🔐 ACCESO AL SERVIDOR
 
 ### Datos de Conexión
-- **Servidor:** 116.202.12.50
-- **Usuario:** fadeadmin
-- **Contraseña:** [LA QUE CREEMOS]
+- **Servidor:** 178.105.160.148
+- **Usuario:** root
+- **Acceso:** solo con clave SSH (la contraseña está desactivada desde noviembre de 2026):
+  `ssh -i ~/.ssh/fade-hetzner root@178.105.160.148`
 - **Puerto SSH:** 22
+- **Proyecto:** `/root/fade-financiacion-lite` (docker compose, servicio `flask-app`)
+- **Web:** https://financiacion.fade.es
 
 ### Cómo Conectarse
 
 #### Desde Windows (PowerShell):
 ```powershell
-ssh fadeadmin@116.202.12.50
+ssh root@178.105.160.148
 ```
 
 #### Desde Mac/Linux (Terminal):
 ```bash
-ssh fadeadmin@116.202.12.50
+ssh root@178.105.160.148
 ```
 
 ---
@@ -27,7 +30,7 @@ ssh fadeadmin@116.202.12.50
 Una vez conectados al servidor, existe un script que facilita todas las operaciones:
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 ./scripts/gestionar.sh
 ```
 
@@ -40,7 +43,7 @@ Este script muestra un menú interactivo con todas las opciones disponibles.
 ### 1. Ver Estado del Sistema
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 docker compose ps
 ```
 
@@ -53,7 +56,7 @@ docker compose ps
 ### 2. Ver Logs de la Aplicación
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 docker compose logs flask-app --tail=50
 ```
 
@@ -70,7 +73,7 @@ docker compose logs -f flask-app
 **Si la aplicación falla o se comporta extraño:**
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 docker compose restart flask-app
 ```
 
@@ -86,7 +89,7 @@ docker compose restart
 **Cuando haya nuevas actualizaciones del código:**
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 
 # Descargar cambios
 git pull origin main
@@ -107,7 +110,7 @@ docker compose ps
 **Backup manual de las convocatorias:**
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 
 # Crear carpeta de backups si no existe
 mkdir -p backups
@@ -123,7 +126,7 @@ ls -lh backups/
 
 Desde tu ordenador (no desde el servidor):
 ```bash
-scp fadeadmin@116.202.12.50:~/fade-financiacion-lite/backups/programas_*.json .
+scp root@178.105.160.148:/root/fade-financiacion-lite/backups/programas_*.json .
 ```
 
 ---
@@ -135,7 +138,7 @@ botón «Guardar» del editor, no duplica convocatorias que ya existan y hace un
 del JSON en `data/` antes de escribir.
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 
 # 1. Modo prueba: enseña qué daría de alta, sin guardar nada
 docker compose exec flask-app python scripts/importar_convocatorias.py scripts/cargas/2026-11_convocatorias_abiertas.json
@@ -151,7 +154,7 @@ Si algo sale mal, la copia queda en `data/programas_financiacion.json.antes-carg
 ### 6. Restaurar un Backup
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 
 # Ver backups disponibles
 ls -lh backups/
@@ -173,7 +176,7 @@ docker compose restart flask-app
 **Si aparece "Permission denied" al guardar convocatorias:**
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 chmod 666 data/programas_financiacion.json
 ```
 
@@ -255,7 +258,7 @@ Esperar 10 segundos y probar de nuevo.
 ### No puedo guardar convocatorias
 
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 sudo chmod 666 data/programas_financiacion.json
 docker compose restart flask-app
 ```
@@ -274,7 +277,7 @@ passwd
 
 Editar el archivo `.env`:
 ```bash
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 nano .env
 ```
 
@@ -314,7 +317,7 @@ docker compose restart flask-app
 
 ```bash
 # Ir a la carpeta del proyecto
-cd ~/fade-financiacion-lite
+cd /root/fade-financiacion-lite
 
 # Ver estado
 docker compose ps
@@ -342,7 +345,7 @@ chmod 666 data/programas_financiacion.json
 Después de cualquier operación importante:
 
 - [ ] Los contenedores están "Up (healthy)"
-- [ ] La web carga en http://116.202.12.50
+- [ ] La web carga en https://financiacion.fade.es
 - [ ] Puedo hacer login como admin
 - [ ] Puedo ver las convocatorias
 - [ ] No hay errores en los logs
