@@ -128,6 +128,26 @@ scp fadeadmin@116.202.12.50:~/fade-financiacion-lite/backups/programas_*.json .
 
 ---
 
+### 5 bis. Dar de alta convocatorias en bloque
+
+Las cargas preparadas están en `scripts/cargas/`. El script usa la misma función que el
+botón «Guardar» del editor, no duplica convocatorias que ya existan y hace una copia
+del JSON en `data/` antes de escribir.
+
+```bash
+cd ~/fade-financiacion-lite
+
+# 1. Modo prueba: enseña qué daría de alta, sin guardar nada
+docker compose exec flask-app python scripts/importar_convocatorias.py scripts/cargas/2026-11_convocatorias_abiertas.json
+
+# 2. Si el resultado es el esperado, guardar de verdad
+docker compose exec flask-app python scripts/importar_convocatorias.py scripts/cargas/2026-11_convocatorias_abiertas.json --aplicar
+```
+
+Si algo sale mal, la copia queda en `data/programas_financiacion.json.antes-carga-FECHA`.
+
+---
+
 ### 6. Restaurar un Backup
 
 ```bash

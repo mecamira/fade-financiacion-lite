@@ -1,0 +1,1282 @@
+{
+  "descripcion": "Convocatorias de ventanilla abierta o vigentes revisadas en noviembre de 2026 (Excel «convocatorias_abiertas_para_editor»). Campos sin dato van vacíos para completarlos desde Editar convocatorias.",
+  "programas": [
+    {
+      "nombre_coloquial": "Préstamo participativo Enisa para startups y pymes",
+      "nombre": "Préstamo participativo Enisa para startups y pymes",
+      "nombre_oficial": "Financiación para startups y pymes: préstamos participativos Enisa",
+      "codigo_bdns": null,
+      "organismo": "ENISA (Empresa Nacional de Innovación, S.A.)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "Next Generation"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Préstamo participativo sin garantías. Interés en dos tramos: Euríbor + diferencial y tramo variable según rentabilidad. Hasta 7 años de amortización con hasta 2 de carencia. Comisión de apertura 0,5 %.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": 25000,
+        "importe_maximo_subvencionable": 1500000
+      },
+      "tipo_proyecto": [
+        "Creación de empresas",
+        "Inversión productiva",
+        "General"
+      ],
+      "resumen_breve": "Préstamos participativos sin garantías de 25.000 a 1,5 millones de euros para startups y pymes con un modelo de negocio innovador.",
+      "descripcion_detallada": "Enisa financia, con préstamos participativos, proyectos empresariales innovadores de startups y pymes sin participar en su gestión ni en su propiedad. Préstamos de 25.000 a 1.500.000 euros sin garantías, con interés vinculado a los resultados de la empresa (Euríbor más diferencial y un segundo tramo según rentabilidad), hasta 7 años de amortización y hasta 2 de carencia. No figura en la CIRBE.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Startups"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Empresa constituida en España con domicilio fiscal en territorio nacional",
+        "Ser pyme (menos de 250 empleados y facturación < 50 M€ o balance < 43 M€)",
+        "Fondos propios al menos iguales al importe del préstamo",
+        "Cualquier sector salvo inmobiliario y financiero",
+        "Modelo de negocio innovador con ventajas competitivas y plan de negocio sólido",
+        "Cuentas del último ejercicio depositadas en el Registro Mercantil (auditadas si se piden más de 300.000 €)",
+        "Al corriente con Hacienda y Seguridad Social",
+        "Cumplir el principio DNSH"
+      ],
+      "gastos_subvencionables": [
+        "Ejecución del plan de negocio presentado"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.enisa.es/servicios/financiacion/startups-y-pymes",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea Directa de Innovación CDTI (LIC)",
+      "nombre": "Línea Directa de Innovación CDTI (LIC)",
+      "nombre_oficial": "Línea Directa de Innovación (LIC)",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "FEDER"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Ayuda parcialmente reembolsable: cobertura hasta el 75 % del presupuesto (85 % con FEDER). Tramo no reembolsable del 7 % (fondos CDTI) o 10 % (fondos europeos). Interés fijo: Euríbor 1 año + 0,5 % (5 años) o + 1 % (7 años).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": 175000,
+        "presupuesto_maximo": 6000000,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "I+D+i",
+        "Inversión productiva"
+      ],
+      "resumen_breve": "Ayuda parcialmente reembolsable del CDTI para proyectos de innovación tecnológica cercanos al mercado, de 175.000 € a 6 M€ de presupuesto.",
+      "descripcion_detallada": "Ayuda parcialmente reembolsable para empresas que incorporen tecnologías emergentes, adapten tecnologías a nuevos mercados, apliquen diseño industrial o implanten nuevos métodos de producción. Financia activos fijos nuevos y otros costes asociados. Sujeta a minimis.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Aportar al menos el 15 % del presupuesto con recursos propios o financiación externa",
+        "No se admite refinanciación",
+        "Duración del proyecto de 9 a 24 meses",
+        "Sujeta a los límites de minimis",
+        "No iniciar el proyecto antes de la solicitud",
+        "Mantener la inversión 5 años y cumplir DNSH si se cofinancia con FEDER"
+      ],
+      "gastos_subvencionables": [
+        "Activos fijos nuevos",
+        "Otros costes asociados al proyecto"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/ayudas/linea-directa-de-innovacion",
+        "bases_reguladoras": "https://www.cdti.es/sites/default/files/2026-09/3._lic_2026_07.pdf",
+        "bases": "https://www.cdti.es/sites/default/files/2026-09/3._lic_2026_07.pdf",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea Directa de Expansión CDTI (LICA)",
+      "nombre": "Línea Directa de Expansión CDTI (LICA)",
+      "nombre_oficial": "Línea Directa de Expansión (LIC A)",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "FEDER"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Ayuda parcialmente reembolsable. Tramo no reembolsable del 10 % (fondos CDTI) o del 15 al 30 % si se cofinancia con fondos europeos, según la región (anexo I de la ficha). Comprobar en el anexo I el porcentaje para Asturias.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": 175000,
+        "presupuesto_maximo": 30000000,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva",
+        "I+D+i"
+      ],
+      "resumen_breve": "Ayuda parcialmente reembolsable del CDTI para inversiones tecnológicas innovadoras en regiones asistidas como Asturias, de 175.000 € a 30 M€.",
+      "descripcion_detallada": "Esta tipología de ayuda tiene como objetivo potenciar la innovación en determinadas regiones españolas más desfavorecidas, mediante proyectos de inversión innovadora (activos fijos) que mejoren las capacidades y faciliten el crecimiento de las empresas.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Proyecto ubicado en una región asistida del Mapa de Ayudas Regionales 2022-2027 (Asturias lo es)",
+        "En las zonas «c», como Asturias, solo pueden acceder pymes",
+        "Duración del proyecto de 9 a 24 meses, con un solo hito",
+        "Efecto incentivador: no iniciar la inversión antes de la solicitud",
+        "Mantener la inversión 5 años",
+        "Aportar al menos el 25 % con recursos propios o financiación externa"
+      ],
+      "gastos_subvencionables": [
+        "Activos fijos nuevos vinculados a la inversión innovadora"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/ayudas/linea-directa-de-expansion",
+        "bases_reguladoras": "https://www.cdti.es/sites/default/files/2026-02/4._lica_2026_02.pdf",
+        "bases": "https://www.cdti.es/sites/default/files/2026-02/4._lica_2026_02.pdf",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Proyectos de innovación en pesca y acuicultura CDTI-FEMPA",
+      "nombre": "Proyectos de innovación en pesca y acuicultura CDTI-FEMPA",
+      "nombre_oficial": "Proyectos de Innovación FEMPA (IDF)",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "FEMPA"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Ayuda parcialmente reembolsable: cobertura hasta el 85 % del presupuesto. Tramo no reembolsable hasta el 33 % (calculado sobre el 75 %). Interés Euríbor a 1 año. Amortización en 10 o 15 años. Intensidad máxima FEMPA 75 % (85 % en Canarias).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": 175000,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "I+D+i"
+      ],
+      "resumen_breve": "Ayuda parcialmente reembolsable del CDTI, con fondos FEMPA, de hasta el 85 % del presupuesto para proyectos de innovación de empresas pesqueras y acuícolas.",
+      "descripcion_detallada": "El CDTI participa en el Fondo Europeo Marítimo, de Pesca y de Acuicultura (FEMPA) como organismo intermedio para financiar proyectos de innovación en el sector pesquero (gestión sostenible de recursos, reducción de la huella ambiental, artes y técnicas más eficientes y selectivas, gestión de residuos, seguridad, soluciones digitales, valor añadido de la producción) y en acuicultura (conocimiento técnico y científico, nuevas especies, productos y procesos).",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Gran Empresa"
+      ],
+      "sectores": [
+        "Agricultura/Ganadería/Silvicultura/Pesca"
+      ],
+      "requisitos": [
+        "Empresa válidamente constituida con domicilio fiscal en España",
+        "Pesca extractiva, transformación o comercialización (en transformación, solo pymes) o acuicultura",
+        "Aportar al menos el 15 % del presupuesto con recursos propios",
+        "Subcontratar al menos el 5 % del presupuesto con organismos de investigación",
+        "Duración de 12 a 36 meses, con hitos de 9 a 18 meses",
+        "No iniciar el proyecto antes de la solicitud",
+        "Cumplir las condiciones de la política pesquera común"
+      ],
+      "gastos_subvencionables": [
+        "Personal",
+        "Aparatos y equipos (amortización)",
+        "Materiales",
+        "Colaboraciones externas y subcontrataciones",
+        "Costes indirectos"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/ayudas/proyectos-de-innovacion-fempa",
+        "bases_reguladoras": "https://www.cdti.es/sites/default/files/2026-02/6._idf_innovacion_2026_02.pdf",
+        "bases": "https://www.cdti.es/sites/default/files/2026-02/6._idf_innovacion_2026_02.pdf",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Proyectos de inversión en acuicultura y transformación pesquera CDTI-FEMPA",
+      "nombre": "Proyectos de inversión en acuicultura y transformación pesquera CDTI-FEMPA",
+      "nombre_oficial": "Proyectos de Inversión FEMPA (LIF)",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "FEMPA"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Ayuda parcialmente reembolsable: cobertura hasta el 85 % del presupuesto aprobado. Tramo no reembolsable del 33 %.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": 175000,
+        "presupuesto_maximo": 9500000,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva"
+      ],
+      "resumen_breve": "Ayuda parcialmente reembolsable del CDTI, con fondos FEMPA, de hasta el 85 % para inversiones en acuicultura y en transformación y comercialización de productos pesqueros.",
+      "descripcion_detallada": "Ayuda parcialmente reembolsable para empresas que realicen inversiones productivas en acuicultura o en la transformación y comercialización de productos de la pesca y la acuicultura, financiando activos fijos nuevos y otros costes.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Gran Empresa"
+      ],
+      "sectores": [
+        "Agricultura/Ganadería/Silvicultura/Pesca"
+      ],
+      "requisitos": [
+        "Acuicultura: empresas de cualquier tamaño",
+        "Transformación y comercialización: solo pymes",
+        "Proyectos individuales de una sola empresa",
+        "Duración de 9 a 24 meses",
+        "Aportar con recursos propios o financiación externa la parte no financiada",
+        "No financia aumento de capacidad de pesca, construcción o importación de buques ni repoblación directa"
+      ],
+      "gastos_subvencionables": [
+        "Activos fijos nuevos",
+        "Otros costes de la inversión"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/ayudas/proyectos-de-inversion-fempa",
+        "bases_reguladoras": "https://www.cdti.es/sites/default/files/2026-02/7._lif_inversion_2026_02.pdf",
+        "bases": "https://www.cdti.es/sites/default/files/2026-02/7._lif_inversion_2026_02.pdf",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Ayudas CDTI a pymes en proyectos Eurostars y Partenariados Horizonte Europa 2026",
+      "nombre": "Ayudas CDTI a pymes en proyectos Eurostars y Partenariados Horizonte Europa 2026",
+      "nombre_oficial": "Ayudas CDTI a pymes en proyectos Eurostars y Partenariados Horizonte Europa 2026",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Subvención"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [
+        "Otros"
+      ],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Subvención. Si no hay presupuesto suficiente, intensidad máxima del 60 % (pequeña), 50 % (mediana) y 40 % (grande).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": 400000
+      },
+      "tipo_proyecto": [
+        "I+D+i",
+        "Internacionalización"
+      ],
+      "resumen_breve": "Subvención del CDTI de hasta 400.000 € por beneficiario para pymes españolas con proyectos de I+D aprobados en Eurostars-3 o en Partenariados cofinanciados de Horizonte Europa.",
+      "descripcion_detallada": "Eurostars-3 apoya proyectos de I+D cercanos al mercado liderados por pymes innovadoras, dentro de la Asociación Europea de Pymes Innovadoras entre Eureka y la Comisión Europea. Una vez aprobado el proyecto por el Secretariado Eureka, el CDTI concede la ayuda a los socios españoles mediante concesión directa, con fondos CDTI (75 %) y de la Unión Europea (25 %). La misma resolución financia a los participantes españoles en las Asociaciones cofinanciadas del Pilar II de Horizonte Europa.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME"
+      ],
+      "sectores": [
+        "I+D+i"
+      ],
+      "requisitos": [
+        "Proyecto aprobado en la convocatoria internacional (Eurostars-3 o Partenariado del Pilar II)",
+        "Empresa española; en Eurostars no pueden ser beneficiarias las grandes empresas",
+        "Proyecto de hasta 36 meses que empiece en 2026 y termine antes del 31/12/2029",
+        "Efecto incentivador y no estar en crisis"
+      ],
+      "gastos_subvencionables": [],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/ayudas/eurostars-3-2026-cod10",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Innvierte: coinversión del CDTI en empresas tecnológicas",
+      "nombre": "Innvierte: coinversión del CDTI en empresas tecnológicas",
+      "nombre_oficial": "Programa Innvierte (Innvierte Economía Sostenible, S.I.C.C. S.M.E., S.A.)",
+      "codigo_bdns": null,
+      "organismo": "CDTI",
+      "tipo_ayuda": [
+        "Capital Riesgo"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Innvierte aporta entre 0,5 y 0,9 veces lo que aporta el inversor privado (procedimiento de homologación de 2023).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": 500000,
+        "importe_maximo_subvencionable": 10000000
+      },
+      "tipo_proyecto": [
+        "Creación de empresas",
+        "I+D+i"
+      ],
+      "resumen_breve": "Coinversión del CDTI, junto a inversores privados homologados, en el capital de startups y pymes tecnológicas españolas.",
+      "descripcion_detallada": "Innvierte es la iniciativa de capital riesgo del CDTI que coinvierte con inversores privados homologados en empresas españolas innovadoras o de base tecnológica para impulsar su crecimiento. El inversor privado lidera y es mayoritario en cada operación.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Startups",
+        "PYME"
+      ],
+      "sectores": [
+        "Tecnología/Digital",
+        "I+D+i"
+      ],
+      "requisitos": [
+        "La solicitud la presenta un inversor privado homologado por Innvierte, que lidera la ronda",
+        "Empresa tecnológica o innovadora con sede en España",
+        "El inversor privado debe ser mayoritario en la coinversión"
+      ],
+      "gastos_subvencionables": [],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.cdti.es/innvierte",
+        "bases_reguladoras": "https://www.cdti.es/sites/default/files/2024-08/20240807_cdti_innvierte_procedimiento_homologacion.pdf",
+        "bases": "https://www.cdti.es/sites/default/files/2024-08/20240807_cdti_innvierte_procedimiento_homologacion.pdf",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Empresas y Emprendedores",
+      "nombre": "Línea ICO Empresas y Emprendedores",
+      "nombre_oficial": "ICO Empresas y Emprendedores",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % de las necesidades de financiación. Interés fijo o variable más el margen de la entidad. De 1 a 20 años con hasta 3 de carencia.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva",
+        "Digitalización",
+        "General"
+      ],
+      "resumen_breve": "Financiación a través de bancos para proyectos de inversión, actividad, liquidez y digitalización de autónomos y empresas, a plazos de 1 a 20 años.",
+      "descripcion_detallada": "Línea de mediación del ICO, que se solicita en las entidades de crédito, para financiar proyectos de inversión, actividades empresariales, necesidades de liquidez o gastos, proyectos de digitalización (programa Acelera Pyme) y rehabilitación de viviendas y edificios. Préstamo, leasing, renting o línea de crédito, de 1 a 20 años con hasta 3 de carencia.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Emprendedores",
+        "Todas las empresas",
+        "Particulares"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Se solicita directamente en las entidades de crédito adheridas"
+      ],
+      "gastos_subvencionables": [
+        "Proyectos de inversión",
+        "Actividad empresarial y liquidez",
+        "Digitalización (Acelera Pyme)",
+        "Rehabilitación de viviendas y edificios"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico-empresas-y-emprendedores",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39709/Ficha+larga+Empresas+y+emprendedores+II.pdf/3121c305-e262-cfb5-95ee-962a7bf0eb8f?t=1629206762128",
+        "bases": "https://www.ico.es/documents/20124/39709/Ficha+larga+Empresas+y+emprendedores+II.pdf/3121c305-e262-cfb5-95ee-962a7bf0eb8f?t=1629206762128",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Crédito Comercial",
+      "nombre": "Línea ICO Crédito Comercial",
+      "nombre_oficial": "ICO Crédito Comercial",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % de las necesidades de financiación. Interés variable más el margen de la entidad.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "General"
+      ],
+      "resumen_breve": "Liquidez a través de bancos para anticipar facturas o prefinanciar la producción de bienes y servicios que se venden en España.",
+      "descripcion_detallada": "Línea de mediación del ICO para autónomos, emprendedores y empresas con domicilio social en España. Financia la obtención de liquidez mediante el anticipo de facturas y la prefinanciación de los costes de producción de bienes y servicios que se venden en España. Interés variable más el margen de la entidad.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Emprendedores",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Domicilio social en España",
+        "Se solicita en las entidades de crédito adheridas"
+      ],
+      "gastos_subvencionables": [
+        "Anticipo de facturas",
+        "Prefinanciación de costes de producción para ventas en España"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/ico-credito-comercial",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39715/ficha+larga+credito+comercial+II.pdf/1c11b724-c631-63b7-c568-d38ec66f7e99?t=1629207079805",
+        "bases": "https://www.ico.es/documents/20124/39715/ficha+larga+credito+comercial+II.pdf/1c11b724-c631-63b7-c568-d38ec66f7e99?t=1629207079805",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Exportadores",
+      "nombre": "Línea ICO Exportadores",
+      "nombre_oficial": "ICO Exportadores Corto Plazo",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % de las necesidades de financiación. Interés variable más el margen de la entidad.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Internacionalización"
+      ],
+      "resumen_breve": "Financiación a corto plazo a través de bancos para anticipar facturas de exportación o prefinanciar la producción que se vende en el exterior.",
+      "descripcion_detallada": "Línea de mediación del ICO para autónomos, emprendedores y empresas con domicilio social en España. Financia la liquidez mediante el anticipo de facturas de la actividad comercial en el exterior y la prefinanciación de los costes de producción de bienes y servicios que se venden fuera. Puede contar con financiación del BEI u otras entidades multilaterales.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Emprendedores",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Domicilio social en España",
+        "Se solicita en las entidades de crédito adheridas"
+      ],
+      "gastos_subvencionables": [
+        "Anticipo de facturas de exportación",
+        "Prefinanciación de costes de producción para ventas en el exterior"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/ico-exportadores-corto-plazo",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39724/FICHA+LARGA+EXPORTADORES+2022.pdf/c76b1f4c-3607-9a58-730f-5e91294b2d4c?t=1643110590371",
+        "bases": "https://www.ico.es/documents/20124/39724/FICHA+LARGA+EXPORTADORES+2022.pdf/c76b1f4c-3607-9a58-730f-5e91294b2d4c?t=1643110590371",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Garantía SGR/SAECA",
+      "nombre": "Línea ICO Garantía SGR/SAECA",
+      "nombre_oficial": "ICO Garantía SGR / SAECA",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % de las necesidades de financiación. Interés fijo o variable más el margen de la entidad. De 1 a 15 años con hasta 3 de carencia.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva",
+        "General"
+      ],
+      "resumen_breve": "Financiación a través de bancos para inversión, actividad y liquidez de autónomos y empresas que tengan el aval de una SGR (como Asturgar) o de SAECA.",
+      "descripcion_detallada": "Línea de mediación del ICO para autónomos, emprendedores y empresas que dispongan de aval de una Sociedad de Garantía Recíproca o de SAECA. Financia proyectos de inversión, actividades empresariales y necesidades de liquidez o gastos. Préstamo, leasing, renting o línea de crédito, de 1 a 15 años con hasta 3 de carencia. El coste del aval lo acuerdan la SGR o SAECA y el cliente.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Emprendedores",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Disponer de aval de una SGR o de SAECA",
+        "Se solicita en las entidades de crédito, en las SGR o en SAECA"
+      ],
+      "gastos_subvencionables": [
+        "Proyectos de inversión",
+        "Actividad empresarial",
+        "Liquidez y gastos"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/ico-garantia-sgr",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39712/Ficha+informativa++ICO+Garantia+SGR.pdf/a146ffe5-62e4-baa1-15f3-6047a90de722?t=1672219024762",
+        "bases": "https://www.ico.es/documents/20124/39712/Ficha+informativa++ICO+Garantia+SGR.pdf/a146ffe5-62e4-baa1-15f3-6047a90de722?t=1672219024762",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Internacional",
+      "nombre": "Línea ICO Internacional",
+      "nombre_oficial": "ICO Internacional (Inversión y Liquidez)",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % de las necesidades de financiación, en euros o dólares. Interés fijo o variable más el margen de la entidad. De 1 a 20 años con hasta 3 de carencia.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Internacionalización",
+        "Inversión productiva"
+      ],
+      "resumen_breve": "Financiación a través de bancos, en euros o dólares, para inversión, actividad y liquidez de empresas españolas fuera de España.",
+      "descripcion_detallada": "Línea de mediación del ICO para autónomos y empresas domiciliadas en España, o en el extranjero con interés español, que desarrollen actividades fuera del territorio nacional. Financia actividades empresariales, inversión y necesidades de liquidez en el exterior, en euros o dólares, de 1 a 20 años con hasta 3 de carencia.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Empresa domiciliada en España, o en el extranjero con interés español",
+        "Actividad o inversión fuera de España",
+        "Se solicita en las entidades de crédito adheridas"
+      ],
+      "gastos_subvencionables": [
+        "Inversión fuera de España",
+        "Actividad empresarial y liquidez en el exterior"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/ico-internacional",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39724/INTERNACIONAL+TRAMO+I+2021+FICHA+LARGA_con+hiperv%C3%ADnculo+OK.pdf/9d5b312f-1d7f-52c2-4ad0-245995ed70df?t=1638525527072",
+        "bases": "https://www.ico.es/documents/20124/39724/INTERNACIONAL+TRAMO+I+2021+FICHA+LARGA_con+hiperv%C3%ADnculo+OK.pdf/9d5b312f-1d7f-52c2-4ad0-245995ed70df?t=1638525527072",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Canal Internacional",
+      "nombre": "Línea ICO Canal Internacional",
+      "nombre_oficial": "ICO Canal Internacional (Programa de mediación con banca internacional)",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Condiciones financieras que fije la entidad financiera internacional con el cliente.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Internacionalización"
+      ],
+      "resumen_breve": "Financiación en moneda local, a través de bancos extranjeros con acuerdo con el ICO, para inversión y liquidez de empresas con interés español fuera de España.",
+      "descripcion_detallada": "Programa del ICO con instituciones financieras internacionales y bancos locales fuera de España para financiar, en moneda local, las actividades empresariales, inversiones y necesidades de liquidez en el extranjero de autónomos y empresas con interés español. Sin límite de importe; las condiciones las fija la entidad financiera internacional.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Interés español",
+        "Actividad o inversión fuera de España",
+        "Se solicita en las entidades financieras internacionales o bancos locales con acuerdo con el ICO"
+      ],
+      "gastos_subvencionables": [
+        "Inversiones fuera de España",
+        "Liquidez y gastos generales de la actividad en el exterior"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/progama-ico-mediacion-banca-internacional",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39724/Mediacion+Canal+Internacional.pdf/3840c5a0-4988-faae-d34b-bd4641963e16?t=1629289474302",
+        "bases": "https://www.ico.es/documents/20124/39724/Mediacion+Canal+Internacional.pdf/3840c5a0-4988-faae-d34b-bd4641963e16?t=1629289474302",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Línea ICO Red.es Acelera",
+      "nombre": "Línea ICO Red.es Acelera",
+      "nombre_oficial": "ICO Red.es Acelera",
+      "codigo_bdns": null,
+      "organismo": "ICO (Instituto de Crédito Oficial)",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": "2028-03-31"
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 100 % del importe máximo de la resolución de ayudas de Red.es. Interés fijo o variable más el margen de la entidad. De 1 a 7 años con hasta 2 de carencia.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "I+D+i",
+        "Digitalización"
+      ],
+      "resumen_breve": "Préstamo a través de bancos para beneficiarios de ayudas de Red.es, de hasta el 100 % de la ayuda concedida, para proyectos de tecnologías digitales.",
+      "descripcion_detallada": "Financiación para la digitalización de las empresas destinada a beneficiarios de ayudas de las convocatorias de Red.es. Cubre hasta el 100 % del importe máximo de la resolución de ayudas para proyectos de desarrollo experimental en tecnologías como inteligencia artificial, 5G, blockchain, robótica, contenidos digitales o datos, y proyectos de adopción de nuevas tecnologías. De 1 a 7 años con hasta 2 de carencia.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Todas las empresas",
+        "Investigadores",
+        "ONG"
+      ],
+      "sectores": [
+        "Tecnología/Digital"
+      ],
+      "requisitos": [
+        "Ser beneficiario de una ayuda de una convocatoria de Red.es",
+        "Se solicita en las entidades de crédito adheridas"
+      ],
+      "gastos_subvencionables": [
+        "Proyectos de desarrollo experimental en tecnologías digitales",
+        "Desarrollo, impulso y adopción de nuevas tecnologías"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.ico.es/web/guest/ico/ico-red.es-acelera",
+        "bases_reguladoras": "https://www.ico.es/documents/20124/39721/FICHA+ACELERA+II.pdf/8e720717-3e35-abd3-9a12-af813d159a90?t=1629208512349",
+        "bases": "https://www.ico.es/documents/20124/39721/FICHA+ACELERA+II.pdf/8e720717-3e35-abd3-9a12-af813d159a90?t=1629208512349",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Incentivos Económicos Regionales en Asturias",
+      "nombre": "Incentivos Económicos Regionales en Asturias",
+      "nombre_oficial": "Incentivos económicos regionales en la Zona de Promoción Económica del Principado de Asturias (Real Decreto 163/2008, modificado por el Real Decreto 615/2022)",
+      "codigo_bdns": null,
+      "organismo": "Ministerio de Hacienda",
+      "tipo_ayuda": [
+        "Subvención"
+      ],
+      "ambito": "Autonómico",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": "2027-12-31"
+      },
+      "financiacion": {
+        "intensidad": "Hasta el 35 % (pequeña), 25 % (mediana) y 15 % (gran empresa) de la inversión aprobada. Sin confirmar tras la reforma de 2022.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": 900000,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva"
+      ],
+      "resumen_breve": "Subvención a fondo perdido para grandes proyectos de inversión (desde unos 900.000 €) que creen, amplíen o diversifiquen establecimientos en Asturias.",
+      "descripcion_detallada": "Subvenciones a fondo perdido para proyectos de inversión de creación, ampliación o diversificación de establecimientos en sectores elegibles (industria transformadora, servicios de apoyo a la producción, establecimientos turísticos e instalaciones de ocio innovadoras) ubicados en Asturias. La intensidad depende del tamaño de la empresa y se valora la creación de empleo y la viabilidad.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "Industria/Manufactura",
+        "Turismo/Hostelería",
+        "Servicios profesionales"
+      ],
+      "requisitos": [
+        "Inversión mínima de 900.000 €",
+        "Autofinanciación mínima del 25 %",
+        "Crear o mantener empleo",
+        "No iniciar la inversión antes de la solicitud",
+        "Grandes empresas: solo inversiones iniciales que creen una nueva actividad económica (RD 615/2022)"
+      ],
+      "gastos_subvencionables": [
+        "Activos fijos de la inversión"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.idepa.es/detalle-ayuda/-/asset_publisher/EorU9gEBOv3g/content/ayuda-no-idepa-ley-de-incentivos-economicos-regionales-lir-zona-de-promocion-economica-de-asturias-zpe-",
+        "bases_reguladoras": "https://www.boe.es/eli/es/rd/2008/02/08/163/con",
+        "bases": "https://www.boe.es/eli/es/rd/2008/02/08/163/con",
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Avales Asturgar para pymes y autónomos",
+      "nombre": "Avales Asturgar para pymes y autónomos",
+      "nombre_oficial": "Avales Asturgar para pymes y autónomos",
+      "codigo_bdns": null,
+      "organismo": "Entidades Financieras",
+      "tipo_ayuda": [
+        "Aval/Garantía"
+      ],
+      "ambito": "Autonómico",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Aval financiero sobre la operación",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": 600000
+      },
+      "tipo_proyecto": [
+        "Inversión productiva",
+        "General"
+      ],
+      "resumen_breve": "Avales de Asturgar de hasta 600.000 € por operación para que pymes y autónomos asturianos consigan financiación en mejores condiciones.",
+      "descripcion_detallada": "Asturgar facilita el acceso a financiación (préstamos, leasing, renting, líneas de crédito, anticipos…) a pymes y autónomos de Asturias mediante avales que mejoran las condiciones y reducen requisitos. Cubre circulante, inversión o reestructuración financiera.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Autónomos"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Pyme o autónomo con actividad en Asturias",
+        "Ser socio de Asturgar (o adherirse)",
+        "Proyecto viable",
+        "No estar en crisis"
+      ],
+      "gastos_subvencionables": [
+        "Circulante",
+        "Inversión",
+        "Reestructuración financiera"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://asturgar.com/service/linea-de-avales-tecnicos/",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Préstamos Aquisgrán con aval de Asturgar",
+      "nombre": "Préstamos Aquisgrán con aval de Asturgar",
+      "nombre_oficial": "Préstamos Aquisgrán con aval de Asturgar",
+      "codigo_bdns": null,
+      "organismo": "Entidades Financieras",
+      "tipo_ayuda": [
+        "Préstamo/Crédito",
+        "Aval/Garantía"
+      ],
+      "ambito": "Autonómico",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Plazo de 5 años con posible carencia; interés Euríbor + 0,95 %; comisión de aval del 1 % (condiciones del JSON, sin comprobar).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Inversión productiva",
+        "General"
+      ],
+      "resumen_breve": "Préstamos para circulante e inversión de empresas y autónomos asturianos, avalados por Asturgar y financiados por el fondo Aquisgrán de las SGR.",
+      "descripcion_detallada": "Préstamos avalados por Asturgar para financiar circulante e inversión de empresas y autónomos en Asturias, a través del fondo Aquisgrán de las sociedades de garantía (contragarantía de CERSA).",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Autónomos"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Empresa o autónomo de Asturias",
+        "Ser socio de Asturgar (o adherirse)",
+        "Proyecto viable",
+        "No estar en crisis"
+      ],
+      "gastos_subvencionables": [
+        "Circulante",
+        "Inversión"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://asturgar.com/prestamos-financiacion-aquisgran/",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Aval Asturgar para anticipar subvenciones concedidas",
+      "nombre": "Aval Asturgar para anticipar subvenciones concedidas",
+      "nombre_oficial": "Aval Asturgar para anticipar subvenciones concedidas",
+      "codigo_bdns": null,
+      "organismo": "Entidades Financieras",
+      "tipo_ayuda": [
+        "Aval/Garantía"
+      ],
+      "ambito": "Autonómico",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Aval de hasta el 100 % del importe anticipado.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "General"
+      ],
+      "resumen_breve": "Aval de Asturgar para que pymes y autónomos asturianos cobren por adelantado, a través del banco, subvenciones que ya tienen concedidas.",
+      "descripcion_detallada": "Asturgar avala a pymes y autónomos asturianos para que puedan pedir a una entidad financiera el anticipo de subvenciones ya concedidas por organismos públicos regionales, nacionales o europeos, cubriendo hasta el 100 % del importe anticipado.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Autónomos"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Pyme o autónomo de Asturias",
+        "Tener una subvención concedida",
+        "Ser socio de Asturgar (o adherirse)",
+        "Viabilidad"
+      ],
+      "gastos_subvencionables": [],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://asturgar.com/service/anticipo-subvencion/",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Financiación SRP: capital y préstamos participativos",
+      "nombre": "Financiación SRP: capital y préstamos participativos",
+      "nombre_oficial": "Financiación SRP: capital y préstamos participativos",
+      "codigo_bdns": null,
+      "organismo": "Entidades Financieras",
+      "tipo_ayuda": [
+        "Capital Riesgo",
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Autonómico",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Participación minoritaria y temporal en capital o préstamo participativo según proyecto.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": 150000,
+        "importe_maximo_subvencionable": 1500000
+      },
+      "tipo_proyecto": [
+        "Creación de empresas",
+        "Inversión productiva"
+      ],
+      "resumen_breve": "Participación temporal en el capital o préstamos participativos de la SRP, de 150.000 a 1,5 M€, para empresas con proyectos viables en Asturias.",
+      "descripcion_detallada": "La Sociedad Regional de Promoción financia mediante participación minoritaria y temporal en el capital o préstamos participativos a empresas, sobre todo pymes, con proyectos viables en Asturias, para su creación, ampliación o consolidación.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "PYME",
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Proyecto viable ubicado en Asturias",
+        "Potencial de crecimiento",
+        "Equipo gestor sólido"
+      ],
+      "gastos_subvencionables": [
+        "Plan de inversión y crecimiento de la empresa"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://srp.es/",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Gijón Invierte II: fondo de capital riesgo municipal",
+      "nombre": "Gijón Invierte II: fondo de capital riesgo municipal",
+      "nombre_oficial": "Fondo de Capital Riesgo Pyme Gijón Invierte II",
+      "codigo_bdns": null,
+      "organismo": "Ayuntamiento de Gijón",
+      "tipo_ayuda": [
+        "Capital Riesgo"
+      ],
+      "ambito": "Local",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": null,
+        "presupuesto_total": 5000000,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": 50000,
+        "importe_maximo_subvencionable": 500000
+      },
+      "tipo_proyecto": [
+        "Creación de empresas",
+        "I+D+i"
+      ],
+      "resumen_breve": "Fondo municipal de 5 M€, gestionado por Torsa Capital, que invierte de 50.000 a 500.000 € en empresas innovadoras de Gijón.",
+      "descripcion_detallada": "Fondo de capital riesgo promovido por el Ayuntamiento de Gijón dentro de los instrumentos de financiación de Gijón Impulsa, con una dotación de 5 millones de euros y gestionado por Torsa Capital SGEIC. Invierte en empresas de Gijón, sobre todo en fases iniciales, en los ejes estratégicos de la ciudad (creativo, economía verde, circular y azul).",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Startups",
+        "PYME"
+      ],
+      "sectores": [
+        "General/Multisectorial",
+        "Energía/Sostenibilidad",
+        "Cultura/Creativo"
+      ],
+      "requisitos": [
+        "Empresa ubicada en Gijón",
+        "Actividad en los ejes estratégicos de Gijón",
+        "Preferentemente de base tecnológica"
+      ],
+      "gastos_subvencionables": [],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.idepa.es/detalle-ayuda/-/asset_publisher/EorU9gEBOv3g/content/ayuda-no-idepa-fondo-de-capital-riesgo-del-ayuntamiento-de-gijon-gijon-invierte-",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Microcréditos MicroBank para mujeres emprendedoras",
+      "nombre": "Microcréditos MicroBank para mujeres emprendedoras",
+      "nombre_oficial": "Microcréditos MicroBank para mujeres emprendedoras",
+      "codigo_bdns": null,
+      "organismo": "Entidades Financieras",
+      "tipo_ayuda": [
+        "Préstamo/Crédito"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Préstamo sin avales; plazo de hasta 6 años (dato del JSON, sin comprobar).",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": 30000
+      },
+      "tipo_proyecto": [
+        "Creación de empresas",
+        "General"
+      ],
+      "resumen_breve": "Microcréditos sin avales de hasta 30.000 € de MicroBank, con el Instituto de las Mujeres, para autónomas y microempresas lideradas por mujeres.",
+      "descripcion_detallada": "MicroBank, en convenio con el Instituto de las Mujeres, concede microcréditos para iniciar, consolidar o ampliar negocios de mujeres. Valora la confianza en la persona y la viabilidad del proyecto, sin necesidad de garantías ni avales.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Autónomos",
+        "PYME"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Mujer autónoma o microempresa (menos de 10 trabajadores y facturación < 2 M€)",
+        "Plan de empresa viable",
+        "Sin avales"
+      ],
+      "gastos_subvencionables": [
+        "Inicio, consolidación o ampliación del negocio"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": "https://www.microbank.com/es/productos/negocios-convenio.html",
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    },
+    {
+      "nombre_coloquial": "Bonificaciones FUNDAE para la formación de la plantilla",
+      "nombre": "Bonificaciones FUNDAE para la formación de la plantilla",
+      "nombre_oficial": "Formación programada por las empresas (crédito de formación 2026)",
+      "codigo_bdns": null,
+      "organismo": "Ministerio de Trabajo y Economía Social",
+      "tipo_ayuda": [
+        "Ventaja fiscal"
+      ],
+      "ambito": "Nacional",
+      "fondos_europeos": [],
+      "comentarios": "",
+      "convocatoria": {
+        "estado": "Abierta",
+        "fecha_apertura": null,
+        "fecha_cierre": null
+      },
+      "financiacion": {
+        "intensidad": "Hasta el crédito anual de la empresa, con cofinanciación privada según tamaño.",
+        "presupuesto_total": null,
+        "presupuesto_minimo": null,
+        "presupuesto_maximo": null,
+        "importe_minimo_subvencionable": null,
+        "importe_maximo_subvencionable": null
+      },
+      "tipo_proyecto": [
+        "Formación y Empleo"
+      ],
+      "resumen_breve": "Las empresas pueden recuperar el coste de la formación de su plantilla con bonificaciones en las cotizaciones a la Seguridad Social, hasta su crédito anual.",
+      "descripcion_detallada": "Las empresas disponen de un crédito anual para formar a su plantilla, calculado sobre la cuota de formación profesional cotizada el año anterior, que se aplica como bonificación en las cotizaciones a la Seguridad Social. Se gestiona en la plataforma de FUNDAE. El crédito caduca el 31 de diciembre; las empresas de menos de 50 trabajadores pueden acumularlo hasta dos ejercicios más si lo comunican antes del 30 de junio.",
+      "descripcion_es_objeto": false,
+      "interes_fade": false,
+      "beneficiarios": [
+        "Todas las empresas"
+      ],
+      "sectores": [
+        "General/Multisectorial"
+      ],
+      "requisitos": [
+        "Al corriente con la Seguridad Social y Hacienda",
+        "Trabajadores del Régimen General",
+        "Informar a la representación legal de los trabajadores",
+        "Cofinanciación privada según tamaño de empresa"
+      ],
+      "gastos_subvencionables": [
+        "Acciones formativas para la plantilla",
+        "Permisos individuales de formación"
+      ],
+      "enlaces": {
+        "url_bdns": null,
+        "convocatoria": null,
+        "bases_reguladoras": null,
+        "bases": null,
+        "extracto": null
+      }
+    }
+  ]
+}
